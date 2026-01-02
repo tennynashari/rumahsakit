@@ -8,21 +8,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Important: enables sending cookies with requests
 })
-
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
 
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
@@ -34,24 +21,15 @@ api.interceptors.response.use(
       originalRequest._retry = true
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken')
-        if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
-            refreshToken,
-          })
+        // Try to refresh the token
+        await axios.post(`${API_BASE_URL}/auth/refresh-token`, {}, {
+          withCredentials: true
+        })
 
-          const { accessToken } = response.data.data
-          localStorage.setItem('accessToken', accessToken)
-
-          // Retry original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`
-          return api(originalRequest)
-        }
+        // Retry original request
+        return api(originalRequest)
       } catch (refreshError) {
-        // Refresh failed, logout user
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        localStorage.removeItem('user')
+        // Refresh failed, redirect to login
         window.location.href = '/login'
         return Promise.reject(refreshError)
       }

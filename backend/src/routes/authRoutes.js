@@ -1,6 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { login, register, refreshToken, logout } = require('../controllers/authController');
+const { login, register, refreshToken, logout, me } = require('../controllers/authController');
+const { auth } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -26,6 +27,11 @@ router.post('/register', [
 // @desc    Refresh access token
 // @access  Public
 router.post('/refresh-token', refreshToken);
+
+// @route   GET /api/auth/me
+// @desc    Get current user
+// @access  Private
+router.get('/me', auth, me);
 
 // @route   POST /api/auth/logout
 // @desc    Logout user

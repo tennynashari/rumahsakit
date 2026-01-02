@@ -13,6 +13,12 @@ export const authService = {
     return response.data
   },
 
+  // Get current user
+  me: async () => {
+    const response = await api.get('/auth/me')
+    return response.data
+  },
+
   // Refresh token
   refreshToken: async (refreshToken) => {
     const response = await api.post('/auth/refresh-token', { refreshToken })

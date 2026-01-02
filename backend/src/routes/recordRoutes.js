@@ -29,8 +29,12 @@ router.post('/', [
   authorize('ADMIN', 'DOCTOR', 'NURSE'),
   body('patientId').isInt(),
   body('doctorId').isInt(),
+  body('visitId').optional({ checkFalsy: true }),
+  body('diagnosisCode').optional({ checkFalsy: true }).trim(),
   body('symptoms').notEmpty().withMessage('Symptoms are required'),
-  body('diagnosis').notEmpty().withMessage('Diagnosis is required')
+  body('diagnosis').notEmpty().withMessage('Diagnosis is required'),
+  body('treatment').optional({ checkFalsy: true }).trim(),
+  body('prescription').optional({ checkFalsy: true }).trim()
 ], createRecord);
 
 // @route   PUT /api/records/:id
@@ -39,8 +43,12 @@ router.post('/', [
 router.put('/:id', [
   auth,
   authorize('ADMIN', 'DOCTOR', 'NURSE'),
+  body('visitId').optional({ checkFalsy: true }),
+  body('diagnosisCode').optional({ checkFalsy: true }).trim(),
   body('symptoms').optional().notEmpty(),
-  body('diagnosis').optional().notEmpty()
+  body('diagnosis').optional().notEmpty(),
+  body('treatment').optional({ checkFalsy: true }).trim(),
+  body('prescription').optional({ checkFalsy: true }).trim()
 ], updateRecord);
 
 // @route   DELETE /api/records/:id

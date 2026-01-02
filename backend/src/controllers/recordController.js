@@ -174,18 +174,25 @@ const createRecord = async (req, res) => {
       });
     }
 
+    // Prepare data object
+    const recordData = {
+      patientId: parseInt(patientId),
+      doctorId: parseInt(doctorId),
+      diagnosisCode: diagnosisCode || null,
+      symptoms: symptoms || null,
+      diagnosis: diagnosis || null,
+      treatment: treatment || null,
+      prescription: prescription || null,
+      attachments: attachments || null
+    };
+
+    // Only add visitId if provided
+    if (visitId) {
+      recordData.visitId = parseInt(visitId);
+    }
+
     const record = await prisma.medicalRecord.create({
-      data: {
-        visitId: visitId ? parseInt(visitId) : null,
-        patientId: parseInt(patientId),
-        doctorId: parseInt(doctorId),
-        diagnosisCode,
-        symptoms,
-        diagnosis,
-        treatment,
-        prescription,
-        attachments
-      },
+      data: recordData,
       include: {
         patient: {
           select: {

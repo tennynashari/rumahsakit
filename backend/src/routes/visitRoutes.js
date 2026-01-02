@@ -30,7 +30,8 @@ router.post('/', [
   body('patientId').isInt(),
   body('doctorId').isInt(),
   body('visitType').isIn(['OUTPATIENT', 'INPATIENT', 'EMERGENCY']),
-  body('scheduledAt').isISO8601()
+  body('scheduledAt').isISO8601(),
+  body('notes').optional({ checkFalsy: true }).trim()
 ], createVisit);
 
 // @route   PUT /api/visits/:id
@@ -41,7 +42,10 @@ router.put('/:id', [
   authorize('ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK'),
   body('visitType').optional().isIn(['OUTPATIENT', 'INPATIENT', 'EMERGENCY']),
   body('scheduledAt').optional().isISO8601(),
-  body('status').optional().isIn(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW'])
+  body('status').optional().isIn(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW']),
+  body('notes').optional({ checkFalsy: true }).trim(),
+  body('diagnosis').optional({ checkFalsy: true }).trim(),
+  body('treatment').optional({ checkFalsy: true }).trim()
 ], updateVisit);
 
 // @route   DELETE /api/visits/:id

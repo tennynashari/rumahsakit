@@ -28,29 +28,23 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState)
 
-  // Check for existing token on mount
+  // Check authentication status on mount
   useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem('accessToken')
-      const userData = localStorage.getItem('user')
-
-      if (token && userData) {
-        try {
-          const user = JSON.parse(userData)
-          dispatch({ type: 'SET_USER', payload: user })
-        } catch (error) {
-          // Invalid stored data, clear it
-          localStorage.removeItem('accessToken')
-          localStorage.removeItem('refreshToken')
-          localStorage.removeItem('user')
+    const checkAuth = async () => {
+      try {
+        // Try to fetch current user with cookies
+        const response = await authService.me()
+        if (response.data.user) {
+          dispatch({ type: 'SET_USER', payload: response.data.user })
+        } else {
           dispatch({ type: 'SET_LOADING', payload: false })
         }
-      } else {
+      } catch (error) {
         dispatch({ type: 'SET_LOADING', payload: false })
       }
     }
 
-    initializeAuth()
+    checkAuth()
   }, [])
 
   const login = async (credentials) => {
@@ -58,12 +52,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: 'SET_LOADING', payload: true })
       
       const response = await authService.login(credentials)
-      const { user, accessToken, refreshToken } = response.data
-
-      // Store tokens and user data
-      localStorage.setItem('accessToken', accessToken)
-      localStorage.setItem('refreshToken', refreshToken)
-      localStorage.setItem('user', JSON.stringify(user))
+      const { user } = response.data
 
       dispatch({ type: 'SET_USER', payload: user })
       toast.success('Login successful!')
@@ -100,11 +89,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       // Ignore logout errors
     } finally {
-      // Clear local storage and state
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      localStorage.removeItem('user')
-      
       dispatch({ type: 'LOGOUT' })
       toast.success('Logged out successfully')
     }

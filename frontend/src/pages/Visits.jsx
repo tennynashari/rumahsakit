@@ -427,7 +427,7 @@ const Visits = () => {
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Schedule Visit</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="relative">
+              <div className="relative patient-autocomplete">
                 <label className="form-label">Patient <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <input
@@ -450,7 +450,7 @@ const Visits = () => {
                 </div>
                 
                 {/* Autocomplete Dropdown */}
-                {showPatientDropdown && patientSearch && (
+                {showPatientDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                     {filteredPatients.length > 0 ? (
                       filteredPatients.map(patient => (
@@ -467,7 +467,7 @@ const Visits = () => {
                       ))
                     ) : (
                       <div className="px-4 py-2 text-sm text-gray-500">
-                        No patients found
+                        {patientSearch ? 'No patients found' : 'Type to search patients...'}
                       </div>
                     )}
                   </div>
