@@ -1,0 +1,13 @@
+# 1. Pastikan PostgreSQL server running dengan database 'rumahsakit'
+# 2. Buat user dan database jika belum ada:
+# createuser -U postgres rumahsakit
+# createdb -U postgres -O rumahsakit rumahsakit
+
+# 3. Run migrations:
+cd backend
+npx prisma migrate dev --name init
+
+# 4. Seed database dengan data contoh:
+npx prisma db seed
+
+docker-compose up -d
