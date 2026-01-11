@@ -14,7 +14,7 @@ const VisitEdit = () => {
   const [formData, setFormData] = useState({
     patientId: '',
     doctorId: '',
-    visitType: 'OUTPATIENT',
+    visitType: 'GENERAL_CHECKUP',
     scheduledAt: '',
     status: 'SCHEDULED',
     notes: ''
@@ -81,10 +81,10 @@ const VisitEdit = () => {
     try {
       setSubmitting(true)
       await visitService.updateVisit(id, formData)
-      toast.success('Visit updated successfully')
+      toast.success('Schedule updated successfully')
       navigate(`/visits/${id}`)
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to update visit')
+      toast.error(error.response?.data?.error || 'Failed to update schedule')
     } finally {
       setSubmitting(false)
     }
@@ -110,15 +110,15 @@ const VisitEdit = () => {
           Back
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Visit</h1>
-          <p className="text-gray-600">Update visit information</p>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Schedule</h1>
+          <p className="text-gray-600">Update schedule information</p>
         </div>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Visit Information</h2>
+          <h2 className="text-lg font-semibold mb-4">Schedule Information</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Patient - Read Only */}
@@ -141,7 +141,7 @@ const VisitEdit = () => {
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">Patient cannot be changed after visit is created</p>
+              <p className="text-xs text-gray-500 mt-1">Patient cannot be changed after schedule is created</p>
             </div>
 
             {/* Doctor */}
@@ -165,10 +165,10 @@ const VisitEdit = () => {
               </select>
             </div>
 
-            {/* Visit Type */}
+            {/* Schedule Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Visit Type <span className="text-red-500">*</span>
+                Schedule Type <span className="text-red-500">*</span>
               </label>
               <select
                 name="visitType"
@@ -177,7 +177,7 @@ const VisitEdit = () => {
                 className="form-input"
                 required
               >
-                <option value="GENERAL_CHECKUP">General Check Up</option>
+                <option value="GENERAL_CHECKUP">General Checkup</option>
                 <option value="OUTPATIENT">Outpatient</option>
                 <option value="INPATIENT">Inpatient</option>
                 <option value="EMERGENCY">Emergency</option>

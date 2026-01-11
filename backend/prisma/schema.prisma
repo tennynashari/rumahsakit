@@ -57,6 +57,7 @@ model Visit {
   doctorId    Int         @map("doctor_id")
   visitType   VisitType   @map("visit_type")
   scheduledAt DateTime    @map("scheduled_at")
+  queueNumber String?     @map("queue_number") @db.VarChar(20)
   status      VisitStatus @default(SCHEDULED)
   notes       String?     @db.Text
   createdAt   DateTime    @default(now()) @map("created_at")
@@ -198,6 +199,7 @@ enum Gender {
 }
 
 enum VisitType {
+  GENERAL_CHECKUP
   OUTPATIENT
   INPATIENT
   EMERGENCY

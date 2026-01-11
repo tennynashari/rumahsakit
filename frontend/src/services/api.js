@@ -17,7 +17,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't retry for /auth/me or /auth/refresh-token endpoints
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/me') || 
+                          originalRequest.url?.includes('/auth/refresh-token')
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true
 
       try {
@@ -29,8 +33,10 @@ api.interceptors.response.use(
         // Retry original request
         return api(originalRequest)
       } catch (refreshError) {
-        // Refresh failed, redirect to login
-        window.location.href = '/login'
+        // Refresh failed, redirect to login only if not already there
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login'
+        }
         return Promise.reject(refreshError)
       }
     }

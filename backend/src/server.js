@@ -46,8 +46,12 @@ app.use('/api/', limiter);
 // Stricter rate limiting for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 5 : 100, // More lenient in development
-  message: 'Too many authentication attempts'
+  max: process.env.NODE_ENV === 'production' ? 50 : 1000, // More lenient in development
+  message: 'Too many authentication attempts',
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Skip rate limiting for /api/auth/me endpoint during development
+  skip: (req) => process.env.NODE_ENV !== 'production' && req.path === '/me'
 });
 app.use('/api/auth', authLimiter);
 

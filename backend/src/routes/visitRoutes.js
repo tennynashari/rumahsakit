@@ -29,7 +29,7 @@ router.post('/', [
   authorize('ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK'),
   body('patientId').isInt(),
   body('doctorId').isInt(),
-  body('visitType').isIn(['OUTPATIENT', 'INPATIENT', 'EMERGENCY']),
+  body('visitType').isIn(['OUTPATIENT', 'INPATIENT', 'EMERGENCY', 'GENERAL_CHECKUP']),
   body('scheduledAt').isISO8601(),
   body('notes').optional({ checkFalsy: true }).trim()
 ], createVisit);
@@ -40,7 +40,7 @@ router.post('/', [
 router.put('/:id', [
   auth,
   authorize('ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK'),
-  body('visitType').optional().isIn(['OUTPATIENT', 'INPATIENT', 'EMERGENCY']),
+  body('visitType').optional().isIn(['OUTPATIENT', 'INPATIENT', 'EMERGENCY', 'GENERAL_CHECKUP']),
   body('scheduledAt').optional().isISO8601(),
   body('status').optional().isIn(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW']),
   body('notes').optional({ checkFalsy: true }).trim(),

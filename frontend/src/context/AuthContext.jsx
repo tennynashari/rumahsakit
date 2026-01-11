@@ -40,10 +40,14 @@ export const AuthProvider = ({ children }) => {
           dispatch({ type: 'SET_LOADING', payload: false })
         }
       } catch (error) {
+        // If auth check fails, just set loading to false
+        // Don't set error to avoid showing error on login page
         dispatch({ type: 'SET_LOADING', payload: false })
       }
     }
 
+    // Only check auth if we have cookies or localStorage tokens
+    // This prevents unnecessary API calls on login page
     checkAuth()
   }, [])
 

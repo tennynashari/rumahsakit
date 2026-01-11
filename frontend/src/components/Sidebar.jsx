@@ -30,7 +30,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       roles: ['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK']
     },
     {
-      name: 'Visits',
+      name: 'Schedule',
       href: '/visits',
       icon: Calendar,
       roles: ['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK']

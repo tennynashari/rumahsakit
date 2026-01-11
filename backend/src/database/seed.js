@@ -241,41 +241,77 @@ async function main() {
     });
 
     if (firstPatients.length > 0 && doctors.length > 0) {
-      const visitTypes = ['GENERAL', 'EMERGENCY', 'FOLLOW_UP', 'CHECKUP'];
-      const visitStatuses = ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED'];
+      // Generate visits with queue numbers for today
+      const today = new Date();
+      const year = today.getFullYear().toString().slice(-2);
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const datePrefix = `${year}${month}${day}`;
 
       const sampleVisits = [
         {
           patientId: firstPatients[0].id,
           doctorId: doctors[0].id,
           visitType: 'OUTPATIENT',
-          scheduledAt: new Date('2026-01-03T09:00:00'),
+          scheduledAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0),
+          queueNumber: `${datePrefix}-001`,
           status: 'SCHEDULED',
-          notes: 'Regular outpatient checkup appointment'
+          notes: 'Regular checkup appointment'
         },
         {
           patientId: firstPatients[1].id,
           doctorId: doctors[1].id,
           visitType: 'OUTPATIENT',
-          scheduledAt: new Date('2026-01-02T14:30:00'),
-          status: 'COMPLETED',
-          notes: 'Follow-up outpatient consultation'
+          scheduledAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 30),
+          queueNumber: `${datePrefix}-002`,
+          status: 'SCHEDULED',
+          notes: 'Follow-up consultation'
         },
         {
           patientId: firstPatients[2].id,
           doctorId: doctors[0].id,
-          visitType: 'INPATIENT',
-          scheduledAt: new Date('2026-01-02T10:00:00'),
+          visitType: 'OUTPATIENT',
+          scheduledAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0),
+          queueNumber: `${datePrefix}-003`,
           status: 'IN_PROGRESS',
-          notes: 'Inpatient admission for observation'
+          notes: 'General consultation'
         },
         {
           patientId: firstPatients[3].id,
           doctorId: doctors[1].id,
-          visitType: 'EMERGENCY',
-          scheduledAt: new Date('2026-01-01T16:45:00'),
+          visitType: 'OUTPATIENT',
+          scheduledAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 30),
+          queueNumber: `${datePrefix}-004`,
+          status: 'SCHEDULED',
+          notes: 'Routine health screening'
+        },
+        {
+          patientId: firstPatients[4].id,
+          doctorId: doctors[0].id,
+          visitType: 'OUTPATIENT',
+          scheduledAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 11, 0),
+          queueNumber: `${datePrefix}-005`,
+          status: 'SCHEDULED',
+          notes: 'Medical consultation'
+        },
+        // Yesterday's visits
+        {
+          patientId: firstPatients[0].id,
+          doctorId: doctors[0].id,
+          visitType: 'OUTPATIENT',
+          scheduledAt: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1, 14, 30),
+          queueNumber: `${year}${month}${String(today.getDate() - 1).padStart(2, '0')}-001`,
           status: 'COMPLETED',
-          notes: 'Emergency visit - chest pain'
+          notes: 'Completed consultation'
+        },
+        {
+          patientId: firstPatients[2].id,
+          doctorId: doctors[1].id,
+          visitType: 'EMERGENCY',
+          scheduledAt: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1, 16, 45),
+          queueNumber: `${year}${month}${String(today.getDate() - 1).padStart(2, '0')}-002`,
+          status: 'COMPLETED',
+          notes: 'Emergency visit - resolved'
         }
       ];
 
@@ -283,7 +319,7 @@ async function main() {
         const visit = await prisma.visit.create({
           data: visitData
         });
-        console.log(`✅ Visit created: ${visit.visitType} - Patient ID ${visit.patientId}`);
+        console.log(`✅ Visit created: ${visit.queueNumber} - ${visit.visitType} - Patient ID ${visit.patientId}`);
       }
 
       // Create sample medical records

@@ -22,7 +22,7 @@ const Visits = () => {
   const [formData, setFormData] = useState({
     patientId: '',
     doctorId: '',
-    visitType: 'OUTPATIENT',
+    visitType: 'GENERAL_CHECKUP',
     scheduledAt: '',
     notes: ''
   })
@@ -59,7 +59,7 @@ const Visits = () => {
         pages: response.data.pagination?.pages || 0
       }))
     } catch (error) {
-      toast.error('Failed to fetch visits')
+      toast.error('Failed to fetch schedules')
     } finally {
       setLoading(false)
     }
@@ -95,23 +95,23 @@ const Visits = () => {
     e.preventDefault()
     try {
       await visitService.createVisit(formData)
-      toast.success('Visit scheduled successfully')
+      toast.success('Schedule created successfully')
       setShowModal(false)
       fetchVisits()
       resetForm()
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to create visit')
+      toast.error(error.response?.data?.error || 'Failed to create schedule')
     }
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this visit?')) {
+    if (window.confirm('Are you sure you want to delete this schedule?')) {
       try {
         await visitService.deleteVisit(id)
-        toast.success('Visit deleted successfully')
+        toast.success('Schedule deleted successfully')
         fetchVisits()
       } catch (error) {
-        toast.error('Failed to delete visit')
+        toast.error('Failed to delete schedule')
       }
     }
   }
@@ -120,7 +120,7 @@ const Visits = () => {
     setFormData({
       patientId: '',
       doctorId: '',
-      visitType: 'OUTPATIENT',
+      visitType: 'GENERAL_CHECKUP',
       scheduledAt: '',
       notes: ''
     })
@@ -174,8 +174,8 @@ const Visits = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Visits & Appointments</h1>
-          <p className="text-sm text-gray-600">Manage patient visits and appointments</p>
+          <h1 className="text-2xl font-bold text-gray-900">Schedule & Appointments</h1>
+          <p className="text-sm text-gray-600">Manage patient schedules and appointments</p>
         </div>
         <button onClick={() => setShowModal(true)} className="btn btn-primary">
           <Plus className="w-4 h-4 mr-2" />
@@ -191,7 +191,7 @@ const Visits = () => {
               <Calendar className="w-6 h-6 text-white" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Visits</p>
+              <p className="text-sm font-medium text-gray-600">Total Schedules</p>
               <p className="text-2xl font-semibold text-gray-900">{visits.length}</p>
             </div>
           </div>
@@ -278,10 +278,10 @@ const Visits = () => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Queue #</th>
                   <th>Patient</th>
                   <th>Doctor</th>
-                  <th>Visit Type</th>
+                  <th>Type</th>
                   <th>Scheduled</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -291,14 +291,16 @@ const Visits = () => {
                 {filteredVisits.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center py-8 text-gray-500">
-                      No visits found
+                      No schedules found
                     </td>
                   </tr>
                 ) : (
                   filteredVisits.map((visit) => (
                     <tr key={visit.id} className="hover:bg-gray-50">
                       <td>
-                        <div className="text-sm font-mono text-gray-900">#{visit.id}</div>
+                        <div className="text-sm font-mono font-bold text-primary-600">
+                          {visit.queueNumber || `#${visit.id}`}
+                        </div>
                       </td>
                       <td>
                         <div className="font-medium text-gray-900">
@@ -365,7 +367,7 @@ const Visits = () => {
             <div className="text-sm text-gray-700">
               Showing page <span className="font-medium">{pagination.page}</span> of{' '}
               <span className="font-medium">{pagination.pages}</span>
-              {' '}({pagination.total} total visits)
+              {' '}({pagination.total} total schedules)
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -502,14 +504,14 @@ const Visits = () => {
               </div>
 
               <div>
-                <label className="form-label">Visit Type <span className="text-red-500">*</span></label>
+                <label className="form-label">Schedule Type <span className="text-red-500">*</span></label>
                 <select
                   required
                   className="form-input"
                   value={formData.visitType}
                   onChange={(e) => setFormData({...formData, visitType: e.target.value})}
                 >
-                  <option value="GENERAL_CHECKUP">General Check Up</option>
+                  <option value="GENERAL_CHECKUP">General Checkup</option>
                   <option value="OUTPATIENT">Outpatient</option>
                   <option value="INPATIENT">Inpatient</option>
                   <option value="EMERGENCY">Emergency</option>

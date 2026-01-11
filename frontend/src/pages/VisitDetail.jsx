@@ -21,7 +21,7 @@ const VisitDetail = () => {
       setVisit(response.data.visit)
     } catch (error) {
       console.error('Fetch visit error:', error)
-      toast.error('Failed to fetch visit details')
+      toast.error('Failed to fetch schedule details')
       navigate('/visits')
     } finally {
       setLoading(false)
@@ -67,7 +67,7 @@ const VisitDetail = () => {
   }
 
   if (!visit) {
-    return <div className="text-center py-12">Visit not found</div>
+    return <div className="text-center py-12">Schedule not found</div>
   }
 
   return (
@@ -83,8 +83,15 @@ const VisitDetail = () => {
             Back
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Visit Details</h1>
-            <p className="text-gray-600">Visit ID: #{visit.id}</p>
+            <h1 className="text-2xl font-bold text-gray-900">Schedule Details</h1>
+            <div className="flex items-center space-x-4 mt-1">
+              <p className="text-gray-600">Schedule ID: #{visit.id}</p>
+              {visit.queueNumber && (
+                <p className="text-sm font-mono font-bold text-primary-600 px-3 py-1 bg-primary-50 rounded">
+                  Queue: {visit.queueNumber}
+                </p>
+              )}
+            </div>
           </div>
         </div>
         <button
@@ -92,7 +99,7 @@ const VisitDetail = () => {
           className="inline-flex items-center px-5 py-2.5 bg-primary-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-sm transition-colors"
         >
           <Edit className="w-4 h-4 mr-2" />
-          Edit Visit
+          Edit Schedule
         </button>
       </div>
 
@@ -101,7 +108,7 @@ const VisitDetail = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className={`px-4 py-2 rounded-lg border-2 ${getVisitTypeColor(visit.visitType)}`}>
-              <div className="text-sm font-medium">Visit Type</div>
+              <div className="text-sm font-medium">Schedule Type</div>
               <div className="text-lg font-bold">{visit.visitType}</div>
             </div>
             <div>
