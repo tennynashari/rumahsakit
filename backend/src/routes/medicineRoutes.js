@@ -9,65 +9,73 @@ const {
   deleteMedicine,
   addBatch,
   updateBatch,
-  deleteBatch
+  deleteBatch,
+  exportMedicinesExcel
 } = require('../controllers/medicineController');
 
 const router = express.Router();
 
-// Medicine routes
+// @route   GET /api/medicines/export/excel
+// @desc    Export all medicines to Excel
+// @access  Private
+router.get('/export/excel', auth, exportMedicinesExcel);
+
+// @route   GET /api/medicines
+// @desc    Get all medicines
+// @access  Private
 router.get('/', auth, getMedicines);
+
+// @route   GET /api/medicines/:id
+// @desc    Get medicine by ID
+// @access  Private
 router.get('/:id', auth, getMedicine);
 
-router.post(
-  '/',
+// @route   POST /api/medicines
+// @desc    Create new medicine
+// @access  Private (Admin, Pharmacy)
+router.post('/', [
   auth,
   authorize('ADMIN', 'PHARMACY'),
-  [
-    body('name').trim().notEmpty().withMessage('Medicine name is required'),
-    body('unit').trim().notEmpty().withMessage('Unit is required'),
-    body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number')
-  ],
-  createMedicine
-);
+  body('name').trim().isLength({ min: 2 }),
+  body('unit').trim().notEmpty(),
+  body('price').isFloat({ min: 0 })
+], createMedicine);
 
-router.put(
-  '/:id',
+// @route   PUT /api/medicines/:id
+// @desc    Update medicine
+// @access  Private (Admin, Pharmacy)
+router.put('/:id', [
   auth,
-  authorize('ADMIN', 'PHARMACY'),
-  [
-    body('name').trim().notEmpty().withMessage('Medicine name is required'),
-    body('unit').trim().notEmpty().withMessage('Unit is required'),
-    body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number')
-  ],
-  updateMedicine
-);
+  authorize('ADMIN', 'PHARMACY')
+], updateMedicine);
 
+// @route   DELETE /api/medicines/:id
+// @desc    Delete medicine
+// @access  Private (Admin)
 router.delete('/:id', auth, authorize('ADMIN'), deleteMedicine);
 
-// Batch routes
-router.post(
-  '/:id/batches',
+// @route   POST /api/medicines/:id/batch
+// @desc    Add new batch to medicine
+// @access  Private (Admin, Pharmacy)
+router.post('/:id/batch', [
   auth,
   authorize('ADMIN', 'PHARMACY'),
-  [
-    body('batchNo').trim().notEmpty().withMessage('Batch number is required'),
-    body('stock').isInt({ min: 0 }).withMessage('Stock must be a positive number'),
-    body('expiryDate').isISO8601().withMessage('Valid expiry date is required')
-  ],
-  addBatch
-);
+  body('batchNo').trim().notEmpty(),
+  body('stock').isInt({ min: 0 }),
+  body('expiryDate').isISO8601()
+], addBatch);
 
-router.put(
-  '/batches/:batchId',
+// @route   PUT /api/medicines/:id/batch/:batchId
+// @desc    Update medicine batch
+// @access  Private (Admin, Pharmacy)
+router.put('/:id/batch/:batchId', [
   auth,
-  authorize('ADMIN', 'PHARMACY'),
-  [
-    body('stock').isInt({ min: 0 }).withMessage('Stock must be a positive number'),
-    body('expiryDate').isISO8601().withMessage('Valid expiry date is required')
-  ],
-  updateBatch
-);
+  authorize('ADMIN', 'PHARMACY')
+], updateBatch);
 
-router.delete('/batches/:batchId', auth, authorize('ADMIN', 'PHARMACY'), deleteBatch);
+// @route   DELETE /api/medicines/:id/batch/:batchId
+// @desc    Delete medicine batch
+// @access  Private (Admin)
+router.delete('/:id/batch/:batchId', auth, authorize('ADMIN'), deleteBatch);
 
 module.exports = router;

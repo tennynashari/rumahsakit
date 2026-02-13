@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { patientService } from '../services'
-import { Search, Plus, Eye, Edit, Trash2, Filter } from 'lucide-react'
+import { Search, Plus, Eye, Edit, Trash2, Filter, Download } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const Patients = () => {
@@ -56,6 +56,33 @@ const Patients = () => {
     }
   }
 
+  const handleExport = async () => {
+    try {
+      toast.loading('Exporting data...')
+      const response = await patientService.exportPatients()
+      
+      // Create blob and download
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `Data_Pasien_${new Date().toISOString().split('T')[0]}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast.dismiss()
+      toast.success('Data exported successfully')
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Failed to export data')
+      console.error('Export error:', error)
+    }
+  }
+
   const calculateAge = (dateOfBirth) => {
     const today = new Date()
     const birthDate = new Date(dateOfBirth)
@@ -85,10 +112,19 @@ const Patients = () => {
           <h1 className="text-2xl font-bold text-gray-900">Patients</h1>
           <p className="text-sm text-gray-600">Manage patient information and records</p>
         </div>
-        <Link to="/patients/new" className="btn btn-primary">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Patient
-        </Link>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleExport}
+            className="btn bg-green-600 hover:bg-green-700 text-white"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export Excel
+          </button>
+          <Link to="/patients/new" className="btn btn-primary">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Patient
+          </Link>
+        </div>
       </div>
 
       {/* Search and Filters */}

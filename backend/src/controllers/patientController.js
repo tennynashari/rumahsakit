@@ -155,31 +155,10 @@ const createPatient = async (req, res) => {
       });
     }
 
-    const { 
-      name, 
-      dateOfBirth, 
-      gender, 
-      phone, 
-      address, 
-      emergencyContact,
-      emergencyPhone,
-      email,
-      bloodType,
-      allergies
-    } = req.body;
+    const { name, dateOfBirth, gender, phone, address, emergencyContact } = req.body;
 
     // Generate unique MRN
     const medicalRecordNo = await generateMRN();
-
-    // Build emergency contact object
-    const emergencyContactData = {};
-    if (emergencyContact || emergencyPhone) {
-      emergencyContactData.name = emergencyContact || '';
-      emergencyContactData.phone = emergencyPhone || '';
-      emergencyContactData.email = email || '';
-      emergencyContactData.bloodType = bloodType || '';
-      emergencyContactData.allergies = allergies || '';
-    }
 
     const patient = await prisma.patient.create({
       data: {
@@ -189,7 +168,7 @@ const createPatient = async (req, res) => {
         gender,
         phone,
         address,
-        emergencyContact: Object.keys(emergencyContactData).length > 0 ? emergencyContactData : null
+        emergencyContact
       }
     });
 
@@ -200,7 +179,6 @@ const createPatient = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Create patient error:', error);
     if (error.code === 'P2002') {
       return res.status(400).json({
         success: false,
@@ -229,44 +207,11 @@ const updatePatient = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { 
-      name, 
-      dateOfBirth, 
-      gender, 
-      phone, 
-      address,
-      emergencyContact,
-      emergencyPhone,
-      email,
-      bloodType,
-      allergies
-    } = req.body;
+    const updateData = { ...req.body };
 
-    // Build emergency contact object
-    const emergencyContactData = {};
-    if (emergencyContact || emergencyPhone || email || bloodType || allergies) {
-      emergencyContactData.name = emergencyContact || '';
-      emergencyContactData.phone = emergencyPhone || '';
-      emergencyContactData.email = email || '';
-      emergencyContactData.bloodType = bloodType || '';
-      emergencyContactData.allergies = allergies || '';
-    }
-
-    const updateData = {
-      name,
-      gender,
-      phone,
-      address
-    };
-
-    // Only update dateOfBirth if provided
-    if (dateOfBirth) {
-      updateData.dateOfBirth = new Date(dateOfBirth);
-    }
-
-    // Only update emergencyContact if data exists
-    if (Object.keys(emergencyContactData).length > 0) {
-      updateData.emergencyContact = emergencyContactData;
+    // Convert dateOfBirth to Date object if provided
+    if (updateData.dateOfBirth) {
+      updateData.dateOfBirth = new Date(updateData.dateOfBirth);
     }
 
     const patient = await prisma.patient.update({
@@ -281,7 +226,6 @@ const updatePatient = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update patient error:', error);
     if (error.code === 'P2025') {
       return res.status(404).json({
         success: false,
@@ -408,11 +352,92 @@ const searchPatients = async (req, res) => {
   }
 };
 
+// @desc    Export all patients to Excel
+// @route   GET /api/patients/export/excel
+// @access  Private
+const exportPatientsExcel = async (req, res) => {
+  try {
+    const XLSX = require('xlsx');
+    
+    // Fetch all patients without pagination
+    const patients = await prisma.patient.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        visits: {
+          select: {
+            id: true
+          }
+        }
+      }
+    });
+
+    // Transform data for Excel
+    const excelData = patients.map((patient, index) => {
+      const age = Math.floor((new Date() - new Date(patient.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000));
+      
+      return {
+        'No': index + 1,
+        'No. Rekam Medis': patient.medicalRecordNo,
+        'Nama Lengkap': patient.name,
+        'Tanggal Lahir': new Date(patient.dateOfBirth).toLocaleDateString('id-ID'),
+        'Umur': age + ' tahun',
+        'Jenis Kelamin': patient.gender === 'MALE' ? 'Laki-laki' : patient.gender === 'FEMALE' ? 'Perempuan' : 'Lainnya',
+        'No. Telepon': patient.phone || '-',
+        'Alamat': patient.address || '-',
+        'Kontak Darurat': patient.emergencyContact ? JSON.stringify(patient.emergencyContact) : '-',
+        'Jumlah Kunjungan': patient.visits.length,
+        'Tanggal Registrasi': new Date(patient.createdAt).toLocaleDateString('id-ID')
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 5 },  // No
+      { wch: 20 }, // No. Rekam Medis
+      { wch: 25 }, // Nama
+      { wch: 15 }, // Tanggal Lahir
+      { wch: 12 }, // Umur
+      { wch: 15 }, // Jenis Kelamin
+      { wch: 15 }, // Telepon
+      { wch: 40 }, // Alamat
+      { wch: 30 }, // Kontak Darurat
+      { wch: 15 }, // Jumlah Kunjungan
+      { wch: 18 }  // Tanggal Registrasi
+    ];
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Data Pasien');
+
+    // Generate buffer
+    const filename = `Data_Pasien_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set headers and send file
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while exporting patients'
+    });
+  }
+};
+
 module.exports = {
   getPatients,
   getPatient,
   createPatient,
   updatePatient,
   deletePatient,
-  searchPatients
+  searchPatients,
+  exportPatientsExcel
 };

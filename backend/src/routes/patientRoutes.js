@@ -7,10 +7,16 @@ const {
   createPatient, 
   updatePatient, 
   deletePatient,
-  searchPatients
+  searchPatients,
+  exportPatientsExcel
 } = require('../controllers/patientController');
 
 const router = express.Router();
+
+// @route   GET /api/patients/export/excel
+// @desc    Export all patients to Excel
+// @access  Private
+router.get('/export/excel', auth, exportPatientsExcel);
 
 // @route   GET /api/patients
 // @desc    Get all patients with pagination
@@ -36,13 +42,8 @@ router.post('/', [
   body('name').trim().isLength({ min: 2 }),
   body('dateOfBirth').isISO8601(),
   body('gender').isIn(['MALE', 'FEMALE', 'OTHER']),
-  body('phone').optional({ checkFalsy: true }).trim(),
-  body('address').optional({ checkFalsy: true }).trim(),
-  body('email').optional({ checkFalsy: true }).trim(),
-  body('emergencyContact').optional({ checkFalsy: true }).trim(),
-  body('emergencyPhone').optional({ checkFalsy: true }).trim(),
-  body('bloodType').optional({ checkFalsy: true }).trim(),
-  body('allergies').optional({ checkFalsy: true }).trim()
+  body('phone').optional().isMobilePhone(),
+  body('address').optional().trim()
 ], createPatient);
 
 // @route   PUT /api/patients/:id
@@ -54,13 +55,8 @@ router.put('/:id', [
   body('name').optional().trim().isLength({ min: 2 }),
   body('dateOfBirth').optional().isISO8601(),
   body('gender').optional().isIn(['MALE', 'FEMALE', 'OTHER']),
-  body('phone').optional({ checkFalsy: true }).trim(),
-  body('address').optional({ checkFalsy: true }).trim(),
-  body('email').optional({ checkFalsy: true }).trim(),
-  body('emergencyContact').optional({ checkFalsy: true }).trim(),
-  body('emergencyPhone').optional({ checkFalsy: true }).trim(),
-  body('bloodType').optional({ checkFalsy: true }).trim(),
-  body('allergies').optional({ checkFalsy: true }).trim()
+  body('phone').optional().isMobilePhone(),
+  body('address').optional().trim()
 ], updatePatient);
 
 // @route   DELETE /api/patients/:id

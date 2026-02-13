@@ -393,6 +393,146 @@ const getBillingStats = async (req, res) => {
   }
 };
 
+// @desc    Export billings to Excel
+// @route   GET /api/billing/export/excel
+// @access  Private
+const exportBillingsExcel = async (req, res) => {
+  try {
+    const XLSX = require('xlsx');
+    const { startDate, endDate } = req.query;
+
+    // Build where clause for date filtering
+    const where = {};
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate);
+      }
+      if (endDate) {
+        where.createdAt.lte = new Date(endDate);
+      }
+    }
+
+    // Fetch all billings with filters
+    const billings = await prisma.billing.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        patient: {
+          select: {
+            medicalRecordNo: true,
+            name: true,
+            phone: true,
+            gender: true
+          }
+        },
+        visit: {
+          select: {
+            visitType: true,
+            scheduledAt: true,
+            doctor: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Transform data for Excel
+    const excelData = billings.map((billing, index) => {
+      return {
+        'No': index + 1,
+        'No. Rekam Medis': billing.patient.medicalRecordNo,
+        'Nama Pasien': billing.patient.name,
+        'Jenis Kelamin': billing.patient.gender === 'MALE' ? 'Laki-laki' : billing.patient.gender === 'FEMALE' ? 'Perempuan' : 'Lainnya',
+        'No. Telepon': billing.patient.phone || '-',
+        'Dokter': billing.visit?.doctor?.name || '-',
+        'Jenis Kunjungan': billing.visit ? (
+          billing.visit.visitType === 'OUTPATIENT' ? 'Rawat Jalan' : 
+          billing.visit.visitType === 'INPATIENT' ? 'Rawat Inap' : 
+          billing.visit.visitType === 'EMERGENCY' ? 'Darurat' : billing.visit.visitType
+        ) : '-',
+        'Subtotal': new Intl.NumberFormat('id-ID', { 
+          style: 'currency', 
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(billing.subtotal),
+        'Pajak': new Intl.NumberFormat('id-ID', { 
+          style: 'currency', 
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(billing.tax),
+        'Diskon': new Intl.NumberFormat('id-ID', { 
+          style: 'currency', 
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(billing.discount),
+        'Total': new Intl.NumberFormat('id-ID', { 
+          style: 'currency', 
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(billing.total),
+        'Status': billing.status === 'PAID' ? 'Lunas' :
+                  billing.status === 'UNPAID' ? 'Belum Bayar' :
+                  billing.status === 'PARTIALLY_PAID' ? 'Dibayar Sebagian' :
+                  billing.status === 'CANCELLED' ? 'Dibatalkan' : billing.status,
+        'Tanggal Bayar': billing.paidAt ? new Date(billing.paidAt).toLocaleDateString('id-ID') : '-',
+        'Tanggal Dibuat': new Date(billing.createdAt).toLocaleDateString('id-ID'),
+        'Jam': new Date(billing.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 5 },  // No
+      { wch: 20 }, // No. Rekam Medis
+      { wch: 25 }, // Nama Pasien
+      { wch: 15 }, // Jenis Kelamin
+      { wch: 15 }, // Telepon
+      { wch: 25 }, // Dokter
+      { wch: 15 }, // Jenis Kunjungan
+      { wch: 18 }, // Subtotal
+      { wch: 18 }, // Pajak
+      { wch: 18 }, // Diskon
+      { wch: 18 }, // Total
+      { wch: 18 }, // Status
+      { wch: 18 }, // Tanggal Bayar
+      { wch: 18 }, // Tanggal Dibuat
+      { wch: 10 }  // Jam
+    ];
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Data Tagihan');
+
+    // Generate buffer
+    const dateRange = startDate && endDate 
+      ? `_${new Date(startDate).toISOString().split('T')[0]}_sd_${new Date(endDate).toISOString().split('T')[0]}`
+      : `_${new Date().toISOString().split('T')[0]}`;
+    const filename = `Data_Tagihan${dateRange}.xlsx`;
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set headers and send file
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while exporting billings'
+    });
+  }
+};
+
 module.exports = {
   getBillings,
   getBilling,
@@ -400,5 +540,6 @@ module.exports = {
   updateBilling,
   recordPayment,
   deleteBilling,
-  getBillingStats
+  getBillingStats,
+  exportBillingsExcel
 };

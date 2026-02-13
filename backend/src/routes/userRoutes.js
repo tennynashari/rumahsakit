@@ -6,47 +6,50 @@ const {
   getUser,
   createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  exportUsersExcel
 } = require('../controllers/userController');
 
 const router = express.Router();
 
+// @route   GET /api/users/export/excel
+// @desc    Export all users to Excel
+// @access  Private (Admin)
+router.get('/export/excel', auth, authorize('ADMIN'), exportUsersExcel);
+
 // @route   GET /api/users
 // @desc    Get all users
-// @access  Private
-router.get('/', auth, getUsers);
+// @access  Private (Admin)
+router.get('/', auth, authorize('ADMIN'), getUsers);
 
 // @route   GET /api/users/:id
 // @desc    Get user by ID
-// @access  Private
-router.get('/:id', auth, getUser);
+// @access  Private (Admin)
+router.get('/:id', auth, authorize('ADMIN'), getUser);
 
 // @route   POST /api/users
 // @desc    Create new user
-// @access  Private (Admin only)
+// @access  Private (Admin)
 router.post('/', [
   auth,
   authorize('ADMIN'),
-  body('email').isEmail().withMessage('Please provide a valid email'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('name').notEmpty().withMessage('Name is required'),
-  body('role').isIn(['ADMIN', 'DOCTOR', 'NURSE', 'RECEPTIONIST']).withMessage('Invalid role')
+  body('name').trim().isLength({ min: 2 }),
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 6 }),
+  body('role').isIn(['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK', 'PHARMACY', 'LABORATORY', 'PATIENT'])
 ], createUser);
 
 // @route   PUT /api/users/:id
 // @desc    Update user
-// @access  Private (Admin only or own profile)
+// @access  Private (Admin)
 router.put('/:id', [
   auth,
-  body('email').optional().isEmail().withMessage('Please provide a valid email'),
-  body('password').optional().isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('name').optional().notEmpty().withMessage('Name cannot be empty'),
-  body('role').optional().isIn(['ADMIN', 'DOCTOR', 'NURSE', 'RECEPTIONIST']).withMessage('Invalid role')
+  authorize('ADMIN')
 ], updateUser);
 
 // @route   DELETE /api/users/:id
 // @desc    Delete user
-// @access  Private (Admin only)
+// @access  Private (Admin)
 router.delete('/:id', auth, authorize('ADMIN'), deleteUser);
 
 module.exports = router;

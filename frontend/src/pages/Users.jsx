@@ -1,24 +1,16 @@
 import React, { useState, useEffect } from 'react'
+import { Eye, Edit, Trash2, UserPlus, Download } from 'lucide-react'
 import { userService } from '../services'
-import { Search, Plus, Edit, Trash2, UserCheck, UserX, Stethoscope } from 'lucide-react'
-import toast from 'react-hot-toast'
 
 const Users = () => {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [roleFilter, setRoleFilter] = useState('')
-  const [showModal, setShowModal] = useState(false)
-  const [editingUser, setEditingUser] = useState(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'DOCTOR',
-    department: '',
-    phone: ''
-  })
+  const [error, setError] = useState(null)
+  const [exporting, setExporting] = useState(false)
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   useEffect(() => {
     fetchUsers()
@@ -27,414 +19,319 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const response = await userService.getUsers()
-      setUsers(response.data.users || [])
-    } catch (error) {
-      toast.error('Failed to fetch users')
+      setError(null)
+      const data = await userService.getUsers()
+      setUsers(data)
+    } catch (err) {
+      console.error('Error fetching users:', err)
+      setError(err.response?.data?.message || 'Failed to fetch users')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      setSubmitting(true)
-      if (editingUser) {
-        const updateData = { ...formData }
-        if (!updateData.password) {
-          delete updateData.password
-        }
-        await userService.updateUser(editingUser.id, updateData)
-        toast.success('User updated successfully')
-      } else {
-        await userService.createUser(formData)
-        toast.success('User created successfully')
-      }
-      setShowModal(false)
-      setEditingUser(null)
-      resetForm()
-      fetchUsers()
-    } catch (error) {
-      toast.error(error.response?.data?.error || `Failed to ${editingUser ? 'update' : 'create'} user`)
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const handleEdit = (user) => {
-    setEditingUser(user)
-    setFormData({
-      name: user.name,
-      email: user.email,
-      password: '',
-      role: user.role,
-      department: user.department || '',
-      phone: user.phone || ''
-    })
-    setShowModal(true)
-  }
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+  const handleDelete = async (id, name) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus user ${name}?`)) {
       try {
         await userService.deleteUser(id)
-        toast.success('User deleted successfully')
         fetchUsers()
-      } catch (error) {
-        toast.error('Failed to delete user')
+      } catch (err) {
+        console.error('Error deleting user:', err)
+        alert(err.response?.data?.message || 'Failed to delete user')
       }
     }
   }
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      email: '',
-      password: '',
-      role: 'DOCTOR',
-      department: '',
-      phone: ''
-    })
-  }
-
-  const getRoleBadge = (role) => {
-    const badges = {
-      ADMIN: 'bg-red-100 text-red-800',
-      DOCTOR: 'bg-blue-100 text-blue-800',
-      NURSE: 'bg-green-100 text-green-800',
-      FRONT_DESK: 'bg-yellow-100 text-yellow-800',
-      PHARMACY: 'bg-purple-100 text-purple-800',
-      LABORATORY: 'bg-pink-100 text-pink-800'
+  const handleExport = async () => {
+    try {
+      setExporting(true)
+      const response = await userService.exportUsers()
+      
+      // Create blob and download
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers['content-disposition']
+      const filename = contentDisposition
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : `Data_Pengguna_${new Date().toISOString().split('T')[0]}.xlsx`
+      
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Error exporting users:', err)
+      alert(err.response?.data?.message || 'Failed to export users')
+    } finally {
+      setExporting(false)
     }
-    return badges[role] || 'bg-gray-100 text-gray-800'
   }
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = !searchTerm || 
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.department && user.department.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesRole = !roleFilter || user.role === roleFilter
-    return matchesSearch && matchesRole
-  })
+  const getRoleLabel = (role) => {
+    const roleMap = {
+      ADMIN: 'Administrator',
+      DOCTOR: 'Dokter',
+      NURSE: 'Perawat',
+      FRONT_DESK: 'Front Desk',
+      PHARMACY: 'Farmasi',
+      LABORATORY: 'Laboratorium',
+      PATIENT: 'Pasien'
+    }
+    return roleMap[role] || role
+  }
 
-  const stats = {
-    total: users.length,
-    active: users.filter(u => u.isActive).length,
-    doctors: users.filter(u => u.role === 'DOCTOR').length,
-    nurses: users.filter(u => u.role === 'NURSE').length
+  const getRoleBadgeClass = (role) => {
+    const badgeMap = {
+      ADMIN: 'badge-danger',
+      DOCTOR: 'badge-primary',
+      NURSE: 'badge-success',
+      FRONT_DESK: 'badge-warning',
+      PHARMACY: 'badge-info',
+      LABORATORY: 'badge-secondary',
+      PATIENT: 'badge-gray'
+    }
+    return badgeMap[role] || 'badge-gray'
+  }
+
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem)
+  const totalPages = Math.ceil(users.length / itemsPerPage)
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber)
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <p className="text-sm text-gray-600">Manage system users, roles, and permissions</p>
+          <h1 className="text-2xl font-bold text-gray-900">Manajemen Pengguna</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Kelola pengguna sistem dan peran mereka
+          </p>
         </div>
-        <button onClick={() => { resetForm(); setEditingUser(null); setShowModal(true) }} className="btn btn-primary">
-          <Plus className="w-4 h-4 mr-2" />
-          Add User
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="card">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-              <UserCheck className="w-6 h-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-              <UserCheck className="w-6 h-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Active</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.active}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
-              <Stethoscope className="w-6 h-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Doctors</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.doctors}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
-              <UserCheck className="w-6 h-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Nurses</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.nurses}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Filter */}
-      <div className="card">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by name, email, or department..."
-              className="form-input pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <select
-            className="form-input min-w-[200px]"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+        <div className="flex gap-2">
+          <button
+            onClick={handleExport}
+            disabled={exporting || users.length === 0}
+            className="btn btn-success flex items-center gap-2"
           >
-            <option value="">All Roles</option>
-            <option value="ADMIN">Administrator</option>
-            <option value="DOCTOR">Doctor</option>
-            <option value="NURSE">Nurse</option>
-            <option value="FRONT_DESK">Front Desk</option>
-            <option value="PHARMACY">Pharmacy</option>
-            <option value="LABORATORY">Laboratory</option>
-          </select>
+            <Download className="w-4 h-4" />
+            {exporting ? 'Exporting...' : 'Export Excel'}
+          </button>
+          <button className="btn btn-primary flex items-center gap-2">
+            <UserPlus className="w-4 h-4" />
+            Tambah Pengguna
+          </button>
         </div>
       </div>
+
+      {/* Error Alert */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
 
       {/* Users Table */}
-      <div className="card p-0">
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="table">
-              <thead>
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  No
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nama
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Role
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Departemen
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Telepon
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tanggal
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Aksi
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {currentUsers.length === 0 ? (
                 <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Department</th>
-                  <th>Phone</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <td colSpan="9" className="px-6 py-8 text-center text-gray-500">
+                    Tidak ada data pengguna
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className="text-center py-8 text-gray-500">
-                      No users found
+              ) : (
+                currentUsers.map((user, index) => (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {indexOfFirstItem + index + 1}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{user.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`badge ${getRoleBadgeClass(user.role)}`}>
+                        {getRoleLabel(user.role)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {user.department || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {user.phone || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`badge ${user.isActive ? 'badge-success' : 'badge-danger'}`}>
+                        {user.isActive ? 'Aktif' : 'Nonaktif'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(user.createdAt).toLocaleDateString('id-ID')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <button
+                        onClick={() => {/* View user */}}
+                        className="text-blue-600 hover:text-blue-900"
+                        title="Lihat Detail"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {/* Edit user */}}
+                        className="text-green-600 hover:text-green-900"
+                        title="Edit"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user.id, user.name)}
+                        className="text-red-600 hover:text-red-900"
+                        title="Hapus"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td>
-                        <div className="text-sm font-mono text-gray-900">#{user.id}</div>
-                      </td>
-                      <td>
-                        <div className="font-medium text-gray-900">{user.name}</div>
-                      </td>
-                      <td>
-                        <div className="text-sm text-gray-600">{user.email}</div>
-                      </td>
-                      <td>
-                        <span className={`px-2 py-1 text-xs font-medium rounded ${getRoleBadge(user.role)}`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="text-sm text-gray-600">{user.department || '-'}</div>
-                      </td>
-                      <td>
-                        <div className="text-sm text-gray-600">{user.phone || '-'}</div>
-                      </td>
-                      <td>
-                        {user.isActive ? (
-                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
-                            <UserCheck className="w-3 h-3 mr-1" />
-                            Active
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800">
-                            <UserX className="w-3 h-3 mr-1" />
-                            Inactive
-                          </span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="flex items-center space-x-2">
-                          <button 
-                            onClick={() => handleEdit(user)}
-                            className="text-yellow-600 hover:text-yellow-800"
-                            title="Edit User"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(user.id)}
-                            className="text-red-600 hover:text-red-800"
-                            title="Delete User"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div className="flex-1 flex justify-between sm:hidden">
+              <button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="btn btn-secondary"
+              >
+                Sebelumnya
+              </button>
+              <button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="btn btn-secondary"
+              >
+                Selanjutnya
+              </button>
+            </div>
+            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  Menampilkan <span className="font-medium">{indexOfFirstItem + 1}</span> sampai{' '}
+                  <span className="font-medium">{Math.min(indexOfLastItem, users.length)}</span> dari{' '}
+                  <span className="font-medium">{users.length}</span> pengguna
+                </p>
+              </div>
+              <div>
+                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Sebelumnya
+                  </button>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i + 1}
+                      onClick={() => paginate(i + 1)}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                        currentPage === i + 1
+                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Selanjutnya
+                  </button>
+                </nav>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Add/Edit User Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingUser ? 'Edit User' : 'Add New User'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="form-label">Name <span className="text-red-500">*</span></label>
-                  <input
-                    type="text"
-                    required
-                    className="form-input"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="Enter full name"
-                  />
-                </div>
-
-                <div>
-                  <label className="form-label">Email <span className="text-red-500">*</span></label>
-                  <input
-                    type="email"
-                    required
-                    className="form-input"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="Enter email address"
-                  />
-                </div>
-
-                <div>
-                  <label className="form-label">
-                    Password {editingUser ? '' : <span className="text-red-500">*</span>}
-                  </label>
-                  <input
-                    type="password"
-                    required={!editingUser}
-                    className="form-input"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    placeholder={editingUser ? "Leave blank to keep current password" : "Enter password"}
-                  />
-                  {editingUser && (
-                    <p className="text-xs text-gray-500 mt-1">Leave blank to keep current password</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="form-label">Role <span className="text-red-500">*</span></label>
-                  <select
-                    required
-                    className="form-input"
-                    value={formData.role}
-                    onChange={(e) => setFormData({...formData, role: e.target.value})}
-                  >
-                    <option value="ADMIN">Administrator</option>
-                    <option value="DOCTOR">Doctor</option>
-                    <option value="NURSE">Nurse</option>
-                    <option value="FRONT_DESK">Front Desk</option>
-                    <option value="PHARMACY">Pharmacy</option>
-                    <option value="LABORATORY">Laboratory</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="form-label">Department</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.department}
-                    onChange={(e) => setFormData({...formData, department: e.target.value})}
-                    placeholder="e.g., Cardiology, Emergency"
-                  />
-                </div>
-
-                <div>
-                  <label className="form-label">Phone</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    placeholder="+1234567890"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4 border-t">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false)
-                    setEditingUser(null)
-                    resetForm()
-                  }}
-                  className="btn btn-secondary"
-                  disabled={submitting}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary"
-                  disabled={submitting}
-                >
-                  {submitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      {editingUser ? 'Updating...' : 'Creating...'}
-                    </>
-                  ) : (
-                    <>
-                      {editingUser ? 'Update User' : 'Create User'}
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+      {/* Summary Card */}
+      <div className="card bg-blue-50 border border-blue-200">
+        <div className="flex items-start gap-3">
+          <div className="text-blue-600">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-blue-900">Total Pengguna Sistem</h3>
+            <p className="mt-1 text-sm text-blue-700">
+              Terdapat <strong>{users.length}</strong> pengguna terdaftar dalam sistem.
+              Klik "Export Excel" untuk mengunduh data lengkap pengguna.
+            </p>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

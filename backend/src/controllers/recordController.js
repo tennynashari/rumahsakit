@@ -334,10 +334,138 @@ const deleteRecord = async (req, res) => {
   }
 };
 
+// @desc    Export medical records to Excel
+// @route   GET /api/records/export/excel
+// @access  Private
+const exportRecordsExcel = async (req, res) => {
+  try {
+    const XLSX = require('xlsx');
+    const { startDate, endDate } = req.query;
+
+    // Build where clause for date filtering
+    const where = {};
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate);
+      }
+      if (endDate) {
+        where.createdAt.lte = new Date(endDate);
+      }
+    }
+
+    // Fetch all records with filters
+    const records = await prisma.medicalRecord.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        patient: {
+          select: {
+            medicalRecordNo: true,
+            name: true,
+            dateOfBirth: true,
+            gender: true,
+            phone: true
+          }
+        },
+        doctor: {
+          select: {
+            name: true,
+            department: true
+          }
+        },
+        visit: {
+          select: {
+            visitType: true,
+            scheduledAt: true
+          }
+        }
+      }
+    });
+
+    // Transform data for Excel
+    const excelData = records.map((record, index) => {
+      const age = Math.floor((new Date() - new Date(record.patient.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000));
+      
+      return {
+        'No': index + 1,
+        'No. Rekam Medis': record.patient.medicalRecordNo,
+        'Nama Pasien': record.patient.name,
+        'Umur': age + ' tahun',
+        'Jenis Kelamin': record.patient.gender === 'MALE' ? 'Laki-laki' : record.patient.gender === 'FEMALE' ? 'Perempuan' : 'Lainnya',
+        'No. Telepon': record.patient.phone || '-',
+        'Nama Dokter': record.doctor.name,
+        'Departemen': record.doctor.department || '-',
+        'Kode Diagnosis': record.diagnosisCode || '-',
+        'Diagnosis': record.diagnosis || '-',
+        'Keluhan': record.symptoms || '-',
+        'Pengobatan': record.treatment || '-',
+        'Jenis Kunjungan': record.visit ? (
+          record.visit.visitType === 'OUTPATIENT' ? 'Rawat Jalan' : 
+          record.visit.visitType === 'INPATIENT' ? 'Rawat Inap' : 
+          record.visit.visitType === 'EMERGENCY' ? 'Darurat' : record.visit.visitType
+        ) : '-',
+        'Tanggal Kunjungan': record.visit ? new Date(record.visit.scheduledAt).toLocaleDateString('id-ID') : '-',
+        'Tanggal Pembuatan': new Date(record.createdAt).toLocaleDateString('id-ID'),
+        'Jam': new Date(record.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 5 },  // No
+      { wch: 20 }, // No. Rekam Medis
+      { wch: 25 }, // Nama Pasien
+      { wch: 12 }, // Umur
+      { wch: 15 }, // Jenis Kelamin
+      { wch: 15 }, // Telepon
+      { wch: 25 }, // Nama Dokter
+      { wch: 20 }, // Departemen
+      { wch: 15 }, // Kode Diagnosis
+      { wch: 30 }, // Diagnosis
+      { wch: 40 }, // Keluhan
+      { wch: 40 }, // Pengobatan
+      { wch: 15 }, // Jenis Kunjungan
+      { wch: 18 }, // Tanggal Kunjungan
+      { wch: 18 }, // Tanggal Pembuatan
+      { wch: 10 }  // Jam
+    ];
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Rekam Medis');
+
+    // Generate buffer
+    const dateRange = startDate && endDate 
+      ? `_${new Date(startDate).toISOString().split('T')[0]}_sd_${new Date(endDate).toISOString().split('T')[0]}`
+      : `_${new Date().toISOString().split('T')[0]}`;
+    const filename = `Rekam_Medis${dateRange}.xlsx`;
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set headers and send file
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while exporting medical records'
+    });
+  }
+};
+
 module.exports = {
   getRecords,
   getRecord,
   createRecord,
   updateRecord,
-  deleteRecord
+  deleteRecord,
+  exportRecordsExcel
 };

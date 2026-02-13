@@ -13,12 +13,6 @@ export const authService = {
     return response.data
   },
 
-  // Get current user
-  me: async () => {
-    const response = await api.get('/auth/me')
-    return response.data
-  },
-
   // Refresh token
   refreshToken: async (refreshToken) => {
     const response = await api.post('/auth/refresh-token', { refreshToken })
@@ -68,6 +62,14 @@ export const patientService = {
     const response = await api.get('/patients/search', { params: { q: query } })
     return response.data
   },
+
+  // Export patients to Excel
+  exportPatients: async () => {
+    const response = await api.get('/patients/export/excel', {
+      responseType: 'blob'
+    })
+    return response
+  },
 }
 
 export const visitService = {
@@ -100,6 +102,15 @@ export const visitService = {
     const response = await api.delete(`/visits/${id}`)
     return response.data
   },
+
+  // Export visits to Excel
+  exportVisits: async (params = {}) => {
+    const response = await api.get('/visits/export/excel', {
+      params,
+      responseType: 'blob'
+    })
+    return response
+  },
 }
 
 export const recordService = {
@@ -131,6 +142,15 @@ export const recordService = {
   deleteRecord: async (id) => {
     const response = await api.delete(`/records/${id}`)
     return response.data
+  },
+
+  // Export medical records to Excel
+  exportRecords: async (params = {}) => {
+    const response = await api.get('/records/export/excel', {
+      params,
+      responseType: 'blob'
+    })
+    return response
   },
 }
 
@@ -165,22 +185,12 @@ export const medicineService = {
     return response.data
   },
 
-  // Add batch
-  addBatch: async (medicineId, batchData) => {
-    const response = await api.post(`/medicines/${medicineId}/batches`, batchData)
-    return response.data
-  },
-
-  // Update batch
-  updateBatch: async (batchId, batchData) => {
-    const response = await api.put(`/medicines/batches/${batchId}`, batchData)
-    return response.data
-  },
-
-  // Delete batch
-  deleteBatch: async (batchId) => {
-    const response = await api.delete(`/medicines/batches/${batchId}`)
-    return response.data
+  // Export medicines to Excel
+  exportMedicines: async () => {
+    const response = await api.get('/medicines/export/excel', {
+      responseType: 'blob'
+    })
+    return response
   },
 }
 
@@ -194,12 +204,6 @@ export const billingService = {
   // Get single billing
   getBilling: async (id) => {
     const response = await api.get(`/billing/${id}`)
-    return response.data
-  },
-
-  // Get billing statistics
-  getBillingStats: async () => {
-    const response = await api.get('/billing/stats')
     return response.data
   },
 
@@ -226,12 +230,28 @@ export const billingService = {
     const response = await api.delete(`/billing/${id}`)
     return response.data
   },
+
+  // Get billing stats
+  getBillingStats: async () => {
+    const response = await api.get('/billing/stats')
+    return response.data
+  },
+
+  // Export billings to Excel
+  exportBillings: async (params = {}) => {
+    const response = await api.get('/billing/export/excel', {
+      params,
+      responseType: 'blob'
+    })
+    return response
+  },
 }
 
+// User Service
 export const userService = {
   // Get all users
-  getUsers: async (params = {}) => {
-    const response = await api.get('/users', { params })
+  getUsers: async () => {
+    const response = await api.get('/users')
     return response.data
   },
 
@@ -258,18 +278,12 @@ export const userService = {
     const response = await api.delete(`/users/${id}`)
     return response.data
   },
-}
 
-export const dashboardService = {
-  // Get dashboard statistics
-  getStats: async () => {
-    const response = await api.get('/dashboard/stats')
-    return response.data
-  },
-
-  // Get recent activities
-  getActivities: async (params = {}) => {
-    const response = await api.get('/dashboard/activities', { params })
-    return response.data
+  // Export users to Excel
+  exportUsers: async () => {
+    const response = await api.get('/users/export/excel', {
+      responseType: 'blob'
+    })
+    return response
   },
 }

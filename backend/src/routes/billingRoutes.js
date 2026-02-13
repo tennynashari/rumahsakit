@@ -1,60 +1,68 @@
 const express = require('express');
 const { body } = require('express-validator');
-const billingController = require('../controllers/billingController');
 const { auth, authorize } = require('../middleware/authMiddleware');
+const {
+  getBillings,
+  getBilling,
+  createBilling,
+  updateBilling,
+  recordPayment,
+  deleteBilling,
+  getBillingStats,
+  exportBillingsExcel
+} = require('../controllers/billingController');
 
 const router = express.Router();
 
-// Get all billings with filters
-router.get('/', auth, billingController.getBillings);
+// @route   GET /api/billing/export/excel
+// @desc    Export all billings to Excel
+// @access  Private
+router.get('/export/excel', auth, exportBillingsExcel);
 
-// Get billing statistics
-router.get('/stats', auth, billingController.getBillingStats);
+// @route   GET /api/billing/stats
+// @desc    Get billing statistics
+// @access  Private
+router.get('/stats', auth, getBillingStats);
 
-// Get single billing
-router.get('/:id', auth, billingController.getBilling);
+// @route   GET /api/billing
+// @desc    Get all billings
+// @access  Private
+router.get('/', auth, getBillings);
 
-// Create new billing
-router.post('/',
+// @route   GET /api/billing/:id
+// @desc    Get billing by ID
+// @access  Private
+router.get('/:id', auth, getBilling);
+
+// @route   POST /api/billing
+// @desc    Create new billing
+// @access  Private (Admin, Front Desk, Doctor)
+router.post('/', [
   auth,
-  authorize('ADMIN', 'FRONT_DESK'),
-  [
-    body('patientId').notEmpty().withMessage('Patient is required').isInt(),
-    body('items').notEmpty().withMessage('Items are required').isArray(),
-    body('subtotal').notEmpty().withMessage('Subtotal is required').isFloat({ min: 0 }),
-    body('total').notEmpty().withMessage('Total is required').isFloat({ min: 0 })
-  ],
-  billingController.createBilling
-);
+  authorize('ADMIN', 'FRONT_DESK', 'DOCTOR'),
+  body('patientId').isInt(),
+  body('visitId').optional().isInt()
+], createBilling);
 
-// Update billing
-router.put('/:id',
+// @route   PUT /api/billing/:id
+// @desc    Update billing
+// @access  Private (Admin, Front Desk)
+router.put('/:id', [
   auth,
-  authorize('ADMIN', 'FRONT_DESK'),
-  [
-    body('items').optional().isArray(),
-    body('subtotal').optional().isFloat({ min: 0 }),
-    body('total').optional().isFloat({ min: 0 }),
-    body('status').optional().isIn(['UNPAID', 'PARTIALLY_PAID', 'PAID', 'CANCELLED'])
-  ],
-  billingController.updateBilling
-);
+  authorize('ADMIN', 'FRONT_DESK')
+], updateBilling);
 
-// Record payment
-router.post('/:id/payment',
+// @route   POST /api/billing/:id/payment
+// @desc    Record payment for billing
+// @access  Private (Admin, Front Desk)
+router.post('/:id/payment', [
   auth,
-  authorize('ADMIN', 'FRONT_DESK'),
-  [
-    body('amountPaid').notEmpty().withMessage('Amount paid is required').isFloat({ min: 0 })
-  ],
-  billingController.recordPayment
-);
+  authorize('ADMIN', 'FRONT_DESK')
+], recordPayment);
 
-// Delete billing
-router.delete('/:id',
-  auth,
-  authorize('ADMIN'),
-  billingController.deleteBilling
-);
+// @route   DELETE /api/billing/:id
+// @desc    Delete billing
+// @access  Private (Admin)
+router.delete('/:id', auth, authorize('ADMIN'), deleteBilling);
 
 module.exports = router;

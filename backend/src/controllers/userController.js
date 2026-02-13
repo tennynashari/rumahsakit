@@ -290,10 +290,99 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// @desc    Export users to Excel
+// @route   GET /api/users/export/excel
+// @access  Private (Admin)
+const exportUsersExcel = async (req, res) => {
+  try {
+    const XLSX = require('xlsx');
+
+    // Fetch all users
+    const users = await prisma.user.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        department: true,
+        phone: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    // Transform data for Excel
+    const excelData = users.map((user, index) => {
+      const roleLabels = {
+        ADMIN: 'Administrator',
+        DOCTOR: 'Dokter',
+        NURSE: 'Perawat',
+        FRONT_DESK: 'Front Desk',
+        PHARMACY: 'Farmasi',
+        LABORATORY: 'Laboratorium',
+        PATIENT: 'Pasien'
+      };
+
+      return {
+        'No': index + 1,
+        'Nama': user.name,
+        'Email': user.email,
+        'Role': roleLabels[user.role] || user.role,
+        'Departemen': user.department || '-',
+        'No. Telepon': user.phone || '-',
+        'Status': user.isActive ? 'Aktif' : 'Nonaktif',
+        'Tanggal Dibuat': new Date(user.createdAt).toLocaleDateString('id-ID'),
+        'Terakhir Update': new Date(user.updatedAt).toLocaleDateString('id-ID')
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 5 },  // No
+      { wch: 30 }, // Nama
+      { wch: 30 }, // Email
+      { wch: 15 }, // Role
+      { wch: 25 }, // Departemen
+      { wch: 15 }, // Telepon
+      { wch: 10 }, // Status
+      { wch: 18 }, // Tanggal Dibuat
+      { wch: 18 }  // Terakhir Update
+    ];
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Data Pengguna');
+
+    // Generate buffer
+    const filename = `Data_Pengguna_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set headers and send file
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while exporting users'
+    });
+  }
+};
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  exportUsersExcel
 };

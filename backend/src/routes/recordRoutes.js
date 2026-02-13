@@ -6,10 +6,16 @@ const {
   getRecord,
   createRecord,
   updateRecord,
-  deleteRecord
+  deleteRecord,
+  exportRecordsExcel
 } = require('../controllers/recordController');
 
 const router = express.Router();
+
+// @route   GET /api/records/export/excel
+// @desc    Export all medical records to Excel
+// @access  Private
+router.get('/export/excel', auth, exportRecordsExcel);
 
 // @route   GET /api/records
 // @desc    Get all medical records
@@ -23,37 +29,26 @@ router.get('/:id', auth, getRecord);
 
 // @route   POST /api/records
 // @desc    Create new medical record
-// @access  Private (Doctor, Nurse)
+// @access  Private (Admin, Doctor)
 router.post('/', [
   auth,
-  authorize('ADMIN', 'DOCTOR', 'NURSE'),
+  authorize('ADMIN', 'DOCTOR'),
+  body('visitId').isInt(),
   body('patientId').isInt(),
-  body('doctorId').isInt(),
-  body('visitId').optional({ checkFalsy: true }),
-  body('diagnosisCode').optional({ checkFalsy: true }).trim(),
-  body('symptoms').notEmpty().withMessage('Symptoms are required'),
-  body('diagnosis').notEmpty().withMessage('Diagnosis is required'),
-  body('treatment').optional({ checkFalsy: true }).trim(),
-  body('prescription').optional({ checkFalsy: true }).trim()
+  body('doctorId').isInt()
 ], createRecord);
 
 // @route   PUT /api/records/:id
 // @desc    Update medical record
-// @access  Private (Doctor, Nurse)
+// @access  Private (Admin, Doctor)
 router.put('/:id', [
   auth,
-  authorize('ADMIN', 'DOCTOR', 'NURSE'),
-  body('visitId').optional({ checkFalsy: true }),
-  body('diagnosisCode').optional({ checkFalsy: true }).trim(),
-  body('symptoms').optional().notEmpty(),
-  body('diagnosis').optional().notEmpty(),
-  body('treatment').optional({ checkFalsy: true }).trim(),
-  body('prescription').optional({ checkFalsy: true }).trim()
+  authorize('ADMIN', 'DOCTOR')
 ], updateRecord);
 
 // @route   DELETE /api/records/:id
 // @desc    Delete medical record
-// @access  Private (Admin only)
+// @access  Private (Admin)
 router.delete('/:id', auth, authorize('ADMIN'), deleteRecord);
 
 module.exports = router;

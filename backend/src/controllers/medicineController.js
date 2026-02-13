@@ -387,6 +387,93 @@ const deleteBatch = async (req, res) => {
   }
 };
 
+// @desc    Export medicines to Excel
+// @route   GET /api/medicines/export/excel
+// @access  Private
+const exportMedicinesExcel = async (req, res) => {
+  try {
+    const XLSX = require('xlsx');
+
+    // Fetch all medicines with batches
+    const medicines = await prisma.medicine.findMany({
+      orderBy: {
+        name: 'asc'
+      },
+      include: {
+        batches: {
+          select: {
+            batchNo: true,
+            stock: true,
+            expiryDate: true
+          }
+        }
+      }
+    });
+
+    // Transform data for Excel
+    const excelData = medicines.map((medicine, index) => {
+      const totalStock = medicine.batches.reduce((sum, batch) => sum + batch.stock, 0);
+      const batchInfo = medicine.batches.map(b => 
+        `${b.batchNo} (${b.stock} ${medicine.unit}, Exp: ${new Date(b.expiryDate).toLocaleDateString('id-ID')})`
+      ).join(' | ');
+
+      return {
+        'No': index + 1,
+        'Nama Obat': medicine.name,
+        'Deskripsi': medicine.description || '-',
+        'Satuan': medicine.unit,
+        'Harga': new Intl.NumberFormat('id-ID', { 
+          style: 'currency', 
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(medicine.price),
+        'Total Stok': totalStock,
+        'Status': medicine.isActive ? 'Aktif' : 'Nonaktif',
+        'Batch Info': batchInfo || '-',
+        'Tanggal Dibuat': new Date(medicine.createdAt).toLocaleDateString('id-ID'),
+        'Terakhir Update': new Date(medicine.updatedAt).toLocaleDateString('id-ID')
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 5 },  // No
+      { wch: 30 }, // Nama Obat
+      { wch: 40 }, // Deskripsi
+      { wch: 12 }, // Satuan
+      { wch: 15 }, // Harga
+      { wch: 12 }, // Total Stok
+      { wch: 10 }, // Status
+      { wch: 60 }, // Batch Info
+      { wch: 18 }, // Tanggal Dibuat
+      { wch: 18 }  // Terakhir Update
+    ];
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Data Obat');
+
+    // Generate buffer
+    const filename = `Data_Obat_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set headers and send file
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while exporting medicines'
+    });
+  }
+};
+
 module.exports = {
   getMedicines,
   getMedicine,
@@ -395,5 +482,6 @@ module.exports = {
   deleteMedicine,
   addBatch,
   updateBatch,
-  deleteBatch
+  deleteBatch,
+  exportMedicinesExcel
 };

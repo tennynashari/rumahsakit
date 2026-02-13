@@ -405,10 +405,125 @@ const deleteVisit = async (req, res) => {
   }
 };
 
+// @desc    Export visits to Excel
+// @route   GET /api/visits/export/excel
+// @access  Private
+const exportVisitsExcel = async (req, res) => {
+  try {
+    const XLSX = require('xlsx');
+    const { startDate, endDate } = req.query;
+
+    // Build where clause for date filtering
+    const where = {};
+    if (startDate || endDate) {
+      where.scheduledAt = {};
+      if (startDate) {
+        where.scheduledAt.gte = new Date(startDate);
+      }
+      if (endDate) {
+        where.scheduledAt.lte = new Date(endDate);
+      }
+    }
+
+    // Fetch all visits with filters
+    const visits = await prisma.visit.findMany({
+      where,
+      orderBy: {
+        scheduledAt: 'desc'
+      },
+      include: {
+        patient: {
+          select: {
+            medicalRecordNo: true,
+            name: true,
+            phone: true,
+            gender: true
+          }
+        },
+        doctor: {
+          select: {
+            name: true,
+            department: true
+          }
+        }
+      }
+    });
+
+    // Transform data for Excel
+    const excelData = visits.map((visit, index) => {
+      return {
+        'No': index + 1,
+        'No. Antrian': visit.queueNumber || '-',
+        'No. Rekam Medis': visit.patient.medicalRecordNo,
+        'Nama Pasien': visit.patient.name,
+        'Jenis Kelamin': visit.patient.gender === 'MALE' ? 'Laki-laki' : visit.patient.gender === 'FEMALE' ? 'Perempuan' : 'Lainnya',
+        'No. Telepon': visit.patient.phone || '-',
+        'Nama Dokter': visit.doctor.name,
+        'Departemen': visit.doctor.department || '-',
+        'Jenis Kunjungan': visit.visitType === 'OUTPATIENT' ? 'Rawat Jalan' : 
+                           visit.visitType === 'INPATIENT' ? 'Rawat Inap' : 
+                           visit.visitType === 'EMERGENCY' ? 'Darurat' : visit.visitType,
+        'Tanggal Kunjungan': new Date(visit.scheduledAt).toLocaleDateString('id-ID'),
+        'Jam': new Date(visit.scheduledAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        'Status': visit.status === 'SCHEDULED' ? 'Terjadwal' :
+                  visit.status === 'IN_PROGRESS' ? 'Berlangsung' :
+                  visit.status === 'COMPLETED' ? 'Selesai' :
+                  visit.status === 'CANCELLED' ? 'Dibatalkan' :
+                  visit.status === 'NO_SHOW' ? 'Tidak Hadir' : visit.status,
+        'Catatan': visit.notes || '-'
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 5 },  // No
+      { wch: 12 }, // No. Antrian
+      { wch: 20 }, // No. Rekam Medis
+      { wch: 25 }, // Nama Pasien
+      { wch: 15 }, // Jenis Kelamin
+      { wch: 15 }, // Telepon
+      { wch: 25 }, // Nama Dokter
+      { wch: 20 }, // Departemen
+      { wch: 15 }, // Jenis Kunjungan
+      { wch: 18 }, // Tanggal
+      { wch: 10 }, // Jam
+      { wch: 15 }, // Status
+      { wch: 40 }  // Catatan
+    ];
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Data Kunjungan');
+
+    // Generate buffer
+    const dateRange = startDate && endDate 
+      ? `_${new Date(startDate).toISOString().split('T')[0]}_sd_${new Date(endDate).toISOString().split('T')[0]}`
+      : `_${new Date().toISOString().split('T')[0]}`;
+    const filename = `Data_Kunjungan${dateRange}.xlsx`;
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set headers and send file
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while exporting visits'
+    });
+  }
+};
+
 module.exports = {
   getVisits,
   getVisit,
   createVisit,
   updateVisit,
-  deleteVisit
+  deleteVisit,
+  exportVisitsExcel
 };
