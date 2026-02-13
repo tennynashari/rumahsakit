@@ -20,8 +20,8 @@ const Users = () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await userService.getUsers()
-      setUsers(data)
+      const response = await userService.getUsers()
+      setUsers(response.data.users || [])
     } catch (err) {
       console.error('Error fetching users:', err)
       setError(err.response?.data?.message || 'Failed to fetch users')

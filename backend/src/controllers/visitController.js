@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const prisma = require('../database/prisma');
+const XLSX = require('xlsx');
 
 // @desc    Get all visits
 // @route   GET /api/visits
@@ -410,7 +411,6 @@ const deleteVisit = async (req, res) => {
 // @access  Private
 const exportVisitsExcel = async (req, res) => {
   try {
-    const XLSX = require('xlsx');
     const { startDate, endDate } = req.query;
 
     // Build where clause for date filtering

@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const prisma = require('../database/prisma');
 const bcrypt = require('bcryptjs');
+const XLSX = require('xlsx');
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -295,8 +296,6 @@ const deleteUser = async (req, res) => {
 // @access  Private (Admin)
 const exportUsersExcel = async (req, res) => {
   try {
-    const XLSX = require('xlsx');
-
     // Fetch all users
     const users = await prisma.user.findMany({
       orderBy: {

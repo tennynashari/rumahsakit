@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const prisma = require('../database/prisma');
+const XLSX = require('xlsx');
 
 // @desc    Get all medical records
 // @route   GET /api/records
@@ -339,7 +340,6 @@ const deleteRecord = async (req, res) => {
 // @access  Private
 const exportRecordsExcel = async (req, res) => {
   try {
-    const XLSX = require('xlsx');
     const { startDate, endDate } = req.query;
 
     // Build where clause for date filtering

@@ -8,8 +8,21 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Important: enables sending cookies with requests
 })
+
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
@@ -17,30 +30,60 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    // Don't retry for /auth/me or /auth/refresh-token endpoints
-    const isAuthEndpoint = originalRequest.url?.includes('/auth/me') || 
-                          originalRequest.url?.includes('/auth/refresh-token')
+    console.log('API Error:', {
+      status: error.response?.status,
+      url: originalRequest?.url,
+      message: error.message,
+      hasRetry: !!originalRequest._retry
+    })
 
-    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+    // Only handle 401 errors and prevent infinite loops
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
       try {
-        // Try to refresh the token
-        await axios.post(`${API_BASE_URL}/auth/refresh-token`, {}, {
-          withCredentials: true
+        const refreshToken = localStorage.getItem('refreshToken')
+        if (!refreshToken) {
+          // No refresh token, logout
+          console.log('No refresh token found, redirecting to login')
+          throw new Error('No refresh token')
+        }
+
+        console.log('Attempting to refresh token...')
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
+          refreshToken,
         })
 
-        // Retry original request
-        return api(originalRequest)
+        const { accessToken } = response.data.data
+        localStorage.setItem('accessToken', accessToken)
+        console.log('Token refreshed successfully, new token:', accessToken?.substring(0, 20))
+
+        // Update default Authorization header and retry
+        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+        originalRequest.headers['Authorization'] = `Bearer ${accessToken}`
+        
+        console.log('Retrying original request:', originalRequest.url)
+        return axios(originalRequest)
       } catch (refreshError) {
-        // Refresh failed, redirect to login only if not already there
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login'
+        // Refresh failed, logout user
+        console.error('Token refresh failed:', refreshError.response?.data || refreshError.message)
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('user')
+        
+        // Only redirect if we're not already on login page
+        if (window.location.pathname !== '/login') {
+          console.log('Redirecting to login...')
+          setTimeout(() => {
+            window.location.href = '/login'
+          }, 100)
         }
         return Promise.reject(refreshError)
       }
     }
 
+    // For other errors, just reject without logout
+    console.log('Non-refresh error or already retried, rejecting')
     return Promise.reject(error)
   }
 )

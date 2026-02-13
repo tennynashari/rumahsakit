@@ -5,6 +5,10 @@ const prisma = require('../database/prisma');
 
 // Generate JWT tokens
 const generateTokens = (user) => {
+  console.log('Generating tokens for user:', user.id, user.email)
+  console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET)
+  console.log('JWT_REFRESH_SECRET exists:', !!process.env.JWT_REFRESH_SECRET)
+  
   const accessToken = jwt.sign(
     { id: user.id, email: user.email, role: user.role },
     process.env.JWT_SECRET,
@@ -16,6 +20,11 @@ const generateTokens = (user) => {
     process.env.JWT_REFRESH_SECRET,
     { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
   );
+
+  console.log('Generated tokens:', { 
+    accessToken: accessToken?.substring(0, 20), 
+    refreshToken: refreshToken?.substring(0, 20) 
+  })
 
   return { accessToken, refreshToken };
 };
@@ -79,25 +88,12 @@ const login = async (req, res) => {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    // Set HttpOnly cookies
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 1000 // 1 hour
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
-
     res.json({
       success: true,
       data: {
-        user: userWithoutPassword
+        user: userWithoutPassword,
+        accessToken,
+        refreshToken
       }
     });
 
@@ -180,7 +176,7 @@ const register = async (req, res) => {
 // @access  Public
 const refreshToken = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const { refreshToken } = req.body;
 
     if (!refreshToken) {
       return res.status(401).json({
@@ -215,17 +211,9 @@ const refreshToken = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
     );
 
-    // Set new access token cookie
-    res.cookie('accessToken', newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 1000 // 1 hour
-    });
-
     res.json({
       success: true,
-      data: { success: true }
+      data: { accessToken: newAccessToken }
     });
 
   } catch (error) {
@@ -240,65 +228,17 @@ const refreshToken = async (req, res) => {
 // @route   POST /api/auth/logout
 // @access  Private
 const logout = async (req, res) => {
-  // Clear cookies
-  res.clearCookie('accessToken', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  });
-  res.clearCookie('refreshToken', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  });
-
+  // In a production app, you'd maintain a blacklist of tokens
+  // For now, we'll just send a success response
   res.json({
     success: true,
     message: 'Logged out successfully'
   });
 };
 
-// @desc    Get current user
-// @route   GET /api/auth/me
-// @access  Private
-const me = async (req, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        department: true,
-        phone: true,
-        isActive: true
-      }
-    });
-
-    if (!user || !user.isActive) {
-      return res.status(404).json({
-        success: false,
-        error: 'User not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      data: { user }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Server error'
-    });
-  }
-};
-
 module.exports = {
   login,
   register,
   refreshToken,
-  logout,
-  me
+  logout
 };

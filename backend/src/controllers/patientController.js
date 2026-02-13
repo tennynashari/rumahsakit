@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const prisma = require('../database/prisma');
+const XLSX = require('xlsx');
 
 // Generate unique Medical Record Number
 const generateMRN = async () => {
@@ -357,8 +358,6 @@ const searchPatients = async (req, res) => {
 // @access  Private
 const exportPatientsExcel = async (req, res) => {
   try {
-    const XLSX = require('xlsx');
-    
     // Fetch all patients without pagination
     const patients = await prisma.patient.findMany({
       orderBy: {

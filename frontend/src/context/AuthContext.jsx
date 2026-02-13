@@ -28,27 +28,29 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState)
 
-  // Check authentication status on mount
+  // Check for existing token on mount
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Try to fetch current user with cookies
-        const response = await authService.me()
-        if (response.data.user) {
-          dispatch({ type: 'SET_USER', payload: response.data.user })
-        } else {
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('accessToken')
+      const userData = localStorage.getItem('user')
+
+      if (token && userData) {
+        try {
+          const user = JSON.parse(userData)
+          dispatch({ type: 'SET_USER', payload: user })
+        } catch (error) {
+          // Invalid stored data, clear it
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          localStorage.removeItem('user')
           dispatch({ type: 'SET_LOADING', payload: false })
         }
-      } catch (error) {
-        // If auth check fails, just set loading to false
-        // Don't set error to avoid showing error on login page
+      } else {
         dispatch({ type: 'SET_LOADING', payload: false })
       }
     }
 
-    // Only check auth if we have cookies or localStorage tokens
-    // This prevents unnecessary API calls on login page
-    checkAuth()
+    initializeAuth()
   }, [])
 
   const login = async (credentials) => {
@@ -56,13 +58,26 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: 'SET_LOADING', payload: true })
       
       const response = await authService.login(credentials)
-      const { user } = response.data
+      console.log('AuthContext - Login response:', response)
+      
+      // authService.login returns response.data from axios
+      // Backend returns: { success: true, data: { user, accessToken, refreshToken } }
+      // So response is already { success: true, data: { ... } }
+      const { user, accessToken, refreshToken } = response.data
+
+      console.log('Extracted data:', { user, accessToken: accessToken?.substring(0, 20), refreshToken: refreshToken?.substring(0, 20) })
+
+      // Store tokens and user data
+      localStorage.setItem('accessToken', accessToken)
+      localStorage.setItem('refreshToken', refreshToken)
+      localStorage.setItem('user', JSON.stringify(user))
 
       dispatch({ type: 'SET_USER', payload: user })
       toast.success('Login successful!')
       
       return response
     } catch (error) {
+      console.error('AuthContext - Login error:', error)
       const errorMessage = error.response?.data?.error || 'Login failed'
       dispatch({ type: 'SET_ERROR', payload: errorMessage })
       toast.error(errorMessage)
@@ -93,6 +108,11 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       // Ignore logout errors
     } finally {
+      // Clear local storage and state
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+      
       dispatch({ type: 'LOGOUT' })
       toast.success('Logged out successfully')
     }

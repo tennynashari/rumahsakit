@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const { validationResult } = require('express-validator');
+const XLSX = require('xlsx');
 
 const prisma = new PrismaClient();
 
@@ -398,7 +399,6 @@ const getBillingStats = async (req, res) => {
 // @access  Private
 const exportBillingsExcel = async (req, res) => {
   try {
-    const XLSX = require('xlsx');
     const { startDate, endDate } = req.query;
 
     // Build where clause for date filtering

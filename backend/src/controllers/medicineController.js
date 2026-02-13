@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const prisma = require('../database/prisma');
+const XLSX = require('xlsx');
 
 // @desc    Get all medicines
 // @route   GET /api/medicines
@@ -392,8 +393,6 @@ const deleteBatch = async (req, res) => {
 // @access  Private
 const exportMedicinesExcel = async (req, res) => {
   try {
-    const XLSX = require('xlsx');
-
     // Fetch all medicines with batches
     const medicines = await prisma.medicine.findMany({
       orderBy: {

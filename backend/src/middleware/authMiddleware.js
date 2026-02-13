@@ -3,8 +3,7 @@ const jwt = require('jsonwebtoken');
 // Auth middleware to verify JWT token
 const auth = async (req, res, next) => {
   try {
-    // Try to get token from cookie first, fallback to Authorization header
-    const token = req.cookies.accessToken || req.header('Authorization')?.replace('Bearer ', '');
+    const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
       return res.status(401).json({
@@ -13,10 +12,20 @@ const auth = async (req, res, next) => {
       });
     }
 
+    console.log('Auth middleware - Verifying token...');
+    console.log('Token (first 20 chars):', token?.substring(0, 20));
+    console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+    console.log('JWT_SECRET value:', process.env.JWT_SECRET);
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Token decoded successfully:', decoded);
     req.user = decoded;
     next();
   } catch (error) {
+    console.error('Auth middleware - JWT verification error:');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Full error:', error);
     res.status(401).json({
       success: false,
       error: 'Token is not valid'
