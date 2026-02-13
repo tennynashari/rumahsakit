@@ -1,12 +1,10 @@
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const cookieParser = require('cookie-parser');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -38,7 +36,7 @@ app.use(cors({
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // More lenient in development
+  max: 100, // limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP'
 });
 app.use('/api/', limiter);
@@ -46,19 +44,14 @@ app.use('/api/', limiter);
 // Stricter rate limiting for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 50 : 1000, // More lenient in development
-  message: 'Too many authentication attempts',
-  standardHeaders: true,
-  legacyHeaders: false,
-  // Skip rate limiting for /api/auth/me endpoint during development
-  skip: (req) => process.env.NODE_ENV !== 'production' && req.path === '/me'
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: 'Too many authentication attempts'
 });
 app.use('/api/auth', authLimiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser());
 
 // Logging
 if (process.env.NODE_ENV === 'development') {
@@ -66,27 +59,6 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   app.use(morgan('combined'));
 }
-
-// Root route
-app.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Hospital Information System API',
-    version: '1.0.0',
-    status: 'running',
-    endpoints: {
-      health: '/health',
-      api: '/api',
-      auth: '/api/auth',
-      users: '/api/users',
-      patients: '/api/patients',
-      visits: '/api/visits',
-      records: '/api/records',
-      medicines: '/api/medicines',
-      billing: '/api/billing',
-      dashboard: '/api/dashboard'
-    }
-  });
-});
 
 // Health check
 app.get('/health', (req, res) => {
@@ -99,13 +71,13 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/visits', visitRoutes);
 app.use('/api/records', recordRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/billing', billingRoutes);
-app.use('/api/dashboard', dashboardRoutes);
 
 // Static files for uploads
 app.use('/uploads', express.static('uploads'));

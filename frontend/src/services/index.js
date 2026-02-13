@@ -287,3 +287,18 @@ export const userService = {
     return response
   },
 }
+
+// Dashboard Service
+export const dashboardService = {
+  // Get dashboard statistics
+  getStats: async () => {
+    const response = await api.get('/dashboard/stats')
+    return response.data
+  },
+
+  // Get recent activities
+  getActivities: async (params = {}) => {
+    const response = await api.get('/dashboard/activities', { params })
+    return response.data
+  },
+}
