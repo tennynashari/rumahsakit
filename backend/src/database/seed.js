@@ -5,6 +5,9 @@ async function main() {
   console.log('🌱 Memulai seeding database...');
 
   try {
+    // Array untuk menyimpan semua users
+    const users = [];
+
     // Buat user admin
     const hashedPassword = await bcrypt.hash('admin123', 12);
     
@@ -21,6 +24,7 @@ async function main() {
       }
     });
 
+    users.push(adminUser);
     console.log('✅ User admin dibuat:', adminUser.email);
 
     // Buat user contoh
@@ -97,6 +101,7 @@ async function main() {
         update: {},
         create: userData
       });
+      users.push(user);
       console.log(`✅ User dibuat: ${user.name} (${user.role})`);
     }
 
