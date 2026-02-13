@@ -1,0 +1,106 @@
+# Contoh Nginx Configuration untuk Multiple Applications
+# Server yang sama, Port 80 yang sama, Domain berbeda
+
+# ============================================
+# APLIKASI 1 - Existing App
+# File: /etc/nginx/sites-available/app-lain
+# ============================================
+server {
+    listen 80;
+    server_name app1.example.com www.app1.example.com;
+
+    root /var/www/app-lain;
+    index index.html index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+    }
+}
+
+# ============================================
+# APLIKASI 2 - Hospital (BARU)
+# File: /etc/nginx/sites-available/rumahsakit
+# ============================================
+server {
+    listen 80;
+    server_name rumahsakit.example.com www.rumahsakit.example.com;
+    
+    root /var/www/rumahsakit/frontend/dist;
+    index index.html;
+
+    # Frontend - React Router (SPA)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Backend API Proxy
+    location /api {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+
+    client_max_body_size 10M;
+}
+
+# ============================================
+# APLIKASI 3 - Node.js App dengan PM2
+# File: /etc/nginx/sites-available/app3
+# ============================================
+server {
+    listen 80;
+    server_name app3.example.com;
+
+    location / {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# ============================================
+# CARA ENABLE SEMUA APLIKASI
+# ============================================
+# 1. Buat file config di /etc/nginx/sites-available/
+# 2. Enable dengan symbolic link:
+#    sudo ln -s /etc/nginx/sites-available/rumahsakit /etc/nginx/sites-enabled/
+# 3. Test config:
+#    sudo nginx -t
+# 4. Reload nginx:
+#    sudo systemctl reload nginx
+
+# ============================================
+# VERIFIKASI
+# ============================================
+# List enabled sites:
+#   ls -la /etc/nginx/sites-enabled/
+#
+# Test specific domain:
+#   curl -H "Host: rumahsakit.example.com" http://localhost
+#
+# View which site handles request:
+#   sudo tail -f /var/log/nginx/access.log
