@@ -112,7 +112,7 @@ const Login = () => {
           
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Demo credentials: admin@hospital.com / password123
+              Demo credentials: admin@klinik.com / admin123
             </p>
           </div>
         </form>
