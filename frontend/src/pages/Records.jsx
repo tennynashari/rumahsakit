@@ -338,20 +338,3 @@ const Records = () => {
 }
 
 export default Records
-
-      <div className="card">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Records</h3>
-        <div className="text-center py-8">
-          <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">No recent medical records</p>
-          <p className="text-sm text-yellow-600 mt-4">
-            🚧 <strong>Coming Soon:</strong> Comprehensive EMR features including SOAP notes, 
-            diagnosis coding (ICD-10), prescription management, and medical history tracking.
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default Records
