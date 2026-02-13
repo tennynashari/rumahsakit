@@ -201,6 +201,115 @@ async function main() {
       console.log(`✅ Ruangan dibuat: ${room.roomNumber}`);
     }
 
+    // Buat data pasien contoh
+    const patientNames = [
+      { name: 'Budi Santoso', nik: '3201012001850001', gender: 'MALE', phone: '+6281234567890' },
+      { name: 'Siti Aminah', nik: '3201012002900002', gender: 'FEMALE', phone: '+6281234567891' },
+      { name: 'Ahmad Wijaya', nik: '3201012003880003', gender: 'MALE', phone: '+6281234567892' },
+      { name: 'Dewi Kusuma', nik: '3201012004920004', gender: 'FEMALE', phone: '+6281234567893' },
+      { name: 'Rudi Hartono', nik: '3201012005750005', gender: 'MALE', phone: '+6281234567894' },
+      { name: 'Nia Rahayu', nik: '3201012006950006', gender: 'FEMALE', phone: '+6281234567895' },
+      { name: 'Eko Prasetyo', nik: '3201012007880007', gender: 'MALE', phone: '+6281234567896' },
+      { name: 'Lina Marlina', nik: '3201012008910008', gender: 'FEMALE', phone: '+6281234567897' },
+      { name: 'Joko Susilo', nik: '3201012009780009', gender: 'MALE', phone: '+6281234567898' },
+      { name: 'Maya Sari', nik: '3201012010930010', gender: 'FEMALE', phone: '+6281234567899' }
+    ];
+
+    const patients = [];
+    for (const patientData of patientNames) {
+      const patient = await prisma.patient.create({
+        data: {
+          name: patientData.name,
+          dateOfBirth: new Date(Date.now() - Math.floor(Math.random() * 30 * 365 * 24 * 60 * 60 * 1000) - (18 * 365 * 24 * 60 * 60 * 1000)),
+          gender: patientData.gender,
+          phone: patientData.phone,
+          address: `Jl. Merdeka No. ${Math.floor(Math.random() * 100) + 1}, Jakarta`,
+          emergencyContact: `+628123456${Math.floor(Math.random() * 9000) + 1000}`,
+          bloodType: ['A', 'B', 'AB', 'O'][Math.floor(Math.random() * 4)],
+          nik: patientData.nik
+        }
+      });
+      patients.push(patient);
+      console.log(`✅ Pasien dibuat: ${patient.name}`);
+    }
+
+    // Ambil semua data yang sudah dibuat untuk membuat visits
+    const allRooms = await prisma.room.findMany();
+    const allMedicines = await prisma.medicine.findMany();
+    const doctors = users.filter(u => u.role === 'DOCTOR');
+
+    // Buat kunjungan pasien
+    for (let i = 0; i < 15; i++) {
+      const patient = patients[Math.floor(Math.random() * patients.length)];
+      const doctor = doctors[Math.floor(Math.random() * doctors.length)];
+      const visitTypes = ['OUTPATIENT', 'INPATIENT', 'EMERGENCY', 'GENERAL_CHECKUP'];
+      const visitType = visitTypes[Math.floor(Math.random() * visitTypes.length)];
+      
+      const visitDate = new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000));
+      
+      const visit = await prisma.visit.create({
+        data: {
+          patientId: patient.id,
+          doctorId: doctor.id,
+          visitType: visitType,
+          visitDate: visitDate,
+          queueNumber: i + 1,
+          status: ['SCHEDULED', 'COMPLETED', 'CANCELLED'][Math.floor(Math.random() * 3)],
+          notes: `Kunjungan ${visitType.toLowerCase()} untuk ${patient.name}`,
+          roomId: visitType === 'INPATIENT' ? allRooms[Math.floor(Math.random() * allRooms.length)].id : null
+        }
+      });
+
+      // Buat rekam medis untuk kunjungan yang sudah selesai
+      if (visit.status === 'COMPLETED') {
+        const diagnoses = [
+          'Hipertensi', 'Diabetes Mellitus Tipe 2', 'Gastritis', 'ISPA (Infeksi Saluran Pernapasan Akut)',
+          'Demam Berdarah Dengue', 'Asma', 'Dispepsia', 'Vertigo', 'Migrain', 'Tifoid'
+        ];
+        
+        const record = await prisma.medicalRecord.create({
+          data: {
+            visitId: visit.id,
+            patientId: patient.id,
+            diagnosis: diagnoses[Math.floor(Math.random() * diagnoses.length)],
+            symptoms: 'Keluhan umum pasien',
+            treatment: 'Pengobatan dan terapi yang diberikan',
+            notes: 'Catatan medis tambahan',
+            vitalSigns: {
+              bloodPressure: '120/80',
+              heartRate: 75,
+              temperature: 36.5,
+              weight: 65
+            }
+          }
+        });
+
+        // Buat billing untuk kunjungan yang sudah selesai
+        const consultationFee = visitType === 'EMERGENCY' ? 250000 : (visitType === 'INPATIENT' ? 500000 : 150000);
+        const medicationCost = Math.floor(Math.random() * 200000) + 50000;
+        const roomCharge = visitType === 'INPATIENT' ? (Math.floor(Math.random() * 500000) + 300000) : 0;
+        const totalAmount = consultationFee + medicationCost + roomCharge;
+
+        await prisma.billing.create({
+          data: {
+            visitId: visit.id,
+            patientId: patient.id,
+            totalAmount: totalAmount,
+            paidAmount: Math.random() > 0.3 ? totalAmount : Math.floor(totalAmount * 0.5),
+            paymentStatus: Math.random() > 0.3 ? 'PAID' : 'UNPAID',
+            paymentMethod: ['CASH', 'CREDIT_CARD', 'INSURANCE'][Math.floor(Math.random() * 3)],
+            items: {
+              consultation: consultationFee,
+              medication: medicationCost,
+              room: roomCharge
+            }
+          }
+        });
+      }
+
+      console.log(`✅ Kunjungan dibuat: ${patient.name} - ${visitType}`);
+    }
+
     console.log('🎉 Database berhasil di-seed!');
     console.log('\n📋 Kredensial Login Default:');
     console.log('Email: admin@klinik.com');
