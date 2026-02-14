@@ -74,7 +74,7 @@ model Visit {
 
 model MedicalRecord {
   id            Int      @id @default(autoincrement())
-  visitId       Int?     @map("visit_id")
+  visitId       Int      @map("visit_id")
   patientId     Int      @map("patient_id")
   doctorId      Int      @map("doctor_id")
   diagnosisCode String?  @map("diagnosis_code") @db.VarChar(20)
@@ -87,7 +87,7 @@ model MedicalRecord {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   // Relations
-  visit   Visit?  @relation(fields: [visitId], references: [id])
+  visit   Visit   @relation(fields: [visitId], references: [id])
   patient Patient @relation(fields: [patientId], references: [id])
   doctor  User    @relation(fields: [doctorId], references: [id])
 

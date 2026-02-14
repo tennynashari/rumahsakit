@@ -460,7 +460,8 @@ const exportVisitsExcel = async (req, res) => {
         'No. Telepon': visit.patient.phone || '-',
         'Nama Dokter': visit.doctor.name,
         'Departemen': visit.doctor.department || '-',
-        'Jenis Kunjungan': visit.visitType === 'OUTPATIENT' ? 'Rawat Jalan' : 
+        'Jenis Kunjungan': visit.visitType === 'GENERAL_CHECKUP' ? 'Pemeriksaan Umum' :
+                           visit.visitType === 'OUTPATIENT' ? 'Rawat Jalan' : 
                            visit.visitType === 'INPATIENT' ? 'Rawat Inap' : 
                            visit.visitType === 'EMERGENCY' ? 'Darurat' : visit.visitType,
         'Tanggal Kunjungan': new Date(visit.scheduledAt).toLocaleDateString('id-ID'),

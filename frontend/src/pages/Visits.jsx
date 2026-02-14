@@ -107,6 +107,7 @@ const Visits = () => {
 
   const getVisitTypeBadge = (type) => {
     const typeConfig = {
+      GENERAL_CHECKUP: { label: 'Pemeriksaan Umum', className: 'bg-green-100 text-green-800' },
       OUTPATIENT: { label: 'Rawat Jalan', className: 'bg-blue-100 text-blue-800' },
       INPATIENT: { label: 'Rawat Inap', className: 'bg-purple-100 text-purple-800' },
       EMERGENCY: { label: 'Darurat', className: 'bg-red-100 text-red-800' }

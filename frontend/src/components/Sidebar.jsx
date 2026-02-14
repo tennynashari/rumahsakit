@@ -13,7 +13,7 @@ import {
   Activity
 } from 'lucide-react'
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+const Sidebar = () => {
   const { user } = useAuth()
 
   const navigation = [
@@ -30,7 +30,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       roles: ['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK']
     },
     {
-      name: 'Schedule',
+      name: 'Visits',
       href: '/visits',
       icon: Calendar,
       roles: ['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK']
@@ -65,17 +65,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     item.roles.includes(user?.role)
   )
 
-  const handleLinkClick = () => {
-    if (window.innerWidth < 768) {
-      setSidebarOpen(false)
-    }
-  }
-
   return (
-    <aside className={`fixed left-0 top-16 z-30 w-64 h-screen bg-white border-r border-gray-200 transition-transform duration-300 ${
-      sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-    } md:translate-x-0`}>
-      <div className="h-full px-3 py-4 overflow-y-auto pb-20">
+    <aside className="fixed left-0 top-16 z-20 w-64 h-screen bg-white border-r border-gray-200">
+      <div className="h-full px-3 py-4 overflow-y-auto">
         <ul className="space-y-2">
           {filteredNavigation.map((item) => {
             const Icon = item.icon
@@ -83,7 +75,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <li key={item.name}>
                 <NavLink
                   to={item.href}
-                  onClick={handleLinkClick}
                   className={({ isActive }) =>
                     `flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${
                       isActive ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600' : ''
@@ -103,28 +94,26 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             <li>
               <NavLink
                 to="/reports"
-                onClick={handleLinkClick}
                 className={({ isActive }) =>
                   `flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${
                     isActive ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600' : ''
                   }`
                 }
               >
-                <Activity className="w-5 h-5 text-gray-500" />
+                <Activity className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" />
                 <span className="ml-3 font-medium">Reports</span>
               </NavLink>
             </li>
             <li>
               <NavLink
                 to="/settings"
-                onClick={handleLinkClick}
                 className={({ isActive }) =>
                   `flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${
                     isActive ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600' : ''
                   }`
                 }
               >
-                <Settings className="w-5 h-5 text-gray-500" />
+                <Settings className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" />
                 <span className="ml-3 font-medium">Settings</span>
               </NavLink>
             </li>

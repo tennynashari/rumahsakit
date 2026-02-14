@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { billingService } from '../services'
-import { CreditCard, Receipt, Download, Eye, Edit, Trash2, Plus, DollarSign } from 'lucide-react'
+import { CreditCard, Receipt, Download, Eye, Edit, Trash2, Plus, DollarSign, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const Billing = () => {
@@ -82,6 +82,21 @@ const Billing = () => {
         fetchBillings(currentPage)
       } catch (error) {
         toast.error('Gagal menghapus tagihan')
+      }
+    }
+  }
+
+  const handleMarkAsPaid = async (id) => {
+    if (window.confirm('Tandai tagihan ini sebagai lunas?')) {
+      try {
+        await billingService.updateBilling(id, {
+          status: 'PAID'
+        })
+        toast.success('Tagihan berhasil ditandai lunas')
+        fetchBillings(currentPage)
+      } catch (error) {
+        toast.error('Gagal mengubah status tagihan')
+        console.error('Mark as paid error:', error)
       }
     }
   }
@@ -289,6 +304,15 @@ const Billing = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </Link>
+                          {billing.status === 'UNPAID' && (
+                            <button
+                              onClick={() => handleMarkAsPaid(billing.id)}
+                              className="text-green-600 hover:text-green-900"
+                              title="Tandai Lunas"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                          )}
                           <Link
                             to={`/billing/${billing.id}/edit`}
                             className="text-blue-600 hover:text-blue-900"

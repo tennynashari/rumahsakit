@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Eye, Edit, Trash2, UserPlus, Download } from 'lucide-react'
 import { userService } from '../services'
 
@@ -135,10 +136,13 @@ const Users = () => {
             <Download className="w-4 h-4" />
             {exporting ? 'Exporting...' : 'Export Excel'}
           </button>
-          <button className="btn btn-primary flex items-center gap-2">
+          <Link
+            to="/users/new"
+            className="btn btn-primary flex items-center gap-2"
+          >
             <UserPlus className="w-4 h-4" />
             Tambah Pengguna
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -223,20 +227,20 @@ const Users = () => {
                       {new Date(user.createdAt).toLocaleDateString('id-ID')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <button
-                        onClick={() => {/* View user */}}
-                        className="text-blue-600 hover:text-blue-900"
+                      <Link
+                        to={`/users/${user.id}`}
+                        className="text-blue-600 hover:text-blue-900 inline-block"
                         title="Lihat Detail"
                       >
                         <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => {/* Edit user */}}
-                        className="text-green-600 hover:text-green-900"
+                      </Link>
+                      <Link
+                        to={`/users/${user.id}/edit`}
+                        className="text-green-600 hover:text-green-900 inline-block"
                         title="Edit"
                       >
                         <Edit className="w-4 h-4" />
-                      </button>
+                      </Link>
                       <button
                         onClick={() => handleDelete(user.id, user.name)}
                         className="text-red-600 hover:text-red-900"

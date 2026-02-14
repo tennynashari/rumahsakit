@@ -51,11 +51,22 @@ const VisitDetail = () => {
 
   const getVisitTypeColor = (type) => {
     const colors = {
+      GENERAL_CHECKUP: 'bg-green-50 text-green-700 border-green-200',
       OUTPATIENT: 'bg-blue-50 text-blue-700 border-blue-200',
       INPATIENT: 'bg-purple-50 text-purple-700 border-purple-200',
       EMERGENCY: 'bg-red-50 text-red-700 border-red-200'
     }
     return colors[type] || 'bg-gray-50 text-gray-700 border-gray-200'
+  }
+
+  const getVisitTypeLabel = (type) => {
+    const labels = {
+      GENERAL_CHECKUP: 'General Checkup',
+      OUTPATIENT: 'Outpatient',
+      INPATIENT: 'Inpatient',
+      EMERGENCY: 'Emergency'
+    }
+    return labels[type] || type
   }
 
   if (loading) {
@@ -109,7 +120,7 @@ const VisitDetail = () => {
           <div className="flex items-center space-x-4">
             <div className={`px-4 py-2 rounded-lg border-2 ${getVisitTypeColor(visit.visitType)}`}>
               <div className="text-sm font-medium">Schedule Type</div>
-              <div className="text-lg font-bold">{visit.visitType}</div>
+              <div className="text-lg font-bold">{getVisitTypeLabel(visit.visitType)}</div>
             </div>
             <div>
               <div className="text-sm text-gray-600">Status</div>

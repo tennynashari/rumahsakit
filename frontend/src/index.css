@@ -50,11 +50,11 @@
   }
   
   .table th {
-    @apply px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
   }
   
   .table td {
-    @apply px-3 sm:px-6 py-4 text-sm text-gray-900;
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
   }
   
   .badge {
@@ -78,14 +78,53 @@
   }
 }
 
-/* Mobile responsive utilities */
-@layer utilities {
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+/* Print styles */
+@media print {
+  /* Hide navigation elements */
+  nav, aside, .sidebar, header {
+    display: none !important;
   }
   
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  /* Remove margins and padding from main content */
+  main {
+    margin: 0 !important;
+    margin-left: 0 !important;
+    padding: 1rem !important;
+  }
+  
+  /* Remove padding and margins from layout */
+  .flex.pt-16 {
+    padding-top: 0 !important;
+  }
+  
+  /* Hide print buttons and action buttons */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure full width for printed content */
+  body, .min-h-screen {
+    padding: 0 !important;
+  }
+  
+  /* Remove background colors for print */
+  body {
+    background: white !important;
+  }
+  
+  /* Optimize page breaks */
+  .card {
+    page-break-inside: avoid;
+  }
+  
+  /* Make sure tables fit on page */
+  table {
+    width: 100%;
+    page-break-inside: auto;
+  }
+  
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
   }
 }

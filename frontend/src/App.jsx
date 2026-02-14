@@ -10,12 +10,23 @@ import PatientDetail from './pages/PatientDetail'
 import PatientForm from './pages/PatientForm'
 import PatientEdit from './pages/PatientEdit'
 import Visits from './pages/Visits'
+import VisitForm from './pages/VisitForm'
 import VisitDetail from './pages/VisitDetail'
 import VisitEdit from './pages/VisitEdit'
 import Records from './pages/Records'
+import RecordForm from './pages/RecordForm'
+import RecordEdit from './pages/RecordEdit'
 import Medicines from './pages/Medicines'
+import MedicineForm from './pages/MedicineForm'
+import MedicineEdit from './pages/MedicineEdit'
 import Billing from './pages/Billing'
+import BillingForm from './pages/BillingForm'
+import BillingDetail from './pages/BillingDetail'
+import BillingEdit from './pages/BillingEdit'
 import Users from './pages/Users'
+import UserForm from './pages/UserForm'
+import UserEdit from './pages/UserEdit'
+import UserDetail from './pages/UserDetail'
 import Reports from './pages/Reports'
 import Settings from './pages/Settings'
 
@@ -116,15 +127,6 @@ function App() {
             />
             
             <Route 
-              path="/patients/:id" 
-              element={
-                <ProtectedRoute>
-                  <PatientDetail />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
               path="/patients/:id/edit" 
               element={
                 <ProtectedRoute>
@@ -134,19 +136,19 @@ function App() {
             />
             
             <Route 
-              path="/visits" 
+              path="/patients/:id" 
               element={
                 <ProtectedRoute>
-                  <Visits />
+                  <PatientDetail />
                 </ProtectedRoute>
               } 
             />
             
             <Route 
-              path="/visits/:id" 
+              path="/visits/new" 
               element={
                 <ProtectedRoute>
-                  <VisitDetail />
+                  <VisitForm />
                 </ProtectedRoute>
               } 
             />
@@ -161,10 +163,64 @@ function App() {
             />
             
             <Route 
+              path="/visits/:id" 
+              element={
+                <ProtectedRoute>
+                  <VisitDetail />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/visits" 
+              element={
+                <ProtectedRoute>
+                  <Visits />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/records/new" 
+              element={
+                <ProtectedRoute>
+                  <RecordForm />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/records/:id/edit" 
+              element={
+                <ProtectedRoute>
+                  <RecordEdit />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
               path="/records" 
               element={
                 <ProtectedRoute>
                   <Records />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/medicines/new" 
+              element={
+                <ProtectedRoute>
+                  <MedicineForm />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/medicines/:id/edit" 
+              element={
+                <ProtectedRoute>
+                  <MedicineEdit />
                 </ProtectedRoute>
               } 
             />
@@ -179,19 +235,37 @@ function App() {
             />
             
             <Route 
-              path="/billing" 
+              path="/billing/new" 
               element={
                 <ProtectedRoute>
-                  <Billing />
+                  <BillingForm />
                 </ProtectedRoute>
               } 
             />
             
             <Route 
-              path="/users" 
+              path="/billing/:id/edit" 
               element={
                 <ProtectedRoute>
-                  <Users />
+                  <BillingEdit />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/billing/:id" 
+              element={
+                <ProtectedRoute>
+                  <BillingDetail />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/billing" 
+              element={
+                <ProtectedRoute>
+                  <Billing />
                 </ProtectedRoute>
               } 
             />
@@ -210,6 +284,42 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/users/new" 
+              element={
+                <ProtectedRoute>
+                  <UserForm />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/users/:id/edit" 
+              element={
+                <ProtectedRoute>
+                  <UserEdit />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/users/:id" 
+              element={
+                <ProtectedRoute>
+                  <UserDetail />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/users" 
+              element={
+                <ProtectedRoute>
+                  <Users />
                 </ProtectedRoute>
               } 
             />

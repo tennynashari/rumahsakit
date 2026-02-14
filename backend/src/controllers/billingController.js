@@ -214,7 +214,17 @@ const updateBilling = async (req, res) => {
     if (tax !== undefined) updateData.tax = parseFloat(tax);
     if (discount !== undefined) updateData.discount = parseFloat(discount);
     if (total !== undefined) updateData.total = parseFloat(total);
-    if (status !== undefined) updateData.status = status;
+    if (status !== undefined) {
+      updateData.status = status;
+      // Set paidAt when billing is marked as PAID
+      if (status === 'PAID' && existingBilling.status !== 'PAID') {
+        updateData.paidAt = new Date();
+      }
+      // Clear paidAt if status changed from PAID to something else
+      if (status !== 'PAID' && existingBilling.status === 'PAID') {
+        updateData.paidAt = null;
+      }
+    }
 
     const billing = await prisma.billing.update({
       where: { id: parseInt(id) },

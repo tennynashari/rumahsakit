@@ -32,11 +32,7 @@ A comprehensive web-based Hospital Information System built with modern technolo
 
 ### Technical Features
 
-- **🔐 Security**: 
-  - JWT authentication with **HttpOnly Cookies** (XSS protected)
-  - Role-based authorization
-  - Input validation
-  - CSRF protection with SameSite cookies
+- **🔐 Security**: JWT authentication, role-based authorization, input validation
 - **📱 Responsive Design**: Mobile-friendly interface using Tailwind CSS
 - **🔄 Real-time Updates**: Live data synchronization
 - **📈 Analytics**: Interactive charts and statistics

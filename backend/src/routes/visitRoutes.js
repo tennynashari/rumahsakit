@@ -35,7 +35,7 @@ router.post('/', [
   authorize('ADMIN', 'FRONT_DESK', 'DOCTOR'),
   body('patientId').isInt(),
   body('doctorId').isInt(),
-  body('visitType').isIn(['OUTPATIENT', 'INPATIENT', 'EMERGENCY']),
+  body('visitType').isIn(['GENERAL_CHECKUP', 'OUTPATIENT', 'INPATIENT', 'EMERGENCY']),
   body('scheduledAt').isISO8601()
 ], createVisit);
 

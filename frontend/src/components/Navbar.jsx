@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { Bell, ChevronDown, LogOut, User, Settings, Menu, X } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Settings } from 'lucide-react'
 
-const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
+const Navbar = () => {
   const { user, logout } = useAuth()
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
@@ -16,17 +16,9 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
       <div className="px-3 py-3 lg:px-5 lg:pl-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-start">
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 text-gray-600 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-            >
-              {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-            
-            <div className="flex ml-2 md:ml-0 md:mr-24">
-              <span className="self-center text-sm sm:text-xl md:text-2xl font-semibold text-gray-900">
-                🏥 <span className="hidden sm:inline">Hospital IS</span>
+            <div className="flex ml-2 md:mr-24">
+              <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-gray-900">
+                🏥 Hospital Information System
               </span>
             </div>
           </div>
