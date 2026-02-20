@@ -263,7 +263,41 @@ For development and testing:
 
 ## 🚢 Deployment
 
-### Docker Deployment
+### 🚀 CI/CD Automation (Recommended)
+
+#### For GitHub Repository
+**✅ GitHub Actions** - Auto deploy on push
+```bash
+# Setup (15 minutes)
+1. Generate SSH key on server
+2. Add GitHub Secrets (SSH_PRIVATE_KEY, SERVER_HOST, SERVER_USER)
+3. Push code → Auto deploy!
+```
+📖 **Full Guide:** [GITHUB_ACTIONS_SETUP.md](./GITHUB_ACTIONS_SETUP.md)
+
+#### For GitLab Repository
+**✅ GitLab CI/CD** - Automated pipeline
+```bash
+# Setup (30 minutes)
+1. Install GitLab Runner on server
+2. Register runner with GitLab
+3. Setup CI/CD Variables
+4. Push → Manual trigger deploy
+```
+📖 **Full Guide:** [GITLAB_CI_DEPLOYMENT.md](./GITLAB_CI_DEPLOYMENT.md)
+
+#### Quick Comparison
+| Feature | GitHub Actions | GitLab CI/CD | Manual |
+|---------|---------------|---------------|--------|
+| Setup Time | 15 min | 30 min | 10 min |
+| Auto Deploy | ✅ Yes | ✅ Yes | ❌ No |
+| Free Tier | 2000 min/mo | 400 min/mo | Unlimited |
+
+📖 **Detailed Comparison:** [DEPLOYMENT_COMPARISON.md](./DEPLOYMENT_COMPARISON.md)
+
+---
+
+### 🐳 Docker Deployment
 
 1. **Build and start containers**
    ```bash
@@ -280,26 +314,35 @@ For development and testing:
    docker-compose exec backend npx prisma db seed
    ```
 
-### Manual Deployment
+---
 
-1. **Build applications**
-   ```bash
-   npm run build
-   ```
+### 🔧 Manual Deployment
 
-2. **Set up production database**
-   ```bash
-   cd backend
-   DATABASE_URL="your-production-db-url" npx prisma migrate deploy
-   ```
+For quick deployments without CI/CD:
 
-3. **Start production servers**
-   ```bash
-   # Backend
-   NODE_ENV=production npm start
+```bash
+# Set environment
+export SERVER_USER="klinik"
+export SERVER_HOST="192.168.1.50"
+export DEPLOY_PATH="/var/www/klinik"
 
-   # Frontend (serve built files with nginx or similar)
-   ```
+# Run deployment script
+bash scripts/manual-deploy.sh
+```
+
+📖 **Script Documentation:** [scripts/README.md](./scripts/README.md)
+
+---
+
+### 📋 Server Setup
+
+For Ubuntu 24.04 server setup:
+```bash
+# Install Node.js, PostgreSQL, PM2, Nginx
+# Setup database and configure environment
+```
+
+📖 **Complete Guide:** [DEPLOYMENT_UBUNTU.md](./DEPLOYMENT_UBUNTU.md)
 
 ## 📚 API Documentation
 

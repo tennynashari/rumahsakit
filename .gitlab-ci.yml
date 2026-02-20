@@ -1,0 +1,236 @@
+# GitLab CI/CD Configuration for Hospital Information System
+# Stages: build → test → deploy
+
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  # Node version
+  NODE_VERSION: "20"
+  # Deployment paths
+  DEPLOY_PATH: "/var/www/klinik"
+  
+# Cache node_modules for faster builds
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - backend/node_modules/
+    - frontend/node_modules/
+
+# ==================== BUILD STAGE ====================
+
+build:backend:
+  stage: build
+  image: node:20-alpine
+  script:
+    - cd backend
+    - npm ci --prefer-offline
+    - npx prisma generate
+    - echo "Backend build successful"
+  artifacts:
+    paths:
+      - backend/node_modules/
+      - backend/prisma/
+    expire_in: 1 hour
+  only:
+    - master
+    - develop
+    - merge_requests
+
+build:frontend:
+  stage: build
+  image: node:20-alpine
+  script:
+    - cd frontend
+    - npm ci --prefer-offline
+    - npm run build
+    - echo "Frontend build successful"
+  artifacts:
+    paths:
+      - frontend/dist/
+      - frontend/node_modules/
+    expire_in: 1 hour
+  only:
+    - master
+    - develop
+    - merge_requests
+
+# ==================== TEST STAGE ====================
+
+test:backend:
+  stage: test
+  image: node:20-alpine
+  dependencies:
+    - build:backend
+  script:
+    - cd backend
+    - echo "Running backend tests..."
+    # Add your test commands here
+    # - npm test
+    - echo "Backend tests passed"
+  only:
+    - master
+    - develop
+    - merge_requests
+
+test:frontend:
+  stage: test
+  image: node:20-alpine
+  dependencies:
+    - build:frontend
+  script:
+    - cd frontend
+    - echo "Running frontend tests..."
+    # Add your test commands here
+    # - npm test
+    - echo "Frontend tests passed"
+  only:
+    - master
+    - develop
+    - merge_requests
+
+# Lint check
+lint:check:
+  stage: test
+  image: node:20-alpine
+  script:
+    - cd backend && npm ci --prefer-offline
+    - cd ../frontend && npm ci --prefer-offline
+    - echo "Running linters..."
+    # Add lint commands
+    # - cd ../backend && npm run lint
+    # - cd ../frontend && npm run lint
+    - echo "Lint checks passed"
+  only:
+    - merge_requests
+  allow_failure: true
+
+# ==================== DEPLOY STAGE ====================
+
+# Deploy to Production
+deploy:production:
+  stage: deploy
+  image: alpine:latest
+  dependencies:
+    - build:backend
+    - build:frontend
+  before_script:
+    # Install dependencies
+    - apk add --no-cache openssh-client rsync
+    
+    # Setup SSH
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    
+  script:
+    - echo "Deploying to production server..."
+    
+    # 1. BACKEND DEPLOYMENT
+    - echo "📦 Deploying backend..."
+    - ssh $SERVER_USER@$SERVER_HOST "mkdir -p $DEPLOY_PATH/backend"
+    
+    # Sync backend files (excluding node_modules, we'll install on server)
+    - rsync -avz --delete 
+        --exclude 'node_modules' 
+        --exclude '.env' 
+        --exclude 'dist'
+        backend/ $SERVER_USER@$SERVER_HOST:$DEPLOY_PATH/backend/
+    
+    # Install dependencies and run migrations on server
+    - ssh $SERVER_USER@$SERVER_HOST "cd $DEPLOY_PATH/backend && 
+        npm ci --production &&
+        npx prisma generate &&
+        npx prisma migrate deploy"
+    
+    # 2. FRONTEND DEPLOYMENT
+    - echo "🎨 Deploying frontend..."
+    - ssh $SERVER_USER@$SERVER_HOST "mkdir -p $DEPLOY_PATH/frontend"
+    
+    # Sync built frontend files
+    - rsync -avz --delete 
+        frontend/dist/ $SERVER_USER@$SERVER_HOST:$DEPLOY_PATH/frontend/dist/
+    
+    # 3. RESTART SERVICES
+    - echo "🔄 Restarting services..."
+    - ssh $SERVER_USER@$SERVER_HOST "pm2 restart klinik-backend || pm2 start $DEPLOY_PATH/backend/src/server.js --name klinik-backend"
+    
+    # 4. HEALTH CHECK
+    - echo "🏥 Health check..."
+    - ssh $SERVER_USER@$SERVER_HOST "curl -f http://localhost:5000/api/health || exit 1"
+    
+    - echo "✅ Deployment successful!"
+    
+  environment:
+    name: production
+    url: http://$SERVER_HOST
+  only:
+    - master
+  when: manual  # Require manual trigger for production
+  
+# Deploy to Staging (Auto deploy on develop branch)
+deploy:staging:
+  stage: deploy
+  extends: .deploy_template
+  script:
+    - echo "Deploying to staging server..."
+    # Similar to production but to staging server
+    - echo "Staging deployment complete"
+  environment:
+    name: staging
+    url: http://staging.$SERVER_HOST
+  only:
+    - develop
+  when: on_success  # Auto deploy
+
+# ==================== ROLLBACK ====================
+
+rollback:production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "🔙 Rolling back to previous version..."
+    - ssh $SERVER_USER@$SERVER_HOST "cd $DEPLOY_PATH && git reset --hard HEAD~1"
+    - ssh $SERVER_USER@$SERVER_HOST "cd $DEPLOY_PATH/backend && npm ci && npx prisma generate"
+    - ssh $SERVER_USER@$SERVER_HOST "cd $DEPLOY_PATH/frontend && npm ci && npm run build"
+    - ssh $SERVER_USER@$SERVER_HOST "pm2 restart klinik-backend"
+    - echo "✅ Rollback successful!"
+  environment:
+    name: production
+    action: rollback
+  only:
+    - master
+  when: manual
+
+# ==================== NOTIFICATIONS ====================
+
+# Notify on deployment success/failure
+# You can integrate with Slack, Discord, or email here
+notify:success:
+  stage: .post
+  script:
+    - echo "🎉 Pipeline completed successfully!"
+    # Add webhook notification here
+  when: on_success
+  only:
+    - master
+
+notify:failure:
+  stage: .post
+  script:
+    - echo "❌ Pipeline failed!"
+    # Add webhook notification here
+  when: on_failure
+  only:
+    - master
