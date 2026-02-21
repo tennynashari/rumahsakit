@@ -97,11 +97,6 @@ const VisitDetail = () => {
             <h1 className="text-2xl font-bold text-gray-900">Schedule Details</h1>
             <div className="flex items-center space-x-4 mt-1">
               <p className="text-gray-600">Schedule ID: #{visit.id}</p>
-              {visit.queueNumber && (
-                <p className="text-sm font-mono font-bold text-primary-600 px-3 py-1 bg-primary-50 rounded">
-                  Queue: {visit.queueNumber}
-                </p>
-              )}
             </div>
           </div>
         </div>
