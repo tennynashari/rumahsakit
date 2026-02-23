@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { billingService, patientService, visitService } from '../services'
 import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const BillingForm = () => {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -36,7 +38,7 @@ const BillingForm = () => {
       setVisits(visitsResponse.data.visits || [])
     } catch (error) {
       console.error('Fetch data error:', error)
-      toast.error('Gagal memuat data')
+      toast.error(t('billing.form.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -111,7 +113,7 @@ const BillingForm = () => {
       )
 
       if (!validItems) {
-        toast.error('Semua item harus diisi dengan benar')
+        toast.error(t('billing.form.validation.itemRequired'))
         return
       }
 
@@ -131,10 +133,10 @@ const BillingForm = () => {
       }
 
       await billingService.createBilling(submitData)
-      toast.success('Billing berhasil dibuat')
+      toast.success(t('billing.form.createSuccess'))
       navigate('/billing')
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Gagal membuat billing')
+      toast.error(error.response?.data?.error || t('billing.form.createFailed'))
       console.error('Create billing error:', error)
     } finally {
       setSubmitting(false)
@@ -165,24 +167,24 @@ const BillingForm = () => {
           className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Kembali
+          {t('billing.form.back')}
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Buat Billing</h1>
-          <p className="text-gray-600">Buat tagihan baru untuk pasien</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('billing.form.title')}</h1>
+          <p className="text-gray-600">{t('billing.form.subtitle')}</p>
         </div>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Informasi Pasien</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('billing.detail.patientInfo')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Patient */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pasien <span className="text-red-500">*</span>
+                {t('billing.form.patient')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="patientId"
@@ -191,7 +193,7 @@ const BillingForm = () => {
                 className="input"
                 required
               >
-                <option value="">Pilih Pasien</option>
+                <option value="">{t('billing.form.patientPlaceholder')}</option>
                 {patients.map(patient => (
                   <option key={patient.id} value={patient.id}>
                     {patient.name} - {patient.medicalRecordNo}
@@ -203,7 +205,7 @@ const BillingForm = () => {
             {/* Visit (Optional) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kunjungan (Opsional)
+                {t('billing.form.visit')}
               </label>
               <select
                 name="visitId"
@@ -212,15 +214,15 @@ const BillingForm = () => {
                 className="input"
                 disabled={!formData.patientId}
               >
-                <option value="">Tanpa Kunjungan</option>
+                <option value="">{t('billing.form.visitPlaceholder')}</option>
                 {filteredVisits.map(visit => (
                   <option key={visit.id} value={visit.id}>
-                    {new Date(visit.scheduledAt).toLocaleDateString('id-ID')} - {visit.visitType}
+                    {new Date(visit.scheduledAt).toLocaleDateString(i18n.language === 'id' ? 'id-ID' : 'en-US')} - {visit.visitType}
                   </option>
                 ))}
               </select>
               {!formData.patientId && (
-                <p className="text-sm text-gray-500 mt-1">Pilih pasien terlebih dahulu</p>
+                <p className="text-sm text-gray-500 mt-1">{t('billing.form.selectPatientFirst')}</p>
               )}
             </div>
           </div>
@@ -228,14 +230,14 @@ const BillingForm = () => {
 
         <div className="card">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Item Billing</h2>
+            <h2 className="text-lg font-semibold">{t('billing.form.items')}</h2>
             <button
               type="button"
               onClick={addItem}
               className="btn btn-sm bg-primary-600 text-white hover:bg-primary-700"
             >
               <Plus className="w-4 h-4 mr-1" />
-              Tambah Item
+              {t('billing.form.addItem')}
             </button>
           </div>
           
@@ -248,7 +250,7 @@ const BillingForm = () => {
                     value={item.description}
                     onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                     className="input"
-                    placeholder="Deskripsi (misal: Konsultasi Dokter, Obat, dll)"
+                    placeholder={t('billing.form.descriptionPlaceholder')}
                     required
                   />
                 </div>
@@ -258,7 +260,7 @@ const BillingForm = () => {
                     value={item.amount}
                     onChange={(e) => handleItemChange(index, 'amount', e.target.value)}
                     className="input"
-                    placeholder="Jumlah (Rp)"
+                    placeholder={t('billing.form.amountPlaceholder')}
                     min="0"
                     step="0.01"
                     required
@@ -279,13 +281,13 @@ const BillingForm = () => {
         </div>
 
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Perhitungan</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('billing.form.calculations')}</h2>
           
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Pajak (%)
+                  {t('billing.form.taxPercent')}
                 </label>
                 <input
                   type="number"
@@ -302,7 +304,7 @@ const BillingForm = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Diskon (Rp)
+                  {t('billing.form.discountAmount')}
                 </label>
                 <input
                   type="number"
@@ -319,20 +321,20 @@ const BillingForm = () => {
 
             <div className="border-t pt-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Subtotal:</span>
-                <span className="font-medium">Rp {subtotal.toLocaleString('id-ID')}</span>
+                <span className="text-gray-600">{t('billing.table.subtotal')}:</span>
+                <span className="font-medium">{new Intl.NumberFormat(i18n.language === 'id' ? 'id-ID' : 'en-US', { style: 'currency', currency: i18n.language === 'id' ? 'IDR' : 'USD', minimumFractionDigits: 0 }).format(subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Pajak ({formData.tax}%):</span>
-                <span className="font-medium">Rp {tax.toLocaleString('id-ID')}</span>
+                <span className="text-gray-600">{t('billing.table.tax')} ({formData.tax}%):</span>
+                <span className="font-medium">{new Intl.NumberFormat(i18n.language === 'id' ? 'id-ID' : 'en-US', { style: 'currency', currency: i18n.language === 'id' ? 'IDR' : 'USD', minimumFractionDigits: 0 }).format(tax)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Diskon:</span>
-                <span className="font-medium text-red-600">- Rp {discount.toLocaleString('id-ID')}</span>
+                <span className="text-gray-600">{t('billing.table.discount')}:</span>
+                <span className="font-medium text-red-600">- {new Intl.NumberFormat(i18n.language === 'id' ? 'id-ID' : 'en-US', { style: 'currency', currency: i18n.language === 'id' ? 'IDR' : 'USD', minimumFractionDigits: 0 }).format(discount)}</span>
               </div>
               <div className="flex justify-between text-lg font-bold border-t pt-2">
-                <span>Total:</span>
-                <span className="text-primary-600">Rp {total.toLocaleString('id-ID')}</span>
+                <span>{t('billing.table.total')}:</span>
+                <span className="text-primary-600">{new Intl.NumberFormat(i18n.language === 'id' ? 'id-ID' : 'en-US', { style: 'currency', currency: i18n.language === 'id' ? 'IDR' : 'USD', minimumFractionDigits: 0 }).format(total)}</span>
               </div>
             </div>
           </div>
@@ -346,7 +348,7 @@ const BillingForm = () => {
             className="btn bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
             disabled={submitting}
           >
-            Batal
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -356,12 +358,12 @@ const BillingForm = () => {
             {submitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Menyimpan...
+                {t('billing.form.saving')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Simpan
+                {t('billing.form.saveButton')}
               </>
             )}
           </button>

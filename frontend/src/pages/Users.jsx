@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Eye, Edit, Trash2, UserPlus, Download } from 'lucide-react'
 import { userService } from '../services'
 
 const Users = () => {
+  const { t, i18n } = useTranslation()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -25,20 +27,20 @@ const Users = () => {
       setUsers(response.data.users || [])
     } catch (err) {
       console.error('Error fetching users:', err)
-      setError(err.response?.data?.message || 'Failed to fetch users')
+      setError(err.response?.data?.message || t('users.fetchFailed'))
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async (id, name) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus user ${name}?`)) {
+    if (window.confirm(`${t('users.deleteConfirm')} ${name}?`)) {
       try {
         await userService.deleteUser(id)
         fetchUsers()
       } catch (err) {
         console.error('Error deleting user:', err)
-        alert(err.response?.data?.message || 'Failed to delete user')
+        alert(err.response?.data?.message || t('users.deleteFailed'))
       }
     }
   }
@@ -69,23 +71,14 @@ const Users = () => {
       window.URL.revokeObjectURL(url)
     } catch (err) {
       console.error('Error exporting users:', err)
-      alert(err.response?.data?.message || 'Failed to export users')
+      alert(err.response?.data?.message || t('users.exportFailed'))
     } finally {
       setExporting(false)
     }
   }
 
   const getRoleLabel = (role) => {
-    const roleMap = {
-      ADMIN: 'Administrator',
-      DOCTOR: 'Dokter',
-      NURSE: 'Perawat',
-      FRONT_DESK: 'Front Desk',
-      PHARMACY: 'Farmasi',
-      LABORATORY: 'Laboratorium',
-      PATIENT: 'Pasien'
-    }
-    return roleMap[role] || role
+    return t(`users.roles.${role}`, role)
   }
 
   const getRoleBadgeClass = (role) => {
@@ -122,9 +115,9 @@ const Users = () => {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manajemen Pengguna</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Kelola pengguna sistem dan peran mereka
+            {t('users.subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -134,14 +127,14 @@ const Users = () => {
             className="btn btn-success flex items-center gap-2"
           >
             <Download className="w-4 h-4" />
-            {exporting ? 'Exporting...' : 'Export Excel'}
+            {exporting ? t('users.exporting') : t('users.exportData')}
           </button>
           <Link
             to="/users/new"
             className="btn btn-primary flex items-center gap-2"
           >
             <UserPlus className="w-4 h-4" />
-            Tambah Pengguna
+            {t('users.addUser')}
           </Link>
         </div>
       </div>
@@ -160,31 +153,31 @@ const Users = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  No
+                  {t('users.table.no')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nama
+                  {t('users.table.name')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                  {t('users.table.email')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
+                  {t('users.table.role')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Departemen
+                  {t('users.table.department')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Telepon
+                  {t('users.table.phone')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {t('users.table.status')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tanggal
+                  {t('users.table.date')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Aksi
+                  {t('users.table.actions')}
                 </th>
               </tr>
             </thead>
@@ -192,7 +185,7 @@ const Users = () => {
               {currentUsers.length === 0 ? (
                 <tr>
                   <td colSpan="9" className="px-6 py-8 text-center text-gray-500">
-                    Tidak ada data pengguna
+                    {t('users.noData')}
                   </td>
                 </tr>
               ) : (
@@ -220,31 +213,31 @@ const Users = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`badge ${user.isActive ? 'badge-success' : 'badge-danger'}`}>
-                        {user.isActive ? 'Aktif' : 'Nonaktif'}
+                        {user.isActive ? t('users.statusLabels.active') : t('users.statusLabels.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(user.createdAt).toLocaleDateString('id-ID')}
+                      {new Date(user.createdAt).toLocaleDateString(i18n.language === 'id' ? 'id-ID' : 'en-US')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <Link
                         to={`/users/${user.id}`}
                         className="text-blue-600 hover:text-blue-900 inline-block"
-                        title="Lihat Detail"
+                        title={t('common.viewDetail')}
                       >
                         <Eye className="w-4 h-4" />
                       </Link>
                       <Link
                         to={`/users/${user.id}/edit`}
                         className="text-green-600 hover:text-green-900 inline-block"
-                        title="Edit"
+                        title={t('common.edit')}
                       >
                         <Edit className="w-4 h-4" />
                       </Link>
                       <button
                         onClick={() => handleDelete(user.id, user.name)}
                         className="text-red-600 hover:text-red-900"
-                        title="Hapus"
+                        title={t('common.delete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -265,22 +258,22 @@ const Users = () => {
                 disabled={currentPage === 1}
                 className="btn btn-secondary"
               >
-                Sebelumnya
+                {t('users.pagination.previous')}
               </button>
               <button
                 onClick={() => paginate(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 className="btn btn-secondary"
               >
-                Selanjutnya
+                {t('users.pagination.next')}
               </button>
             </div>
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-gray-700">
-                  Menampilkan <span className="font-medium">{indexOfFirstItem + 1}</span> sampai{' '}
-                  <span className="font-medium">{Math.min(indexOfLastItem, users.length)}</span> dari{' '}
-                  <span className="font-medium">{users.length}</span> pengguna
+                  {t('users.pagination.showing')} <span className="font-medium">{indexOfFirstItem + 1}</span> {t('users.pagination.to')}{' '}
+                  <span className="font-medium">{Math.min(indexOfLastItem, users.length)}</span> {t('users.pagination.of')}{' '}
+                  <span className="font-medium">{users.length}</span> {t('users.pagination.users')}
                 </p>
               </div>
               <div>
@@ -290,7 +283,7 @@ const Users = () => {
                     disabled={currentPage === 1}
                     className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                   >
-                    Sebelumnya
+                    {t('users.pagination.previous')}
                   </button>
                   {[...Array(totalPages)].map((_, i) => (
                     <button
@@ -310,7 +303,7 @@ const Users = () => {
                     disabled={currentPage === totalPages}
                     className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                   >
-                    Selanjutnya
+                    {t('users.pagination.next')}
                   </button>
                 </nav>
               </div>
@@ -328,11 +321,8 @@ const Users = () => {
             </svg>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-blue-900">Total Pengguna Sistem</h3>
-            <p className="mt-1 text-sm text-blue-700">
-              Terdapat <strong>{users.length}</strong> pengguna terdaftar dalam sistem.
-              Klik "Export Excel" untuk mengunduh data lengkap pengguna.
-            </p>
+            <h3 className="text-sm font-medium text-blue-900">{t('users.totalUsers')}</h3>
+            <p className="mt-1 text-sm text-blue-700" dangerouslySetInnerHTML={{ __html: t('users.totalUsersInfo', { count: users.length }) }} />
           </div>
         </div>
       </div>

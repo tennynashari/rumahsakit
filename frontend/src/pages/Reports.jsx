@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { dashboardService, billingService, patientService, visitService } from '../services'
 import { 
   Download, 
@@ -14,6 +15,7 @@ import {
 import toast from 'react-hot-toast'
 
 const Reports = () => {
+  const { t, i18n } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
@@ -96,7 +98,7 @@ const Reports = () => {
       })
     } catch (error) {
       console.error('Failed to fetch report data:', error)
-      toast.error('Failed to load report data')
+      toast.error(t('reports.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -108,7 +110,7 @@ const Reports = () => {
 
   const handleGenerateReport = () => {
     fetchReportData()
-    toast.success('Report generated successfully')
+    toast.success(t('reports.reportGenerated'))
   }
 
   const handleExportPDF = () => {
@@ -255,13 +257,15 @@ const Reports = () => {
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(url)
-    toast.success('Report exported to CSV')
+    toast.success(t('reports.exportedCsv'))
   }
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('id-ID', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    const currency = i18n.language === 'id' ? 'IDR' : 'USD'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'IDR'
+      currency: currency
     }).format(value)
   }
 
@@ -270,8 +274,8 @@ const Reports = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
-          <p className="text-sm text-gray-600">Generate and export comprehensive hospital reports</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('reports.title')}</h1>
+          <p className="text-sm text-gray-600">{t('reports.subtitle')}</p>
         </div>
       </div>
 
@@ -280,12 +284,12 @@ const Reports = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center">
             <Filter className="w-5 h-5 mr-2" />
-            Report Period
+            {t('reports.reportPeriod')}
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="form-label">Start Date</label>
+            <label className="form-label">{t('reports.startDate')}</label>
             <input
               type="date"
               className="form-input"
@@ -294,7 +298,7 @@ const Reports = () => {
             />
           </div>
           <div>
-            <label className="form-label">End Date</label>
+            <label className="form-label">{t('reports.endDate')}</label>
             <input
               type="date"
               className="form-input"
@@ -308,7 +312,7 @@ const Reports = () => {
               className="btn btn-primary w-full"
               disabled={loading}
             >
-              {loading ? 'Generating...' : 'Generate Report'}
+              {loading ? t('reports.generating') : t('reports.generateReport')}
             </button>
           </div>
         </div>
@@ -316,15 +320,15 @@ const Reports = () => {
 
       {/* Export Actions */}
       <div className="card">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Export Report</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('reports.exportReport')}</h2>
         <div className="flex flex-wrap gap-3">
           <button onClick={handleExportPDF} className="btn btn-primary inline-flex items-center">
             <Printer className="w-4 h-4 mr-2" />
-            Print / PDF
+            {t('reports.printPdf')}
           </button>
           <button onClick={handleExportCSV} className="btn btn-secondary inline-flex items-center">
             <Download className="w-4 h-4 mr-2" />
-            Export to CSV
+            {t('reports.exportCsv')}
           </button>
         </div>
       </div>
@@ -333,17 +337,17 @@ const Reports = () => {
       <div className="card">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <Users className="w-5 h-5 mr-2 text-blue-600" />
-          Patient Statistics
+          {t('reports.patientStats')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <div className="text-sm font-medium text-blue-600">Total Patients</div>
+            <div className="text-sm font-medium text-blue-600">{t('reports.totalPatients')}</div>
             <div className="text-3xl font-bold text-blue-900 mt-2">{reportData.patients.total}</div>
           </div>
           <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-            <div className="text-sm font-medium text-green-600">New Patients (in period)</div>
+            <div className="text-sm font-medium text-green-600">{t('reports.newPatients')}</div>
             <div className="text-3xl font-bold text-green-900 mt-2">{reportData.patients.new}</div>
-            <div className="text-xs text-green-700 mt-1">Registered in selected period</div>
+            <div className="text-xs text-green-700 mt-1">{t('reports.newPatientsNote')}</div>
           </div>
         </div>
       </div>
@@ -352,24 +356,24 @@ const Reports = () => {
       <div className="card">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <Calendar className="w-5 h-5 mr-2 text-purple-600" />
-          Visit Statistics
-          <span className="ml-2 text-xs font-normal text-gray-500">(in selected period)</span>
+          {t('reports.visitStats')}
+          <span className="ml-2 text-xs font-normal text-gray-500">({t('reports.inPeriod')})</span>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-            <div className="text-sm font-medium text-purple-600">Total Visits</div>
+            <div className="text-sm font-medium text-purple-600">{t('reports.totalVisits')}</div>
             <div className="text-3xl font-bold text-purple-900 mt-2">{reportData.visits.total}</div>
           </div>
           <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-            <div className="text-sm font-medium text-green-600">Completed</div>
+            <div className="text-sm font-medium text-green-600">{t('reports.completedVisits')}</div>
             <div className="text-3xl font-bold text-green-900 mt-2">{reportData.visits.completed}</div>
           </div>
           <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-            <div className="text-sm font-medium text-red-600">Cancelled</div>
+            <div className="text-sm font-medium text-red-600">{t('reports.cancelledVisits')}</div>
             <div className="text-3xl font-bold text-red-900 mt-2">{reportData.visits.cancelled}</div>
           </div>
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <div className="text-sm font-medium text-blue-600">Completion Rate</div>
+            <div className="text-sm font-medium text-blue-600">{t('reports.completionRate')}</div>
             <div className="text-3xl font-bold text-blue-900 mt-2">
               {reportData.visits.total > 0 
                 ? Math.round((reportData.visits.completed / reportData.visits.total) * 100) 
@@ -383,26 +387,26 @@ const Reports = () => {
       <div className="card">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <DollarSign className="w-5 h-5 mr-2 text-green-600" />
-          Financial Statistics
-          <span className="ml-2 text-xs font-normal text-gray-500">(in selected period)</span>
+          {t('reports.financialStats')}
+          <span className="ml-2 text-xs font-normal text-gray-500">({t('reports.inPeriod')})</span>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-            <div className="text-sm font-medium text-green-600">Total Revenue</div>
+            <div className="text-sm font-medium text-green-600">{t('reports.totalRevenue')}</div>
             <div className="text-2xl font-bold text-green-900 mt-2">
               {formatCurrency(reportData.billing.revenue)}
             </div>
           </div>
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <div className="text-sm font-medium text-blue-600">Paid Bills</div>
+            <div className="text-sm font-medium text-blue-600">{t('reports.paidBills')}</div>
             <div className="text-3xl font-bold text-blue-900 mt-2">{reportData.billing.paid}</div>
           </div>
           <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-            <div className="text-sm font-medium text-yellow-600">Unpaid Bills</div>
+            <div className="text-sm font-medium text-yellow-600">{t('reports.unpaidBills')}</div>
             <div className="text-3xl font-bold text-yellow-900 mt-2">{reportData.billing.unpaid}</div>
           </div>
           <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-            <div className="text-sm font-medium text-purple-600">Total Bills</div>
+            <div className="text-sm font-medium text-purple-600">{t('reports.totalBills')}</div>
             <div className="text-3xl font-bold text-purple-900 mt-2">{reportData.billing.total}</div>
           </div>
         </div>
@@ -413,11 +417,11 @@ const Reports = () => {
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <TrendingUp className="w-5 h-5 mr-2 text-orange-600" />
-            Key Performance Indicators
+            {t('reports.kpi')}
           </h2>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium text-gray-600">Average Revenue per Patient</span>
+              <span className="text-sm font-medium text-gray-600">{t('reports.avgRevenuePerPatient')}</span>
               <span className="text-lg font-bold text-gray-900">
                 {reportData.patients.total > 0 
                   ? formatCurrency(reportData.billing.revenue / reportData.patients.total)
@@ -425,7 +429,7 @@ const Reports = () => {
               </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium text-gray-600">Payment Collection Rate</span>
+              <span className="text-sm font-medium text-gray-600">{t('reports.paymentCollectionRate')}</span>
               <span className="text-lg font-bold text-gray-900">
                 {reportData.billing.total > 0 
                   ? Math.round((reportData.billing.paid / reportData.billing.total) * 100)
@@ -433,7 +437,7 @@ const Reports = () => {
               </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium text-gray-600">Average Visits per Day</span>
+              <span className="text-sm font-medium text-gray-600">{t('reports.avgVisitsPerDay')}</span>
               <span className="text-lg font-bold text-gray-900">
                 {Math.round(reportData.visits.total / 30)}
               </span>
@@ -444,21 +448,21 @@ const Reports = () => {
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <Activity className="w-5 h-5 mr-2 text-red-600" />
-            System Activity Summary
+            {t('reports.systemActivity')}
           </h2>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium text-gray-600">Active Patients</span>
+              <span className="text-sm font-medium text-gray-600">{t('reports.activePatients')}</span>
               <span className="text-lg font-bold text-gray-900">{reportData.patients.total}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium text-gray-600">Pending Visits</span>
+              <span className="text-sm font-medium text-gray-600">{t('reports.pendingVisits')}</span>
               <span className="text-lg font-bold text-gray-900">
                 {reportData.visits.total - reportData.visits.completed - reportData.visits.cancelled}
               </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium text-gray-600">Outstanding Payments</span>
+              <span className="text-sm font-medium text-gray-600">{t('reports.outstandingPayments')}</span>
               <span className="text-lg font-bold text-gray-900">{reportData.billing.unpaid}</span>
             </div>
           </div>

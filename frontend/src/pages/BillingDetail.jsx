@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { billingService } from '../services'
 import { ArrowLeft, Edit, Printer, Calendar, User, FileText, DollarSign, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const BillingDetail = () => {
+  const { t, i18n } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [billing, setBilling] = useState(null)
@@ -21,7 +23,7 @@ const BillingDetail = () => {
       setBilling(response.data.billing)
     } catch (error) {
       console.error('Fetch billing error:', error)
-      toast.error('Gagal memuat data billing')
+      toast.error(t('billing.form.loadFailed'))
       navigate('/billing')
     } finally {
       setLoading(false)
@@ -36,9 +38,9 @@ const BillingDetail = () => {
     }
     
     const labels = {
-      PAID: 'Sudah Dibayar',
-      UNPAID: 'Belum Dibayar',
-      CANCELLED: 'Dibatalkan'
+      PAID: t('billing.status.paid'),
+      UNPAID: t('billing.status.unpaid'),
+      CANCELLED: t('billing.status.cancelled')
     }
 
     return (
@@ -49,15 +51,18 @@ const BillingDetail = () => {
   }
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('id-ID', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    const currency = i18n.language === 'id' ? 'IDR' : 'USD'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'IDR',
+      currency: currency,
       minimumFractionDigits: 0
     }).format(value)
   }
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -71,16 +76,16 @@ const BillingDetail = () => {
   }
 
   const handleMarkAsPaid = async () => {
-    if (window.confirm('Tandai tagihan ini sebagai lunas?')) {
+    if (window.confirm(t('billing.markAsPaidConfirm'))) {
       try {
         await billingService.updateBilling(id, {
           status: 'PAID'
         })
-        toast.success('Tagihan berhasil ditandai lunas')
+        toast.success(t('billing.markAsPaidSuccess'))
         // Refresh billing data
         fetchBilling()
       } catch (error) {
-        toast.error('Gagal mengubah status tagihan')
+        toast.error(t('billing.markAsPaidFailed'))
         console.error('Mark as paid error:', error)
       }
     }
@@ -97,7 +102,7 @@ const BillingDetail = () => {
   if (!billing) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Billing tidak ditemukan</p>
+        <p className="text-gray-500">{t('billing.detail.notFound')}</p>
       </div>
     )
   }
@@ -112,10 +117,10 @@ const BillingDetail = () => {
             className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Kembali
+            {t('billing.detail.back')}
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Detail Billing</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('billing.detail.title')}</h1>
             <p className="text-gray-600">Invoice #{billing.id}</p>
           </div>
         </div>
@@ -125,7 +130,7 @@ const BillingDetail = () => {
             className="btn bg-gray-600 text-white hover:bg-gray-700"
           >
             <Printer className="w-4 h-4 mr-2" />
-            Cetak
+            {t('billing.detail.print')}
           </button>
           {billing.status === 'UNPAID' && (
             <button
@@ -133,7 +138,7 @@ const BillingDetail = () => {
               className="btn bg-green-600 text-white hover:bg-green-700"
             >
               <CheckCircle className="w-4 h-4 mr-2" />
-              Tandai Lunas
+              {t('billing.detail.markAsPaid')}
             </button>
           )}
           <Link
@@ -141,7 +146,7 @@ const BillingDetail = () => {
             className="btn btn-primary"
           >
             <Edit className="w-4 h-4 mr-2" />
-            Edit
+            {t('billing.detail.edit')}
           </Link>
         </div>
       </div>
@@ -165,19 +170,19 @@ const BillingDetail = () => {
         {/* Patient & Billing Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Informasi Pasien</h3>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">{t('billing.detail.patientInfo')}</h3>
             <div className="space-y-2">
               <div className="flex items-start">
                 <User className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
                 <div>
-                  <p className="text-sm text-gray-600">Nama</p>
+                  <p className="text-sm text-gray-600">{t('billing.detail.patientName')}</p>
                   <p className="font-semibold text-gray-900">{billing.patient.name}</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <FileText className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
                 <div>
-                  <p className="text-sm text-gray-600">No. Rekam Medis</p>
+                  <p className="text-sm text-gray-600">{t('billing.detail.medicalRecordNo')}</p>
                   <p className="font-semibold text-gray-900">{billing.patient.medicalRecordNo}</p>
                 </div>
               </div>
@@ -194,19 +199,19 @@ const BillingDetail = () => {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Informasi Billing</h3>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">{t('billing.detail.billingInfo')}</h3>
             <div className="space-y-2">
               <div className="flex items-start">
                 <Calendar className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
                 <div>
-                  <p className="text-sm text-gray-600">Tanggal Dibuat</p>
+                  <p className="text-sm text-gray-600">{t('billing.detail.billingDate')}</p>
                   <p className="font-semibold text-gray-900">{formatDate(billing.createdAt)}</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <DollarSign className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
                 <div>
-                  <p className="text-sm text-gray-600">Status Pembayaran</p>
+                  <p className="text-sm text-gray-600">{t('billing.table.status')}</p>
                   <div className="mt-1">{getStatusBadge(billing.status)}</div>
                 </div>
               </div>
@@ -225,13 +230,13 @@ const BillingDetail = () => {
 
         {/* Billing Items */}
         <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Rincian Tagihan</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('billing.detail.items')}</h3>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b-2 border-gray-300">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Deskripsi</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Jumlah</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('billing.form.description')}</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">{t('billing.form.amount')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -253,19 +258,19 @@ const BillingDetail = () => {
           <div className="flex justify-end">
             <div className="w-full md:w-1/2 space-y-3">
               <div className="flex justify-between text-gray-700">
-                <span>Subtotal</span>
+                <span>{t('billing.table.subtotal')}</span>
                 <span className="font-medium">{formatCurrency(parseFloat(billing.subtotal))}</span>
               </div>
               <div className="flex justify-between text-gray-700">
-                <span>Pajak</span>
+                <span>{t('billing.table.tax')}</span>
                 <span className="font-medium">{formatCurrency(parseFloat(billing.tax))}</span>
               </div>
               <div className="flex justify-between text-gray-700">
-                <span>Diskon</span>
+                <span>{t('billing.table.discount')}</span>
                 <span className="font-medium text-red-600">- {formatCurrency(parseFloat(billing.discount))}</span>
               </div>
               <div className="flex justify-between text-xl font-bold border-t-2 border-gray-300 pt-3">
-                <span>Total</span>
+                <span>{t('billing.table.total')}</span>
                 <span className="text-primary-600">{formatCurrency(parseFloat(billing.total))}</span>
               </div>
             </div>

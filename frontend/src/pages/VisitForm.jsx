@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { visitService, patientService, userService } from '../services'
 import { ArrowLeft, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const VisitForm = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -39,7 +41,7 @@ const VisitForm = () => {
       setDoctors(doctorsList)
     } catch (error) {
       console.error('Fetch data error:', error)
-      toast.error('Gagal memuat data')
+      toast.error(t('visitForm.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -58,10 +60,10 @@ const VisitForm = () => {
     try {
       setSubmitting(true)
       await visitService.createVisit(formData)
-      toast.success('Kunjungan berhasil dijadwalkan')
+      toast.success(t('visitForm.createSuccess'))
       navigate('/visits')
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Gagal membuat jadwal kunjungan')
+      toast.error(error.response?.data?.error || t('visitForm.createFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -84,24 +86,24 @@ const VisitForm = () => {
           className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Kembali
+          {t('visitForm.back')}
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tambah Kunjungan</h1>
-          <p className="text-gray-600">Buat jadwal kunjungan pasien baru</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('visitForm.title')}</h1>
+          <p className="text-gray-600">{t('visitForm.subtitle')}</p>
         </div>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Informasi Kunjungan</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('visitForm.visitInfo')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Patient */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pasien <span className="text-red-500">*</span>
+                {t('visitForm.patient')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="patientId"
@@ -110,7 +112,7 @@ const VisitForm = () => {
                 className="input"
                 required
               >
-                <option value="">Pilih Pasien</option>
+                <option value="">{t('visitForm.patientPlaceholder')}</option>
                 {patients.map(patient => (
                   <option key={patient.id} value={patient.id}>
                     {patient.name} - {patient.medicalRecordNo}
@@ -122,7 +124,7 @@ const VisitForm = () => {
             {/* Doctor */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Dokter <span className="text-red-500">*</span>
+                {t('visitForm.doctor')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="doctorId"
@@ -131,7 +133,7 @@ const VisitForm = () => {
                 className="input"
                 required
               >
-                <option value="">Pilih Dokter</option>
+                <option value="">{t('visitForm.doctorPlaceholder')}</option>
                 {doctors.map(doctor => (
                   <option key={doctor.id} value={doctor.id}>
                     {doctor.name}
@@ -143,7 +145,7 @@ const VisitForm = () => {
             {/* Visit Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Jenis Kunjungan <span className="text-red-500">*</span>
+                {t('visitForm.visitType')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="visitType"
@@ -152,17 +154,17 @@ const VisitForm = () => {
                 className="input"
                 required
               >
-                <option value="GENERAL_CHECKUP">Pemeriksaan Umum</option>
-                <option value="OUTPATIENT">Rawat Jalan</option>
-                <option value="INPATIENT">Rawat Inap</option>
-                <option value="EMERGENCY">Darurat</option>
+                <option value="GENERAL_CHECKUP">{t('visitForm.visitTypes.GENERAL_CHECKUP')}</option>
+                <option value="OUTPATIENT">{t('visitForm.visitTypes.OUTPATIENT')}</option>
+                <option value="INPATIENT">{t('visitForm.visitTypes.INPATIENT')}</option>
+                <option value="EMERGENCY">{t('visitForm.visitTypes.EMERGENCY')}</option>
               </select>
             </div>
 
             {/* Scheduled Date/Time */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal & Waktu <span className="text-red-500">*</span>
+                {t('visitForm.scheduledAt')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="datetime-local"
@@ -177,7 +179,7 @@ const VisitForm = () => {
             {/* Status */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status <span className="text-red-500">*</span>
+                {t('visitForm.statusLabel')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="status"
@@ -186,18 +188,18 @@ const VisitForm = () => {
                 className="input"
                 required
               >
-                <option value="SCHEDULED">Terjadwal</option>
-                <option value="IN_PROGRESS">Berlangsung</option>
-                <option value="COMPLETED">Selesai</option>
-                <option value="CANCELLED">Dibatalkan</option>
-                <option value="NO_SHOW">Tidak Hadir</option>
+                <option value="SCHEDULED">{t('visitForm.status.SCHEDULED')}</option>
+                <option value="IN_PROGRESS">{t('visitForm.status.IN_PROGRESS')}</option>
+                <option value="COMPLETED">{t('visitForm.status.COMPLETED')}</option>
+                <option value="CANCELLED">{t('visitForm.status.CANCELLED')}</option>
+                <option value="NO_SHOW">{t('visitForm.status.NO_SHOW')}</option>
               </select>
             </div>
 
             {/* Notes */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Catatan
+                {t('visitForm.notes')}
               </label>
               <textarea
                 name="notes"
@@ -205,7 +207,7 @@ const VisitForm = () => {
                 onChange={handleChange}
                 rows="4"
                 className="input"
-                placeholder="Tambahkan catatan tambahan jika diperlukan..."
+                placeholder={t('visitForm.notesPlaceholder')}
               />
             </div>
           </div>
@@ -218,7 +220,7 @@ const VisitForm = () => {
             onClick={() => navigate('/visits')}
             className="btn btn-secondary"
           >
-            Batal
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -228,12 +230,12 @@ const VisitForm = () => {
             {submitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Menyimpan...
+                {t('visitForm.saving')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Simpan
+                {t('visitForm.saveButton')}
               </>
             )}
           </button>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { 
   User, 
@@ -14,6 +15,7 @@ import {
 import toast from 'react-hot-toast'
 
 const Settings = () => {
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('profile')
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -48,7 +50,7 @@ const Settings = () => {
   // Appearance Settings
   const [appearanceSettings, setAppearanceSettings] = useState({
     theme: 'light',
-    language: 'en',
+    language: i18n.language || 'en',
     dateFormat: 'MM/DD/YYYY',
     timeFormat: '12-hour'
   })
@@ -72,24 +74,24 @@ const Settings = () => {
   const handleSaveProfile = (e) => {
     e.preventDefault()
     // TODO: Implement API call
-    toast.success('Profile updated successfully')
+    toast.success(t('settings.profile.saveSuccess'))
   }
 
   const handleChangePassword = (e) => {
     e.preventDefault()
     
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('New passwords do not match')
+      toast.error(t('settings.security.passwordMismatch'))
       return
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters')
+      toast.error(t('settings.security.passwordLengthError'))
       return
     }
 
     // TODO: Implement API call
-    toast.success('Password changed successfully')
+    toast.success(t('settings.security.passwordChanged'))
     setPasswordData({
       currentPassword: '',
       newPassword: '',
@@ -99,28 +101,32 @@ const Settings = () => {
 
   const handleSaveNotifications = () => {
     // TODO: Implement API call
-    toast.success('Notification preferences saved')
+    toast.success(t('settings.notifications.saveSuccess'))
   }
 
   const handleSaveAppearance = () => {
+    // Update i18n language when language setting changes
+    if (appearanceSettings.language !== i18n.language) {
+      i18n.changeLanguage(appearanceSettings.language)
+    }
     // TODO: Implement API call
-    toast.success('Appearance settings saved')
+    toast.success(t('settings.appearance.saveSuccess'))
   }
 
   const tabs = [
-    { id: 'profile', name: 'Profile', icon: User },
-    { id: 'security', name: 'Security', icon: Lock },
-    { id: 'notifications', name: 'Notifications', icon: Bell },
-    { id: 'appearance', name: 'Appearance', icon: Palette },
-    { id: 'system', name: 'System', icon: Database }
+    { id: 'profile', name: t('settings.tabs.profile'), icon: User },
+    { id: 'security', name: t('settings.tabs.security'), icon: Lock },
+    { id: 'notifications', name: t('settings.tabs.notifications'), icon: Bell },
+    { id: 'appearance', name: t('settings.tabs.appearance'), icon: Palette },
+    { id: 'system', name: t('settings.tabs.system'), icon: Database }
   ]
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-sm text-gray-600">Manage your account and application preferences</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('settings.title')}</h1>
+        <p className="text-sm text-gray-600">{t('settings.subtitle')}</p>
       </div>
 
       {/* Settings Container */}
@@ -157,63 +163,63 @@ const Settings = () => {
             <div className="card">
               <div className="flex items-center mb-6">
                 <User className="w-6 h-6 mr-2 text-primary-600" />
-                <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
+                <h2 className="text-xl font-semibold text-gray-900">{t('settings.profile.title')}</h2>
               </div>
               
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="form-label">Full Name</label>
+                    <label className="form-label">{t('settings.profile.name')}</label>
                     <input
                       type="text"
                       className="form-input"
                       value={profileData.name}
                       onChange={(e) => handleProfileChange('name', e.target.value)}
-                      placeholder="John Doe"
+                      placeholder={t('settings.profile.namePlaceholder')}
                     />
                   </div>
 
                   <div>
-                    <label className="form-label">Email</label>
+                    <label className="form-label">{t('settings.profile.email')}</label>
                     <input
                       type="email"
                       className="form-input"
                       value={profileData.email}
                       onChange={(e) => handleProfileChange('email', e.target.value)}
-                      placeholder="john@example.com"
+                      placeholder={t('settings.profile.emailPlaceholder')}
                     />
                   </div>
 
                   <div>
-                    <label className="form-label">Phone Number</label>
+                    <label className="form-label">{t('settings.profile.phone')}</label>
                     <input
                       type="tel"
                       className="form-input"
                       value={profileData.phone}
                       onChange={(e) => handleProfileChange('phone', e.target.value)}
-                      placeholder="+62 812 3456 7890"
+                      placeholder={t('settings.profile.phonePlaceholder')}
                     />
                   </div>
 
                   <div>
-                    <label className="form-label">Department</label>
+                    <label className="form-label">{t('settings.profile.department')}</label>
                     <input
                       type="text"
                       className="form-input"
                       value={profileData.department}
                       onChange={(e) => handleProfileChange('department', e.target.value)}
-                      placeholder="Cardiology"
+                      placeholder={t('settings.profile.departmentPlaceholder')}
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="form-label">Specialization</label>
+                    <label className="form-label">{t('settings.profile.specialization')}</label>
                     <input
                       type="text"
                       className="form-input"
                       value={profileData.specialization}
                       onChange={(e) => handleProfileChange('specialization', e.target.value)}
-                      placeholder="Interventional Cardiology"
+                      placeholder={t('settings.profile.specializationPlaceholder')}
                     />
                   </div>
                 </div>
@@ -221,7 +227,7 @@ const Settings = () => {
                 <div className="flex justify-end pt-4 border-t">
                   <button type="submit" className="btn btn-primary inline-flex items-center">
                     <Save className="w-4 h-4 mr-2" />
-                    Save Changes
+                    {t('settings.profile.saveChanges')}
                   </button>
                 </div>
               </form>
@@ -233,12 +239,12 @@ const Settings = () => {
             <div className="card">
               <div className="flex items-center mb-6">
                 <Lock className="w-6 h-6 mr-2 text-primary-600" />
-                <h2 className="text-xl font-semibold text-gray-900">Security Settings</h2>
+                <h2 className="text-xl font-semibold text-gray-900">{t('settings.security.title')}</h2>
               </div>
 
               <form onSubmit={handleChangePassword} className="space-y-4">
                 <div>
-                  <label className="form-label">Current Password</label>
+                  <label className="form-label">{t('settings.security.currentPassword')}</label>
                   <div className="relative">
                     <input
                       type={showCurrentPassword ? 'text' : 'password'}
@@ -258,7 +264,7 @@ const Settings = () => {
                 </div>
 
                 <div>
-                  <label className="form-label">New Password</label>
+                  <label className="form-label">{t('settings.security.newPassword')}</label>
                   <div className="relative">
                     <input
                       type={showNewPassword ? 'text' : 'password'}
@@ -275,11 +281,11 @@ const Settings = () => {
                       {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Password must be at least 6 characters</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('settings.security.passwordRequirement')}</p>
                 </div>
 
                 <div>
-                  <label className="form-label">Confirm New Password</label>
+                  <label className="form-label">{t('settings.security.confirmPassword')}</label>
                   <div className="relative">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
@@ -301,20 +307,20 @@ const Settings = () => {
                 <div className="flex justify-end pt-4 border-t">
                   <button type="submit" className="btn btn-primary inline-flex items-center">
                     <Lock className="w-4 h-4 mr-2" />
-                    Change Password
+                    {t('settings.security.changePassword')}
                   </button>
                 </div>
               </form>
 
               <div className="mt-8 pt-6 border-t">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Two-Factor Authentication</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{t('settings.security.twoFactorAuth')}</h3>
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">Enable 2FA</p>
-                    <p className="text-sm text-gray-500">Add an extra layer of security to your account</p>
+                    <p className="font-medium text-gray-900">{t('settings.security.enable2FA')}</p>
+                    <p className="text-sm text-gray-500">{t('settings.security.2FADescription')}</p>
                   </div>
                   <button className="btn btn-secondary">
-                    Enable
+                    {t('settings.security.enable')}
                   </button>
                 </div>
               </div>
@@ -326,14 +332,14 @@ const Settings = () => {
             <div className="card">
               <div className="flex items-center mb-6">
                 <Bell className="w-6 h-6 mr-2 text-primary-600" />
-                <h2 className="text-xl font-semibold text-gray-900">Notification Preferences</h2>
+                <h2 className="text-xl font-semibold text-gray-900">{t('settings.notifications.title')}</h2>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">Email Notifications</p>
-                    <p className="text-sm text-gray-500">Receive notifications via email</p>
+                    <p className="font-medium text-gray-900">{t('settings.notifications.emailNotifications')}</p>
+                    <p className="text-sm text-gray-500">{t('settings.notifications.emailNotificationsDesc')}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -348,8 +354,8 @@ const Settings = () => {
 
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">SMS Notifications</p>
-                    <p className="text-sm text-gray-500">Receive notifications via SMS</p>
+                    <p className="font-medium text-gray-900">{t('settings.notifications.smsNotifications')}</p>
+                    <p className="text-sm text-gray-500">{t('settings.notifications.smsNotificationsDesc')}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -364,8 +370,8 @@ const Settings = () => {
 
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">Appointment Reminders</p>
-                    <p className="text-sm text-gray-500">Get reminded about upcoming appointments</p>
+                    <p className="font-medium text-gray-900">{t('settings.notifications.appointmentReminders')}</p>
+                    <p className="text-sm text-gray-500">{t('settings.notifications.appointmentRemindersDesc')}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -380,8 +386,8 @@ const Settings = () => {
 
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">Billing Alerts</p>
-                    <p className="text-sm text-gray-500">Notifications about payments and invoices</p>
+                    <p className="font-medium text-gray-900">{t('settings.notifications.billingAlerts')}</p>
+                    <p className="text-sm text-gray-500">{t('settings.notifications.billingAlertsDesc')}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -396,8 +402,8 @@ const Settings = () => {
 
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">System Updates</p>
-                    <p className="text-sm text-gray-500">Updates about system maintenance and features</p>
+                    <p className="font-medium text-gray-900">{t('settings.notifications.systemUpdates')}</p>
+                    <p className="text-sm text-gray-500">{t('settings.notifications.systemUpdatesDesc')}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -414,7 +420,7 @@ const Settings = () => {
               <div className="flex justify-end pt-4 border-t mt-6">
                 <button onClick={handleSaveNotifications} className="btn btn-primary inline-flex items-center">
                   <Save className="w-4 h-4 mr-2" />
-                  Save Preferences
+                  {t('settings.notifications.saveChanges')}
                 </button>
               </div>
             </div>
@@ -425,12 +431,12 @@ const Settings = () => {
             <div className="card">
               <div className="flex items-center mb-6">
                 <Palette className="w-6 h-6 mr-2 text-primary-600" />
-                <h2 className="text-xl font-semibold text-gray-900">Appearance Settings</h2>
+                <h2 className="text-xl font-semibold text-gray-900">{t('settings.appearance.title')}</h2>
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <label className="form-label">Theme</label>
+                  <label className="form-label">{t('settings.appearance.theme')}</label>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => handleAppearanceChange('theme', 'light')}
@@ -440,8 +446,8 @@ const Settings = () => {
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <div className="font-medium">Light</div>
-                      <div className="text-sm text-gray-500">Default theme</div>
+                      <div className="font-medium">{t('settings.appearance.lightTheme')}</div>
+                      <div className="text-sm text-gray-500">{t('settings.appearance.defaultTheme')}</div>
                     </button>
                     <button
                       onClick={() => handleAppearanceChange('theme', 'dark')}
@@ -451,26 +457,26 @@ const Settings = () => {
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <div className="font-medium">Dark</div>
-                      <div className="text-sm text-gray-500">Coming soon</div>
+                      <div className="font-medium">{t('settings.appearance.darkTheme')}</div>
+                      <div className="text-sm text-gray-500">{t('settings.appearance.comingSoon')}</div>
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="form-label">Language</label>
+                  <label className="form-label">{t('settings.appearance.language')}</label>
                   <select
                     className="form-input"
                     value={appearanceSettings.language}
                     onChange={(e) => handleAppearanceChange('language', e.target.value)}
                   >
-                    <option value="en">English</option>
-                    <option value="id">Bahasa Indonesia</option>
+                    <option value="en">{t('settings.appearance.english')}</option>
+                    <option value="id">{t('settings.appearance.indonesian')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="form-label">Date Format</label>
+                  <label className="form-label">{t('settings.appearance.dateFormat')}</label>
                   <select
                     className="form-input"
                     value={appearanceSettings.dateFormat}
@@ -483,14 +489,14 @@ const Settings = () => {
                 </div>
 
                 <div>
-                  <label className="form-label">Time Format</label>
+                  <label className="form-label">{t('settings.appearance.timeFormat')}</label>
                   <select
                     className="form-input"
                     value={appearanceSettings.timeFormat}
                     onChange={(e) => handleAppearanceChange('timeFormat', e.target.value)}
                   >
-                    <option value="12-hour">12-hour (AM/PM)</option>
-                    <option value="24-hour">24-hour</option>
+                    <option value="12-hour">{t('settings.appearance.12hour')}</option>
+                    <option value="24-hour">{t('settings.appearance.24hour')}</option>
                   </select>
                 </div>
               </div>
@@ -498,7 +504,7 @@ const Settings = () => {
               <div className="flex justify-end pt-4 border-t mt-6">
                 <button onClick={handleSaveAppearance} className="btn btn-primary inline-flex items-center">
                   <Save className="w-4 h-4 mr-2" />
-                  Save Settings
+                  {t('settings.appearance.saveChanges')}
                 </button>
               </div>
             </div>
@@ -509,38 +515,38 @@ const Settings = () => {
             <div className="card">
               <div className="flex items-center mb-6">
                 <Database className="w-6 h-6 mr-2 text-primary-600" />
-                <h2 className="text-xl font-semibold text-gray-900">System Information</h2>
+                <h2 className="text-xl font-semibold text-gray-900">{t('settings.system.title')}</h2>
               </div>
 
               <div className="space-y-4">
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-600">Version</span>
+                    <span className="text-sm font-medium text-gray-600">{t('settings.system.version')}</span>
                     <span className="text-sm font-semibold text-gray-900">1.0.0</span>
                   </div>
                 </div>
 
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-600">Last Updated</span>
+                    <span className="text-sm font-medium text-gray-600">{t('settings.system.lastUpdated')}</span>
                     <span className="text-sm font-semibold text-gray-900">January 2, 2026</span>
                   </div>
                 </div>
 
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-600">Database Status</span>
+                    <span className="text-sm font-medium text-gray-600">{t('settings.system.database')}</span>
                     <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
-                      Connected
+                      {t('settings.system.connected')}
                     </span>
                   </div>
                 </div>
 
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-600">Server Status</span>
+                    <span className="text-sm font-medium text-gray-600">{t('settings.system.server')}</span>
                     <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
-                      Online
+                      {t('settings.system.online')}
                     </span>
                   </div>
                 </div>
@@ -548,19 +554,19 @@ const Settings = () => {
 
               {user?.role === 'ADMIN' && (
                 <div className="mt-6 pt-6 border-t">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Admin Tools</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">{t('settings.system.adminTools')}</h3>
                   <div className="space-y-3">
                     <button className="w-full btn btn-secondary justify-start">
                       <Database className="w-4 h-4 mr-2" />
-                      Backup Database
+                      {t('settings.system.backupDatabase')}
                     </button>
                     <button className="w-full btn btn-secondary justify-start">
                       <Shield className="w-4 h-4 mr-2" />
-                      View System Logs
+                      {t('settings.system.viewLogs')}
                     </button>
                     <button className="w-full btn btn-danger justify-start">
                       <Database className="w-4 h-4 mr-2" />
-                      Clear Cache
+                      {t('settings.system.clearCache')}
                     </button>
                   </div>
                 </div>

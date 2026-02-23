@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { billingService } from '../services'
 import { CreditCard, Receipt, Download, Eye, Edit, Trash2, Plus, DollarSign, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const Billing = () => {
+  const { t, i18n } = useTranslation()
   const [billings, setBillings] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
@@ -27,7 +29,7 @@ const Billing = () => {
       setBillings(response.data.billings)
       setTotalPages(response.data.pagination.pages)
     } catch (error) {
-      toast.error('Gagal memuat data tagihan')
+      toast.error(t('billing.fetchFailed'))
       console.error('Fetch billings error:', error)
     } finally {
       setLoading(false)
@@ -41,11 +43,11 @@ const Billing = () => {
   const handleExport = async () => {
     try {
       if (!filters.startDate || !filters.endDate) {
-        toast.error('Silakan pilih tanggal mulai dan tanggal akhir')
+        toast.error(t('billing.filters.dateRangeRequired'))
         return
       }
 
-      toast.loading('Mengekspor data...')
+      toast.loading(t('billing.exporting'))
       const params = {
         startDate: filters.startDate,
         endDate: filters.endDate
@@ -66,36 +68,36 @@ const Billing = () => {
       window.URL.revokeObjectURL(url)
       
       toast.dismiss()
-      toast.success('Data berhasil diekspor')
+      toast.success(t('billing.exportSuccess'))
     } catch (error) {
       toast.dismiss()
-      toast.error('Gagal mengekspor data')
+      toast.error(t('billing.exportFailed'))
       console.error('Export error:', error)
     }
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus tagihan ini?')) {
+    if (window.confirm(t('billing.deleteConfirm'))) {
       try {
         await billingService.deleteBilling(id)
-        toast.success('Tagihan berhasil dihapus')
+        toast.success(t('billing.deleteSuccess'))
         fetchBillings(currentPage)
       } catch (error) {
-        toast.error('Gagal menghapus tagihan')
+        toast.error(t('billing.deleteFailed'))
       }
     }
   }
 
   const handleMarkAsPaid = async (id) => {
-    if (window.confirm('Tandai tagihan ini sebagai lunas?')) {
+    if (window.confirm(t('billing.markAsPaidConfirm'))) {
       try {
         await billingService.updateBilling(id, {
           status: 'PAID'
         })
-        toast.success('Tagihan berhasil ditandai lunas')
+        toast.success(t('billing.markAsPaidSuccess'))
         fetchBillings(currentPage)
       } catch (error) {
-        toast.error('Gagal mengubah status tagihan')
+        toast.error(t('billing.markAsPaidFailed'))
         console.error('Mark as paid error:', error)
       }
     }
@@ -103,10 +105,10 @@ const Billing = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      PAID: { label: 'Lunas', className: 'bg-green-100 text-green-800' },
-      UNPAID: { label: 'Belum Bayar', className: 'bg-red-100 text-red-800' },
-      PARTIALLY_PAID: { label: 'Dibayar Sebagian', className: 'bg-yellow-100 text-yellow-800' },
-      CANCELLED: { label: 'Dibatalkan', className: 'bg-gray-100 text-gray-800' }
+      PAID: { label: t('billing.status.paid'), className: 'bg-green-100 text-green-800' },
+      UNPAID: { label: t('billing.status.unpaid'), className: 'bg-red-100 text-red-800' },
+      PARTIALLY_PAID: { label: t('billing.status.partiallyPaid'), className: 'bg-yellow-100 text-yellow-800' },
+      CANCELLED: { label: t('billing.status.cancelled'), className: 'bg-gray-100 text-gray-800' }
     }
 
     const config = statusConfig[status] || { label: status, className: 'bg-gray-100 text-gray-800' }
@@ -119,15 +121,18 @@ const Billing = () => {
   }
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('id-ID', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    const currency = i18n.language === 'id' ? 'IDR' : 'USD'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'IDR',
+      currency: currency,
       minimumFractionDigits: 0
     }).format(value)
   }
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -135,7 +140,8 @@ const Billing = () => {
   }
 
   const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString('id-ID', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    return new Date(dateString).toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit'
     })
@@ -146,12 +152,12 @@ const Billing = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tagihan & Pembayaran</h1>
-          <p className="text-sm text-gray-600">Kelola data tagihan dan pembayaran pasien</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('billing.title')}</h1>
+          <p className="text-sm text-gray-600">{t('billing.subtitle')}</p>
         </div>
         <Link to="/billing/new" className="btn btn-primary">
           <Plus className="w-4 h-4 mr-2" />
-          Tambah Tagihan
+          {t('billing.addBilling')}
         </Link>
       </div>
 
@@ -160,7 +166,7 @@ const Billing = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tanggal Mulai
+              {t('billing.filters.startDate')}
             </label>
             <input
               type="date"
@@ -171,7 +177,7 @@ const Billing = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tanggal Akhir
+              {t('billing.filters.endDate')}
             </label>
             <input
               type="date"
@@ -182,18 +188,18 @@ const Billing = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
+              {t('billing.filters.status')}
             </label>
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
               className="input"
             >
-              <option value="">Semua Status</option>
-              <option value="PAID">Lunas</option>
-              <option value="UNPAID">Belum Bayar</option>
-              <option value="PARTIALLY_PAID">Dibayar Sebagian</option>
-              <option value="CANCELLED">Dibatalkan</option>
+              <option value="">{t('billing.filters.allStatus')}</option>
+              <option value="PAID">{t('billing.status.paid')}</option>
+              <option value="UNPAID">{t('billing.status.unpaid')}</option>
+              <option value="PARTIALLY_PAID">{t('billing.status.partiallyPaid')}</option>
+              <option value="CANCELLED">{t('billing.status.cancelled')}</option>
             </select>
           </div>
           <div className="flex items-end">
@@ -203,7 +209,7 @@ const Billing = () => {
               disabled={!filters.startDate || !filters.endDate}
             >
               <Download className="w-4 h-4 mr-2" />
-              Export Excel
+              {t('common.exportExcel')}
             </button>
           </div>
         </div>
@@ -214,12 +220,12 @@ const Billing = () => {
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Memuat data...</p>
+            <p className="mt-4 text-gray-600">{t('billing.loading')}</p>
           </div>
         ) : billings.length === 0 ? (
           <div className="text-center py-12">
             <Receipt className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Tidak ada data tagihan</p>
+            <p className="text-gray-600">{t('billing.noData')}</p>
           </div>
         ) : (
           <>
@@ -228,28 +234,28 @@ const Billing = () => {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Pasien
+                      {t('billing.table.patient')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Subtotal
+                      {t('billing.table.subtotal')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Pajak
+                      {t('billing.table.tax')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Diskon
+                      {t('billing.table.discount')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total
+                      {t('billing.table.total')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
+                      {t('billing.table.status')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tanggal
+                      {t('billing.table.date')}
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aksi
+                      {t('billing.table.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -300,7 +306,7 @@ const Billing = () => {
                           <Link
                             to={`/billing/${billing.id}`}
                             className="text-primary-600 hover:text-primary-900"
-                            title="Lihat Detail"
+                            title={t('common.viewDetail')}
                           >
                             <Eye className="w-4 h-4" />
                           </Link>
@@ -308,7 +314,7 @@ const Billing = () => {
                             <button
                               onClick={() => handleMarkAsPaid(billing.id)}
                               className="text-green-600 hover:text-green-900"
-                              title="Tandai Lunas"
+                              title={t('billing.detail.markAsPaid')}
                             >
                               <CheckCircle className="w-4 h-4" />
                             </button>
@@ -316,14 +322,14 @@ const Billing = () => {
                           <Link
                             to={`/billing/${billing.id}/edit`}
                             className="text-blue-600 hover:text-blue-900"
-                            title="Edit"
+                            title={t('common.edit')}
                           >
                             <Edit className="w-4 h-4" />
                           </Link>
                           <button
                             onClick={() => handleDelete(billing.id)}
                             className="text-red-600 hover:text-red-900"
-                            title="Hapus"
+                            title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -345,20 +351,20 @@ const Billing = () => {
                       disabled={currentPage === 1}
                       className="btn btn-secondary"
                     >
-                      Previous
+                      {t('billing.pagination.previous')}
                     </button>
                     <button
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
                       className="btn btn-secondary"
                     >
-                      Next
+                      {t('billing.pagination.next')}
                     </button>
                   </div>
                   <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm text-gray-700">
-                        Halaman <span className="font-medium">{currentPage}</span> dari{' '}
+                        {t('billing.pagination.page')} <span className="font-medium">{currentPage}</span> {t('billing.pagination.of')}{' '}
                         <span className="font-medium">{totalPages}</span>
                       </p>
                     </div>
@@ -369,14 +375,14 @@ const Billing = () => {
                           disabled={currentPage === 1}
                           className="btn btn-secondary"
                         >
-                          Sebelumnya
+                          {t('billing.pagination.previous')}
                         </button>
                         <button
                           onClick={() => setCurrentPage(currentPage + 1)}
                           disabled={currentPage === totalPages}
                           className="btn btn-secondary ml-3"
                         >
-                          Selanjutnya
+                          {t('billing.pagination.next')}
                         </button>
                       </nav>
                     </div>
