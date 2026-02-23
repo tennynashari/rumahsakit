@@ -263,6 +263,8 @@ For development and testing:
 
 ## 🚢 Deployment
 
+📖 **📘 Complete Deployment Guide:** [DEPLOYMENT.md](./DEPLOYMENT.md) - Panduan lengkap update aplikasi di server
+
 ### 🚀 CI/CD Automation (Recommended)
 
 #### For GitHub Repository
