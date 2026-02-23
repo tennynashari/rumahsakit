@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { patientService } from '../services'
 import { Search, Plus, Eye, Edit, Trash2, Filter, Download } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 
 const Patients = () => {
+  const { t } = useTranslation()
   const [patients, setPatients] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -28,7 +30,7 @@ const Patients = () => {
       setPatients(response.data.patients)
       setTotalPages(response.data.pagination.pages)
     } catch (error) {
-      toast.error('Failed to fetch patients')
+      toast.error(t('patients.fetchFailed'))
     } finally {
       setLoading(false)
     }
@@ -45,20 +47,20 @@ const Patients = () => {
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this patient?')) {
+    if (window.confirm(t('patients.deleteConfirm'))) {
       try {
         await patientService.deletePatient(id)
-        toast.success('Patient deleted successfully')
+        toast.success(t('patients.deleteSuccess'))
         fetchPatients(currentPage, searchTerm)
       } catch (error) {
-        toast.error('Failed to delete patient')
+        toast.error(t('patients.deleteFailed'))
       }
     }
   }
 
   const handleExport = async () => {
     try {
-      toast.loading('Exporting data...')
+      toast.loading(t('patients.exporting'))
       const response = await patientService.exportPatients()
       
       // Create blob and download
@@ -75,10 +77,10 @@ const Patients = () => {
       window.URL.revokeObjectURL(url)
       
       toast.dismiss()
-      toast.success('Data exported successfully')
+      toast.success(t('patients.exportSuccess'))
     } catch (error) {
       toast.dismiss()
-      toast.error('Failed to export data')
+      toast.error(t('patients.exportFailed'))
       console.error('Export error:', error)
     }
   }
@@ -109,7 +111,7 @@ const Patients = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Patients</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('patients.title')}</h1>
           <p className="text-sm text-gray-600">Manage patient information and records</p>
         </div>
         <div className="flex gap-3">
@@ -118,11 +120,11 @@ const Patients = () => {
             className="btn bg-green-600 hover:bg-green-700 text-white"
           >
             <Download className="w-4 h-4 mr-2" />
-            Export Excel
+            {t('patients.exportData')}
           </button>
           <Link to="/patients/new" className="btn btn-primary">
             <Plus className="w-4 h-4 mr-2" />
-            Add Patient
+            {t('patients.registerNew')}
           </Link>
         </div>
       </div>
@@ -135,7 +137,7 @@ const Patients = () => {
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by name, MRN, or phone..."
+                placeholder={t('patients.searchPlaceholder')}
                 className="form-input pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -150,9 +152,9 @@ const Patients = () => {
               onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
             >
               <option value="">All Genders</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
+              <option value="MALE">{t('patients.gender.male')}</option>
+              <option value="FEMALE">{t('patients.gender.female')}</option>
+              <option value="OTHER">{t('patients.gender.other')}</option>
             </select>
             
             <button className="btn btn-secondary">
@@ -173,20 +175,20 @@ const Patients = () => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>MRN</th>
-                  <th>Name</th>
+                  <th>{t('patients.table.mrn')}</th>
+                  <th>{t('patients.table.name')}</th>
                   <th>Age/Gender</th>
-                  <th>Phone</th>
+                  <th>{t('patients.table.phone')}</th>
                   <th>Visits</th>
                   <th>Registered</th>
-                  <th>Actions</th>
+                  <th>{t('patients.table.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {patients.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center py-8 text-gray-500">
-                      No patients found
+                      {t('common.noData')}
                     </td>
                   </tr>
                 ) : (
@@ -198,8 +200,8 @@ const Patients = () => {
                       </td>
                       <td>
                         <div className="text-sm">
-                          <div>{calculateAge(patient.dateOfBirth)} years</div>
-                          <div className="text-gray-500">{patient.gender}</div>
+                          <div>{calculateAge(patient.dateOfBirth)} {t('patients.detail.yearsOld')}</div>
+                          <div className="text-gray-500">{t(`patients.gender.${patient.gender.toLowerCase()}`)}</div>
                         </div>
                       </td>
                       <td className="text-sm">{patient.phone || '-'}</td>

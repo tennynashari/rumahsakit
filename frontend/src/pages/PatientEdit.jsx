@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { patientService } from '../services'
 import { ArrowLeft, Save } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 
 const PatientEdit = () => {
   const navigate = useNavigate()
   const { id } = useParams()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [formData, setFormData] = useState({
@@ -46,7 +48,7 @@ const PatientEdit = () => {
         allergies: emergencyContact.allergies || ''
       })
     } catch (error) {
-      toast.error('Failed to fetch patient details')
+      toast.error(t('patients.detail.fetchFailed'))
       navigate('/patients')
     } finally {
       setFetching(false)
@@ -67,10 +69,10 @@ const PatientEdit = () => {
     try {
       setLoading(true)
       await patientService.updatePatient(id, formData)
-      toast.success('Patient updated successfully')
+      toast.success(t('patients.form.updateSuccess'))
       navigate(`/patients/${id}`)
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to update patient'
+      const errorMessage = error.response?.data?.error || t('patients.form.updateFailed')
       toast.error(errorMessage)
     } finally {
       setLoading(false)
@@ -94,11 +96,11 @@ const PatientEdit = () => {
           className="btn btn-secondary"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('patients.form.back')}
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Patient</h1>
-          <p className="text-sm text-gray-600">Update patient information</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('patients.form.editTitle')}</h1>
+          <p className="text-sm text-gray-600">{t('patients.form.editSubtitle')}</p>
         </div>
       </div>
 
@@ -107,11 +109,11 @@ const PatientEdit = () => {
         <div className="space-y-6">
           {/* Personal Information */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('patients.form.personalInfo')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="form-label">
-                  Full Name <span className="text-red-500">*</span>
+                  {t('patients.form.fullName')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -126,7 +128,7 @@ const PatientEdit = () => {
 
               <div>
                 <label className="form-label">
-                  Date of Birth <span className="text-red-500">*</span>
+                  {t('patients.form.dateOfBirth')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -140,7 +142,7 @@ const PatientEdit = () => {
 
               <div>
                 <label className="form-label">
-                  Gender <span className="text-red-500">*</span>
+                  {t('patients.table.gender')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="gender"
@@ -149,21 +151,21 @@ const PatientEdit = () => {
                   value={formData.gender}
                   onChange={handleChange}
                 >
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
-                  <option value="OTHER">Other</option>
+                  <option value="MALE">{t('patients.gender.male')}</option>
+                  <option value="FEMALE">{t('patients.gender.female')}</option>
+                  <option value="OTHER">{t('patients.gender.other')}</option>
                 </select>
               </div>
 
               <div>
-                <label className="form-label">Blood Type</label>
+                <label className="form-label">{t('patients.form.bloodType')}</label>
                 <select
                   name="bloodType"
                   className="form-input"
                   value={formData.bloodType}
                   onChange={handleChange}
                 >
-                  <option value="">Select Blood Type</option>
+                  <option value="">{t('patients.form.selectBloodType')}</option>
                   <option value="A+">A+</option>
                   <option value="A-">A-</option>
                   <option value="B+">B+</option>
@@ -179,10 +181,10 @@ const PatientEdit = () => {
 
           {/* Contact Information */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('patients.form.contactInfo')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="form-label">Phone Number</label>
+                <label className="form-label">{t('patients.form.phone')}</label>
                 <input
                   type="tel"
                   name="phone"
@@ -194,7 +196,7 @@ const PatientEdit = () => {
               </div>
 
               <div>
-                <label className="form-label">Email</label>
+                <label className="form-label">{t('patients.form.email')}</label>
                 <input
                   type="email"
                   name="email"
@@ -206,7 +208,7 @@ const PatientEdit = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="form-label">Address</label>
+                <label className="form-label">{t('patients.form.address')}</label>
                 <textarea
                   name="address"
                   rows="3"
@@ -221,10 +223,10 @@ const PatientEdit = () => {
 
           {/* Emergency Contact */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Emergency Contact</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('patients.form.emergencyContact')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="form-label">Contact Name</label>
+                <label className="form-label">{t('patients.form.contactName')}</label>
                 <input
                   type="text"
                   name="emergencyContact"
@@ -236,7 +238,7 @@ const PatientEdit = () => {
               </div>
 
               <div>
-                <label className="form-label">Contact Phone</label>
+                <label className="form-label">{t('patients.form.contactPhone')}</label>
                 <input
                   type="tel"
                   name="emergencyPhone"
@@ -251,16 +253,16 @@ const PatientEdit = () => {
 
           {/* Medical Information */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Medical Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('patients.form.medicalInfo')}</h3>
             <div>
-              <label className="form-label">Known Allergies</label>
+              <label className="form-label">{t('patients.form.knownAllergies')}</label>
               <textarea
                 name="allergies"
                 rows="3"
                 className="form-input"
                 value={formData.allergies}
                 onChange={handleChange}
-                placeholder="List any known allergies (e.g., Penicillin, Peanuts)"
+                placeholder={t('patients.form.allergiesPlaceholder')}
               />
             </div>
           </div>
@@ -273,7 +275,7 @@ const PatientEdit = () => {
               className="btn btn-secondary"
               disabled={loading}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
@@ -283,12 +285,12 @@ const PatientEdit = () => {
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Saving...
+                  {t('patients.form.saving')}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Update Patient
+                  {t('patients.form.updateButton')}
                 </>
               )}
             </button>

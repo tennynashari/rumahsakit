@@ -2,10 +2,12 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { patientService } from '../services'
 import { ArrowLeft, Save } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 
 const PatientForm = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -34,10 +36,10 @@ const PatientForm = () => {
     try {
       setLoading(true)
       await patientService.createPatient(formData)
-      toast.success('Patient registered successfully')
+      toast.success(t('patients.form.registerSuccess'))
       navigate('/patients')
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to register patient'
+      const errorMessage = error.response?.data?.error || t('patients.form.registerFailed')
       toast.error(errorMessage)
     } finally {
       setLoading(false)
@@ -53,11 +55,11 @@ const PatientForm = () => {
           className="btn btn-secondary"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('patients.form.back')}
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Register New Patient</h1>
-          <p className="text-sm text-gray-600">Fill in patient information</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('patients.form.title')}</h1>
+          <p className="text-sm text-gray-600">{t('patients.form.subtitle')}</p>
         </div>
       </div>
 
@@ -66,11 +68,11 @@ const PatientForm = () => {
         <div className="space-y-6">
           {/* Personal Information */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('patients.form.personalInfo')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="form-label">
-                  Full Name <span className="text-red-500">*</span>
+                  {t('patients.form.fullName')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -85,7 +87,7 @@ const PatientForm = () => {
 
               <div>
                 <label className="form-label">
-                  Date of Birth <span className="text-red-500">*</span>
+                  {t('patients.form.dateOfBirth')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -99,7 +101,7 @@ const PatientForm = () => {
 
               <div>
                 <label className="form-label">
-                  Gender <span className="text-red-500">*</span>
+                  {t('patients.table.gender')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="gender"
@@ -108,21 +110,21 @@ const PatientForm = () => {
                   value={formData.gender}
                   onChange={handleChange}
                 >
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
-                  <option value="OTHER">Other</option>
+                  <option value="MALE">{t('patients.gender.male')}</option>
+                  <option value="FEMALE">{t('patients.gender.female')}</option>
+                  <option value="OTHER">{t('patients.gender.other')}</option>
                 </select>
               </div>
 
               <div>
-                <label className="form-label">Blood Type</label>
+                <label className="form-label">{t('patients.form.bloodType')}</label>
                 <select
                   name="bloodType"
                   className="form-input"
                   value={formData.bloodType}
                   onChange={handleChange}
                 >
-                  <option value="">Select Blood Type</option>
+                  <option value="">{t('patients.form.selectBloodType')}</option>
                   <option value="A+">A+</option>
                   <option value="A-">A-</option>
                   <option value="B+">B+</option>
@@ -138,10 +140,10 @@ const PatientForm = () => {
 
           {/* Contact Information */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('patients.form.contactInfo')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="form-label">Phone Number</label>
+                <label className="form-label">{t('patients.form.phone')}</label>
                 <input
                   type="tel"
                   name="phone"
@@ -153,7 +155,7 @@ const PatientForm = () => {
               </div>
 
               <div>
-                <label className="form-label">Email</label>
+                <label className="form-label">{t('patients.form.email')}</label>
                 <input
                   type="email"
                   name="email"
@@ -165,7 +167,7 @@ const PatientForm = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="form-label">Address</label>
+                <label className="form-label">{t('patients.form.address')}</label>
                 <textarea
                   name="address"
                   rows="3"
@@ -180,10 +182,10 @@ const PatientForm = () => {
 
           {/* Emergency Contact */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Emergency Contact</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('patients.form.emergencyContact')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="form-label">Contact Name</label>
+                <label className="form-label">{t('patients.form.contactName')}</label>
                 <input
                   type="text"
                   name="emergencyContact"
@@ -195,7 +197,7 @@ const PatientForm = () => {
               </div>
 
               <div>
-                <label className="form-label">Contact Phone</label>
+                <label className="form-label">{t('patients.form.contactPhone')}</label>
                 <input
                   type="tel"
                   name="emergencyPhone"
@@ -210,16 +212,16 @@ const PatientForm = () => {
 
           {/* Medical Information */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Medical Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('patients.form.medicalInfo')}</h3>
             <div>
-              <label className="form-label">Known Allergies</label>
+              <label className="form-label">{t('patients.form.knownAllergies')}</label>
               <textarea
                 name="allergies"
                 rows="3"
                 className="form-input"
                 value={formData.allergies}
                 onChange={handleChange}
-                placeholder="List any known allergies (e.g., Penicillin, Peanuts)"
+                placeholder={t('patients.form.allergiesPlaceholder')}
               />
             </div>
           </div>
@@ -232,7 +234,7 @@ const PatientForm = () => {
               className="btn btn-secondary"
               disabled={loading}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
@@ -242,12 +244,12 @@ const PatientForm = () => {
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Saving...
+                  {t('patients.form.saving')}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Register Patient
+                  {t('patients.form.registerButton')}
                 </>
               )}
             </button>

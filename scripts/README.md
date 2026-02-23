@@ -1,10 +1,46 @@
 # Deployment Scripts
 
-Collection of scripts for deployment and CI/CD setup.
+Collection of scripts for deployment, CI/CD setup, and server maintenance.
 
 ## 📜 Available Scripts
 
-### 1. `setup-gitlab-runner.sh`
+### 1. `fix-permissions.sh` ⭐
+**Purpose:** Fix file ownership and permissions on Ubuntu server
+
+**Usage:**
+```bash
+# On server, in project root
+sudo chmod +x scripts/fix-permissions.sh
+sudo ./scripts/fix-permissions.sh
+```
+
+**What it does:**
+- ✓ Sets base ownership to `klinik:klinik`
+- ✓ Sets base permissions (755/644)
+- ✓ Secures .env files (600)
+- ✓ Sets uploads folder to `klinik:www-data` (775)
+- ✓ Sets frontend dist to `www-data:www-data`
+- ✓ Makes node binaries executable
+
+**Configuration:**
+Edit these variables in the script:
+```bash
+PROJECT_DIR="/var/www/klinik"
+APP_USER="klinik"
+WEB_USER="www-data"
+```
+
+**When to run:**
+- After initial deployment
+- After git pull
+- After npm install
+- When permission errors occur
+
+📖 **Details:** See [FILE_PERMISSIONS.md](../FILE_PERMISSIONS.md)
+
+---
+
+### 2. `setup-gitlab-runner.sh`
 **Purpose:** Install and setup GitLab Runner on Ubuntu server
 
 **Usage:**

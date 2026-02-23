@@ -1,5 +1,11 @@
 # 🚀 Panduan Deployment & Update Server
 
+📖 **Related Docs:**
+- 🔐 [File Permissions Guide](FILE_PERMISSIONS.md) - Permission management untuk Ubuntu
+- 📜 [Scripts Documentation](scripts/README.md) - Deployment automation scripts
+
+---
+
 ## 📦 Update Aplikasi di Server
 
 ### **METHOD 1: Update Tanpa Docker (Recommended untuk Development)**
@@ -36,7 +42,13 @@ cd frontend
 npm run build
 ```
 
-#### 6️⃣ Restart Services
+#### 6️⃣ Fix File Permissions
+```bash
+# Jalankan script fix permissions
+sudo ./scripts/fix-permissions.sh
+```
+
+#### 7️⃣ Restart Services
 ```bash
 # Restart backend (jika menggunakan PM2)
 pm2 restart hospital-backend
@@ -75,6 +87,9 @@ docker-compose down
 
 # Rebuild images dengan update terbaru
 docker-compose build --no-cache
+
+# Fix permissions before starting
+sudo ./scripts/fix-permissions.sh
 
 # Start containers
 docker-compose up -d
