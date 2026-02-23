@@ -133,5 +133,95 @@
       "yearsOld": "tahun",
       "notSpecified": "Tidak disebutkan"
     }
+  },
+  "visits": {
+    "title": "Kunjungan Pasien",
+    "subtitle": "Kelola data kunjungan dan jadwal pasien",
+    "addVisit": "Tambah Kunjungan",
+    "scheduleVisit": "Jadwalkan Kunjungan",
+    "exportData": "Ekspor Data",
+    "deleteConfirm": "Apakah Anda yakin ingin menghapus kunjungan ini?",
+    "deleteSuccess": "Kunjungan berhasil dihapus",
+    "deleteFailed": "Gagal menghapus kunjungan",
+    "fetchFailed": "Gagal memuat data kunjungan",
+    "exportSuccess": "Data berhasil diekspor",
+    "exportFailed": "Gagal mengekspor data",
+    "exporting": "Mengekspor data...",
+    "selectDateRange": "Silakan pilih tanggal mulai dan tanggal akhir",
+    "filters": {
+      "startDate": "Tanggal Mulai",
+      "endDate": "Tanggal Akhir",
+      "status": "Status",
+      "allStatuses": "Semua Status"
+    },
+    "status": {
+      "scheduled": "Terjadwal",
+      "inProgress": "Berlangsung",
+      "completed": "Selesai",
+      "cancelled": "Dibatalkan",
+      "noShow": "Tidak Hadir"
+    },
+    "visitType": {
+      "outpatient": "Rawat Jalan",
+      "inpatient": "Rawat Inap",
+      "emergency": "Darurat",
+      "generalCheckup": "Pemeriksaan Umum"
+    },
+    "table": {
+      "patientName": "Nama Pasien",
+      "doctorName": "Nama Dokter",
+      "visitType": "Jenis Kunjungan",
+      "scheduledAt": "Waktu Jadwal",
+      "status": "Status",
+      "actions": "Aksi"
+    },
+    "form": {
+      "title": "Jadwalkan Kunjungan Baru",
+      "editTitle": "Ubah Kunjungan",
+      "subtitle": "Isi informasi kunjungan",
+      "editSubtitle": "Perbarui informasi kunjungan",
+      "back": "Kembali",
+      "visitInfo": "Informasi Kunjungan",
+      "selectPatient": "Pilih Pasien",
+      "selectDoctor": "Pilih Dokter",
+      "visitType": "Jenis Kunjungan",
+      "scheduledDateTime": "Tanggal & Waktu Jadwal",
+      "notes": "Catatan",
+      "notesPlaceholder": "Masukkan catatan atau gejala...",
+      "scheduleButton": "Jadwalkan Kunjungan",
+      "updateButton": "Perbarui Kunjungan",
+      "saving": "Menyimpan...",
+      "scheduleSuccess": "Kunjungan berhasil dijadwalkan",
+      "scheduleFailed": "Gagal menjadwalkan kunjungan",
+      "updateSuccess": "Kunjungan berhasil diperbarui",
+      "updateFailed": "Gagal memperbarui kunjungan"
+    },
+    "detail": {
+      "title": "Detail Kunjungan",
+      "scheduleId": "ID Jadwal",
+      "queueNumber": "No. Antrian",
+      "visitInfo": "Informasi Kunjungan",
+      "patientInfo": "Informasi Pasien",
+      "doctorInfo": "Informasi Dokter",
+      "visitNotes": "Catatan Kunjungan",
+      "actions": "Aksi",
+      "editVisit": "Ubah Kunjungan",
+      "patientName": "Nama Pasien",
+      "mrn": "No. Rekam Medis",
+      "doctorName": "Dokter",
+      "department": "Departemen",
+      "visitType": "Jenis Kunjungan",
+      "scheduledAt": "Waktu Jadwal",
+      "status": "Status",
+      "notes": "Catatan",
+      "noNotes": "Tidak ada catatan",
+      "fetchFailed": "Gagal memuat detail jadwal",
+      "notFound": "Jadwal tidak ditemukan",
+      "timeline": "Timeline",
+      "created": "Dibuat",
+      "lastUpdated": "Terakhir Diperbarui",
+      "quickActions": "Aksi Cepat",
+      "viewPatient": "Lihat Pasien"
+    }
   }
 }

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { visitService } from '../services'
 import { ArrowLeft, Calendar, Clock, User, Stethoscope, FileText, Edit } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const VisitDetail = () => {
+  const { t, i18n } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [visit, setVisit] = useState(null)
@@ -21,7 +23,7 @@ const VisitDetail = () => {
       setVisit(response.data.visit)
     } catch (error) {
       console.error('Fetch visit error:', error)
-      toast.error('Failed to fetch schedule details')
+      toast.error(t('visits.detail.fetchFailed'))
       navigate('/visits')
     } finally {
       setLoading(false)
@@ -29,7 +31,8 @@ const VisitDetail = () => {
   }
 
   const formatDateTime = (dateString) => {
-    return new Date(dateString).toLocaleString('en-US', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    return new Date(dateString).toLocaleString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -61,12 +64,23 @@ const VisitDetail = () => {
 
   const getVisitTypeLabel = (type) => {
     const labels = {
-      GENERAL_CHECKUP: 'General Checkup',
-      OUTPATIENT: 'Outpatient',
-      INPATIENT: 'Inpatient',
-      EMERGENCY: 'Emergency'
+      GENERAL_CHECKUP: t('visits.visitType.generalCheckup'),
+      OUTPATIENT: t('visits.visitType.outpatient'),
+      INPATIENT: t('visits.visitType.inpatient'),
+      EMERGENCY: t('visits.visitType.emergency')
     }
     return labels[type] || type
+  }
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      SCHEDULED: t('visits.status.scheduled'),
+      IN_PROGRESS: t('visits.status.inProgress'),
+      COMPLETED: t('visits.status.completed'),
+      CANCELLED: t('visits.status.cancelled'),
+      NO_SHOW: t('visits.status.noShow')
+    }
+    return labels[status] || status
   }
 
   if (loading) {
@@ -78,7 +92,7 @@ const VisitDetail = () => {
   }
 
   if (!visit) {
-    return <div className="text-center py-12">Schedule not found</div>
+    return <div className="text-center py-12">{t('visits.detail.notFound')}</div>
   }
 
   return (
@@ -91,15 +105,15 @@ const VisitDetail = () => {
             className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            {t('visits.form.back')}
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Schedule Details</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('visits.detail.title')}</h1>
             <div className="flex items-center space-x-4 mt-1">
-              <p className="text-gray-600">Schedule ID: #{visit.id}</p>
+              <p className="text-gray-600">{t('visits.detail.scheduleId')}: #{visit.id}</p>
               {visit.queueNumber && (
                 <p className="text-sm font-mono font-bold text-primary-600 px-3 py-1 bg-primary-50 rounded">
-                  Queue: {visit.queueNumber}
+                  {t('visits.detail.queueNumber')}: {visit.queueNumber}
                 </p>
               )}
             </div>
@@ -110,7 +124,7 @@ const VisitDetail = () => {
           className="inline-flex items-center px-5 py-2.5 bg-primary-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-sm transition-colors"
         >
           <Edit className="w-4 h-4 mr-2" />
-          Edit Schedule
+          {t('visits.detail.editVisit')}
         </button>
       </div>
 
@@ -119,18 +133,18 @@ const VisitDetail = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className={`px-4 py-2 rounded-lg border-2 ${getVisitTypeColor(visit.visitType)}`}>
-              <div className="text-sm font-medium">Schedule Type</div>
+              <div className="text-sm font-medium">{t('visits.detail.visitType')}</div>
               <div className="text-lg font-bold">{getVisitTypeLabel(visit.visitType)}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-600">Status</div>
+              <div className="text-sm text-gray-600">{t('visits.detail.status')}</div>
               <span className={`inline-block mt-1 px-3 py-1 text-sm font-medium rounded ${getStatusBadge(visit.status)}`}>
-                {visit.status}
+                {getStatusLabel(visit.status)}
               </span>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm text-gray-600">Scheduled Date & Time</div>
+            <div className="text-sm text-gray-600">{t('visits.detail.scheduledAt')}</div>
             <div className="text-lg font-semibold text-gray-900 flex items-center mt-1">
               <Calendar className="w-5 h-5 mr-2 text-primary-600" />
               {formatDateTime(visit.scheduledAt)}
@@ -146,27 +160,27 @@ const VisitDetail = () => {
           <div className="card">
             <div className="flex items-center space-x-2 mb-4">
               <User className="w-5 h-5 text-primary-600" />
-              <h2 className="text-lg font-semibold">Patient Information</h2>
+              <h2 className="text-lg font-semibold">{t('visits.detail.patientInfo')}</h2>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-gray-600">Patient Name</label>
+                <label className="text-sm text-gray-600">{t('visits.detail.patientName')}</label>
                 <p className="font-medium text-gray-900">{visit.patient?.name || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600">Medical Record No.</label>
+                <label className="text-sm text-gray-600">{t('visits.detail.mrn')}</label>
                 <p className="font-medium text-gray-900">{visit.patient?.medicalRecordNo || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600">Gender</label>
+                <label className="text-sm text-gray-600">{t('patients.gender.label')}</label>
                 <p className="font-medium text-gray-900">{visit.patient?.gender || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600">Phone</label>
+                <label className="text-sm text-gray-600">{t('patients.phone')}</label>
                 <p className="font-medium text-gray-900">{visit.patient?.phone || 'N/A'}</p>
               </div>
               <div className="col-span-2">
-                <label className="text-sm text-gray-600">Address</label>
+                <label className="text-sm text-gray-600">{t('patients.address')}</label>
                 <p className="font-medium text-gray-900">{visit.patient?.address || 'N/A'}</p>
               </div>
             </div>
@@ -175,7 +189,7 @@ const VisitDetail = () => {
                 onClick={() => navigate(`/patients/${visit.patient.id}`)}
                 className="btn-secondary mt-4"
               >
-                View Full Patient Profile
+                {t('patients.viewPatientProfile')}
               </button>
             )}
           </div>
@@ -184,23 +198,23 @@ const VisitDetail = () => {
           <div className="card">
             <div className="flex items-center space-x-2 mb-4">
               <Stethoscope className="w-5 h-5 text-primary-600" />
-              <h2 className="text-lg font-semibold">Doctor Information</h2>
+              <h2 className="text-lg font-semibold">{t('visits.detail.doctorInfo')}</h2>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-gray-600">Doctor Name</label>
+                <label className="text-sm text-gray-600">{t('visits.detail.doctorName')}</label>
                 <p className="font-medium text-gray-900">{visit.doctor?.name || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600">Department</label>
+                <label className="text-sm text-gray-600">{t('visits.detail.department')}</label>
                 <p className="font-medium text-gray-900">{visit.doctor?.department || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600">Email</label>
+                <label className="text-sm text-gray-600">{t('patients.email')}</label>
                 <p className="font-medium text-gray-900">{visit.doctor?.email || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600">Phone</label>
+                <label className="text-sm text-gray-600">{t('patients.phone')}</label>
                 <p className="font-medium text-gray-900">{visit.doctor?.phone || 'N/A'}</p>
               </div>
             </div>
@@ -210,13 +224,13 @@ const VisitDetail = () => {
           <div className="card">
             <div className="flex items-center space-x-2 mb-4">
               <FileText className="w-5 h-5 text-primary-600" />
-              <h2 className="text-lg font-semibold">Visit Notes</h2>
+              <h2 className="text-lg font-semibold">{t('visits.detail.visitNotes')}</h2>
             </div>
             <div className="bg-gray-50 p-4 rounded-lg">
               {visit.notes ? (
                 <p className="text-gray-700 whitespace-pre-wrap">{visit.notes}</p>
               ) : (
-                <p className="text-gray-500 italic">No notes available</p>
+                <p className="text-gray-500 italic">{t('visits.detail.noNotes')}</p>
               )}
             </div>
           </div>
@@ -226,16 +240,16 @@ const VisitDetail = () => {
         <div className="space-y-6">
           {/* Timeline */}
           <div className="card">
-            <h3 className="font-semibold text-gray-900 mb-4">Timeline</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">{t('visits.detail.timeline')}</h3>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
                 <div className="bg-primary-100 p-2 rounded-full">
                   <Clock className="w-4 h-4 text-primary-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Created</p>
+                  <p className="text-sm font-medium text-gray-900">{t('visits.detail.created')}</p>
                   <p className="text-xs text-gray-600">
-                    {new Date(visit.createdAt).toLocaleDateString('en-US', {
+                    {new Date(visit.createdAt).toLocaleDateString(i18n.language === 'id' ? 'id-ID' : 'en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -250,9 +264,9 @@ const VisitDetail = () => {
                   <Clock className="w-4 h-4 text-primary-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Last Updated</p>
+                  <p className="text-sm font-medium text-gray-900">{t('visits.detail.lastUpdated')}</p>
                   <p className="text-xs text-gray-600">
-                    {new Date(visit.updatedAt).toLocaleDateString('en-US', {
+                    {new Date(visit.updatedAt).toLocaleDateString(i18n.language === 'id' ? 'id-ID' : 'en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -267,14 +281,14 @@ const VisitDetail = () => {
 
           {/* Quick Actions */}
           <div className="card">
-            <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">{t('visits.detail.quickActions')}</h3>
             <div className="space-y-3">
               <button
                 onClick={() => navigate(`/visits/${id}/edit`)}
                 className="w-full inline-flex items-center justify-center px-4 py-2.5 bg-primary-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
               >
                 <Edit className="w-4 h-4 mr-2" />
-                Edit Visit
+                {t('visits.detail.editVisit')}
               </button>
               <button
                 onClick={() => navigate(`/patients/${visit.patient?.id}`)}
@@ -282,7 +296,7 @@ const VisitDetail = () => {
                 disabled={!visit.patient}
               >
                 <User className="w-4 h-4 mr-2" />
-                View Patient
+                {t('visits.detail.viewPatient')}
               </button>
             </div>
           </div>

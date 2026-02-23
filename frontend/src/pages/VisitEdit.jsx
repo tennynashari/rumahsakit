@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { visitService, patientService, userService } from '../services'
 import { ArrowLeft, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const VisitEdit = () => {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
@@ -61,7 +63,7 @@ const VisitEdit = () => {
       })
     } catch (error) {
       console.error('Fetch visit data error:', error)
-      toast.error('Failed to fetch visit data')
+      toast.error(t('visits.form.updateFailed'))
       navigate('/visits')
     } finally {
       setLoading(false)
@@ -81,10 +83,10 @@ const VisitEdit = () => {
     try {
       setSubmitting(true)
       await visitService.updateVisit(id, formData)
-      toast.success('Schedule updated successfully')
+      toast.success(t('visits.form.updateSuccess'))
       navigate(`/visits/${id}`)
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to update schedule')
+      toast.error(error.response?.data?.error || t('visits.form.updateFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -107,24 +109,24 @@ const VisitEdit = () => {
           className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('visits.form.back')}
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Schedule</h1>
-          <p className="text-gray-600">Update schedule information</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('visits.form.editTitle')}</h1>
+          <p className="text-gray-600">{t('visits.form.editSubtitle')}</p>
         </div>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Schedule Information</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('visits.form.visitInfo')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Patient - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Patient <span className="text-red-500">*</span>
+                {t('visits.form.selectPatient')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="patientId"
@@ -134,20 +136,20 @@ const VisitEdit = () => {
                 required
                 disabled
               >
-                <option value="">Select Patient</option>
+                <option value="">{t('visits.form.selectPatient')}</option>
                 {patients.map(patient => (
                   <option key={patient.id} value={patient.id}>
                     {patient.name} - {patient.medicalRecordNo}
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">Patient cannot be changed after schedule is created</p>
+              <p className="text-xs text-gray-500 mt-1">{t('patients.cannotChangePatient') || 'Patient cannot be changed after schedule is created'}</p>
             </div>
 
             {/* Doctor */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Doctor <span className="text-red-500">*</span>
+                {t('visits.form.selectDoctor')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="doctorId"
@@ -156,7 +158,7 @@ const VisitEdit = () => {
                 className="form-input"
                 required
               >
-                <option value="">Select Doctor</option>
+                <option value="">{t('visits.form.selectDoctor')}</option>
                 {doctors.map(doctor => (
                   <option key={doctor.id} value={doctor.id}>
                     {doctor.name} - {doctor.department}
@@ -168,7 +170,7 @@ const VisitEdit = () => {
             {/* Schedule Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Schedule Type <span className="text-red-500">*</span>
+                {t('visits.form.visitType')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="visitType"
@@ -177,17 +179,17 @@ const VisitEdit = () => {
                 className="form-input"
                 required
               >
-                <option value="GENERAL_CHECKUP">General Checkup</option>
-                <option value="OUTPATIENT">Outpatient</option>
-                <option value="INPATIENT">Inpatient</option>
-                <option value="EMERGENCY">Emergency</option>
+                <option value="GENERAL_CHECKUP">{t('visits.visitType.generalCheckup')}</option>
+                <option value="OUTPATIENT">{t('visits.visitType.outpatient')}</option>
+                <option value="INPATIENT">{t('visits.visitType.inpatient')}</option>
+                <option value="EMERGENCY">{t('visits.visitType.emergency')}</option>
               </select>
             </div>
 
             {/* Status */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status <span className="text-red-500">*</span>
+                {t('visits.detail.status')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="status"
@@ -196,18 +198,18 @@ const VisitEdit = () => {
                 className="form-input"
                 required
               >
-                <option value="SCHEDULED">Scheduled</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CANCELLED">Cancelled</option>
-                <option value="NO_SHOW">No Show</option>
+                <option value="SCHEDULED">{t('visits.status.scheduled')}</option>
+                <option value="IN_PROGRESS">{t('visits.status.inProgress')}</option>
+                <option value="COMPLETED">{t('visits.status.completed')}</option>
+                <option value="CANCELLED">{t('visits.status.cancelled')}</option>
+                <option value="NO_SHOW">{t('visits.status.noShow')}</option>
               </select>
             </div>
 
             {/* Scheduled Date & Time */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Scheduled Date & Time <span className="text-red-500">*</span>
+                {t('visits.form.scheduledDateTime')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="datetime-local"
@@ -222,7 +224,7 @@ const VisitEdit = () => {
             {/* Notes */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Notes
+                {t('visits.form.notes')}
               </label>
               <textarea
                 name="notes"
@@ -230,7 +232,7 @@ const VisitEdit = () => {
                 onChange={handleChange}
                 rows="4"
                 className="form-input"
-                placeholder="Enter visit notes or additional information..."
+                placeholder={t('visits.form.notesPlaceholder')}
               />
             </div>
           </div>
@@ -244,7 +246,7 @@ const VisitEdit = () => {
             className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={submitting}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -254,12 +256,12 @@ const VisitEdit = () => {
             {submitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Updating...
+                {t('visits.form.saving')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Update Visit
+                {t('visits.form.updateButton')}
               </>
             )}
           </button>

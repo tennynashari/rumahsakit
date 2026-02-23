@@ -133,5 +133,95 @@
       "yearsOld": "years old",
       "notSpecified": "Not specified"
     }
+  },
+  "visits": {
+    "title": "Patient Visits",
+    "subtitle": "Manage patient visits and schedules",
+    "addVisit": "Add Visit",
+    "scheduleVisit": "Schedule Visit",
+    "exportData": "Export Data",
+    "deleteConfirm": "Are you sure you want to delete this visit?",
+    "deleteSuccess": "Visit deleted successfully",
+    "deleteFailed": "Failed to delete visit",
+    "fetchFailed": "Failed to fetch visits",
+    "exportSuccess": "Data exported successfully",
+    "exportFailed": "Failed to export data",
+    "exporting": "Exporting data...",
+    "selectDateRange": "Please select start and end dates",
+    "filters": {
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "status": "Status",
+      "allStatuses": "All Statuses"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "noShow": "No Show"
+    },
+    "visitType": {
+      "outpatient": "Outpatient",
+      "inpatient": "Inpatient",
+      "emergency": "Emergency",
+      "generalCheckup": "General Checkup"
+    },
+    "table": {
+      "patientName": "Patient Name",
+      "doctorName": "Doctor Name",
+      "visitType": "Visit Type",
+      "scheduledAt": "Scheduled At",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "form": {
+      "title": "Schedule New Visit",
+      "editTitle": "Edit Visit",
+      "subtitle": "Fill in visit information",
+      "editSubtitle": "Update visit information",
+      "back": "Back",
+      "visitInfo": "Visit Information",
+      "selectPatient": "Select Patient",
+      "selectDoctor": "Select Doctor",
+      "visitType": "Visit Type",
+      "scheduledDateTime": "Scheduled Date & Time",
+      "notes": "Notes",
+      "notesPlaceholder": "Enter notes or symptoms...",
+      "scheduleButton": "Schedule Visit",
+      "updateButton": "Update Visit",
+      "saving": "Saving...",
+      "scheduleSuccess": "Visit scheduled successfully",
+      "scheduleFailed": "Failed to schedule visit",
+      "updateSuccess": "Visit updated successfully",
+      "updateFailed": "Failed to update visit"
+    },
+    "detail": {
+      "title": "Visit Details",
+      "scheduleId": "Schedule ID",
+      "queueNumber": "Queue No",
+      "visitInfo": "Visit Information",
+      "patientInfo": "Patient Information",
+      "doctorInfo": "Doctor Information",
+      "visitNotes": "Visit Notes",
+      "actions": "Actions",
+      "editVisit": "Edit Visit",
+      "patientName": "Patient Name",
+      "mrn": "MRN",
+      "doctorName": "Doctor",
+      "department": "Department",
+      "visitType": "Visit Type",
+      "scheduledAt": "Scheduled At",
+      "status": "Status",
+      "notes": "Notes",
+      "noNotes": "No notes available",
+      "fetchFailed": "Failed to fetch schedule details",
+      "notFound": "Schedule not found",
+      "timeline": "Timeline",
+      "created": "Created",
+      "lastUpdated": "Last Updated",
+      "quickActions": "Quick Actions",
+      "viewPatient": "View Patient"
+    }
   }
 }
