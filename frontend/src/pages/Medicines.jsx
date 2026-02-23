@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { medicineService } from '../services'
 import { Pill, Package, Download, Eye, Edit, Trash2, Plus, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const Medicines = () => {
+  const { t, i18n } = useTranslation()
   const [medicines, setMedicines] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -24,7 +26,7 @@ const Medicines = () => {
       setMedicines(response.data.medicines)
       setTotalPages(response.data.pagination.pages)
     } catch (error) {
-      toast.error('Gagal memuat data obat')
+      toast.error(t('medicines.fetchFailed'))
       console.error('Fetch medicines error:', error)
     } finally {
       setLoading(false)
@@ -43,7 +45,7 @@ const Medicines = () => {
 
   const handleExport = async () => {
     try {
-      toast.loading('Mengekspor data...')
+      toast.loading(t('medicines.exporting'))
       const response = await medicineService.exportMedicines()
       
       // Create blob and download
@@ -60,30 +62,31 @@ const Medicines = () => {
       window.URL.revokeObjectURL(url)
       
       toast.dismiss()
-      toast.success('Data berhasil diekspor')
+      toast.success(t('medicines.exportSuccess'))
     } catch (error) {
       toast.dismiss()
-      toast.error('Gagal mengekspor data')
+      toast.error(t('medicines.exportFailed'))
       console.error('Export error:', error)
     }
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus obat ini?')) {
+    if (window.confirm(t('medicines.deleteConfirm'))) {
       try {
         await medicineService.deleteMedicine(id)
-        toast.success('Obat berhasil dihapus')
+        toast.success(t('medicines.deleteSuccess'))
         fetchMedicines(currentPage, searchTerm)
       } catch (error) {
-        toast.error('Gagal menghapus obat')
+        toast.error(t('medicines.deleteFailed'))
       }
     }
   }
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('id-ID', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'IDR',
+      currency: i18n.language === 'id' ? 'IDR' : 'USD',
       minimumFractionDigits: 0
     }).format(value)
   }
@@ -93,8 +96,8 @@ const Medicines = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Obat & Farmasi</h1>
-          <p className="text-sm text-gray-600">Kelola data obat dan inventori farmasi</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('medicines.title')}</h1>
+          <p className="text-sm text-gray-600">{t('medicines.subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <button 
@@ -102,11 +105,11 @@ const Medicines = () => {
             className="btn bg-green-600 hover:bg-green-700 text-white"
           >
             <Download className="w-4 h-4 mr-2" />
-            Export Excel
+            {t('medicines.exportData')}
           </button>
           <Link to="/medicines/new" className="btn btn-primary">
             <Plus className="w-4 h-4 mr-2" />
-            Tambah Obat
+            {t('medicines.addMedicine')}
           </Link>
         </div>
       </div>
@@ -119,7 +122,7 @@ const Medicines = () => {
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Cari obat berdasarkan nama atau deskripsi..."
+                placeholder={t('medicines.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="input pl-10"
@@ -127,7 +130,7 @@ const Medicines = () => {
             </div>
           </div>
           <button type="submit" className="btn btn-primary">
-            Cari
+            {t('medicines.searchButton')}
           </button>
         </form>
       </div>
@@ -137,12 +140,12 @@ const Medicines = () => {
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Memuat data...</p>
+            <p className="mt-4 text-gray-600">{t('common.loading')}</p>
           </div>
         ) : medicines.length === 0 ? (
           <div className="text-center py-12">
             <Pill className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Tidak ada data obat</p>
+            <p className="text-gray-600">{t('common.noData')}</p>
           </div>
         ) : (
           <>
@@ -151,25 +154,25 @@ const Medicines = () => {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Nama Obat
+                      {t('medicines.table.medicineName')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Deskripsi
+                      {t('medicines.table.description')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Satuan
+                      {t('medicines.table.unit')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Harga
+                      {t('medicines.table.price')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stok
+                      {t('medicines.table.stock')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
+                      {t('medicines.table.status')}
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aksi
+                      {t('medicines.table.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -214,11 +217,11 @@ const Medicines = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {medicine.isActive ? (
                           <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                            Aktif
+                            {t('medicines.table.active')}
                           </span>
                         ) : (
                           <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                            Nonaktif
+                            {t('medicines.table.inactive')}
                           </span>
                         )}
                       </td>
@@ -227,21 +230,21 @@ const Medicines = () => {
                           <Link
                             to={`/medicines/${medicine.id}`}
                             className="text-primary-600 hover:text-primary-900"
-                            title="Lihat Detail"
+                            title={t('common.view')}
                           >
                             <Eye className="w-4 h-4" />
                           </Link>
                           <Link
                             to={`/medicines/${medicine.id}/edit`}
                             className="text-blue-600 hover:text-blue-900"
-                            title="Edit"
+                            title={t('common.edit')}
                           >
                             <Edit className="w-4 h-4" />
                           </Link>
                           <button
                             onClick={() => handleDelete(medicine.id)}
                             className="text-red-600 hover:text-red-900"
-                            title="Hapus"
+                            title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

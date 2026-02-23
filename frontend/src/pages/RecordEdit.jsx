@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { recordService, patientService, visitService, userService } from '../services'
 import { ArrowLeft, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const RecordEdit = () => {
+  const { t, i18n } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
@@ -59,7 +61,7 @@ const RecordEdit = () => {
       })
     } catch (error) {
       console.error('Fetch record data error:', error)
-      toast.error('Gagal memuat data rekam medis')
+      toast.error(t('records.form.loadFailed'))
       navigate('/records')
     } finally {
       setLoading(false)
@@ -92,10 +94,10 @@ const RecordEdit = () => {
       }
 
       await recordService.updateRecord(id, submitData)
-      toast.success('Rekam medis berhasil diperbarui')
+      toast.success(t('records.form.updateSuccess'))
       navigate('/records')
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Gagal memperbarui rekam medis')
+      toast.error(error.response?.data?.error || t('records.form.updateFailed'))
       console.error('Update record error:', error)
     } finally {
       setSubmitting(false)
@@ -119,24 +121,24 @@ const RecordEdit = () => {
           className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Kembali
+          {t('records.form.back')}
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Rekam Medis</h1>
-          <p className="text-gray-600">Perbarui informasi rekam medis</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('records.form.editTitle')}</h1>
+          <p className="text-gray-600">{t('records.form.editSubtitle')}</p>
         </div>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Informasi Kunjungan</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('records.form.visitInfo')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Patient - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pasien <span className="text-red-500">*</span>
+                {t('records.form.patient')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="patientId"
@@ -145,20 +147,20 @@ const RecordEdit = () => {
                 disabled
                 required
               >
-                <option value="">Pilih Pasien</option>
+                <option value="">{t('records.form.selectPatient')}</option>
                 {patients.map(patient => (
                   <option key={patient.id} value={patient.id}>
                     {patient.name} - {patient.medicalRecordNo}
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">Pasien tidak dapat diubah setelah rekam medis dibuat</p>
+              <p className="text-xs text-gray-500 mt-1">{t('records.form.cannotChangePatient')}</p>
             </div>
 
             {/* Visit - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kunjungan <span className="text-red-500">*</span>
+                {t('records.form.visit')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="visitId"
@@ -167,20 +169,20 @@ const RecordEdit = () => {
                 disabled
                 required
               >
-                <option value="">Pilih Kunjungan</option>
+                <option value="">{t('records.form.selectVisit')}</option>
                 {visits.map(visit => (
                   <option key={visit.id} value={visit.id}>
-                    {new Date(visit.scheduledAt).toLocaleDateString('id-ID')} - {visit.visitType}
+                    {new Date(visit.scheduledAt).toLocaleDateString(i18n.language === 'id' ? 'id-ID' : 'en-US')} - {visit.visitType}
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">Kunjungan tidak dapat diubah setelah rekam medis dibuat</p>
+              <p className="text-xs text-gray-500 mt-1">{t('records.form.cannotChangeVisit')}</p>
             </div>
 
             {/* Doctor */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Dokter <span className="text-red-500">*</span>
+                {t('records.form.doctor')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="doctorId"
@@ -189,7 +191,7 @@ const RecordEdit = () => {
                 className="input"
                 required
               >
-                <option value="">Pilih Dokter</option>
+                <option value="">{t('records.form.selectDoctor')}</option>
                 {doctors.map(doctor => (
                   <option key={doctor.id} value={doctor.id}>
                     {doctor.name} - {doctor.department || 'Umum'}
@@ -201,7 +203,7 @@ const RecordEdit = () => {
             {/* Diagnosis Code */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kode Diagnosis (ICD-10)
+                {t('records.form.diagnosisCode')}
               </label>
               <input
                 type="text"
@@ -209,7 +211,7 @@ const RecordEdit = () => {
                 value={formData.diagnosisCode}
                 onChange={handleChange}
                 className="input"
-                placeholder="Contoh: J00"
+                placeholder={t('records.form.diagnosisCodePlaceholder')}
                 maxLength={20}
               />
             </div>
@@ -217,13 +219,13 @@ const RecordEdit = () => {
         </div>
 
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Catatan Medis</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('records.form.medicalNotes')}</h2>
           
           <div className="space-y-6">
             {/* Symptoms */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Keluhan/Gejala
+                {t('records.form.symptoms')}
               </label>
               <textarea
                 name="symptoms"
@@ -231,14 +233,14 @@ const RecordEdit = () => {
                 onChange={handleChange}
                 rows="4"
                 className="input w-full"
-                placeholder="Keluhan yang dialami pasien..."
+                placeholder={t('records.form.symptomsPlaceholder')}
               />
             </div>
 
             {/* Diagnosis */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Diagnosis
+                {t('records.form.diagnosis')}
               </label>
               <textarea
                 name="diagnosis"
@@ -246,14 +248,14 @@ const RecordEdit = () => {
                 onChange={handleChange}
                 rows="4"
                 className="input w-full"
-                placeholder="Diagnosis medis..."
+                placeholder={t('records.form.diagnosisPlaceholder')}
               />
             </div>
 
             {/* Treatment */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tindakan/Terapi
+                {t('records.form.treatment')}
               </label>
               <textarea
                 name="treatment"
@@ -261,14 +263,14 @@ const RecordEdit = () => {
                 onChange={handleChange}
                 rows="4"
                 className="input w-full"
-                placeholder="Tindakan medis atau terapi yang diberikan..."
+                placeholder={t('records.form.treatmentPlaceholder')}
               />
             </div>
 
             {/* Prescription */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Resep (JSON)
+                {t('records.form.prescription')}
               </label>
               <textarea
                 name="prescription"
@@ -276,10 +278,10 @@ const RecordEdit = () => {
                 onChange={handleChange}
                 rows="5"
                 className="input w-full font-mono text-sm"
-                placeholder='{"medicines": [{"name": "Paracetamol", "dosage": "500mg", "frequency": "3x sehari"}]}'
+                placeholder={t('records.form.prescriptionPlaceholder')}
               />
               <p className="text-sm text-gray-500 mt-1">
-                Format JSON. Contoh: {`{"medicines": [{"name": "...", "dosage": "...", "frequency": "..."}]}`}
+                {t('records.form.prescriptionHelp')}
               </p>
             </div>
           </div>
@@ -293,7 +295,7 @@ const RecordEdit = () => {
             className="btn bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
             disabled={submitting}
           >
-            Batal
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -303,12 +305,12 @@ const RecordEdit = () => {
             {submitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Menyimpan...
+                {t('records.form.saving')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Simpan Perubahan
+                {t('records.form.updateButton')}
               </>
             )}
           </button>

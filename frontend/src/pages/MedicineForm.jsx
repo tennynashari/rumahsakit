@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { medicineService } from '../services'
 import { ArrowLeft, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const MedicineForm = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState({
@@ -30,7 +32,7 @@ const MedicineForm = () => {
       // Validate price
       const price = parseFloat(formData.price)
       if (isNaN(price) || price < 0) {
-        toast.error('Harga harus berupa angka positif')
+        toast.error(t('medicines.form.priceValidation'))
         return
       }
 
@@ -42,10 +44,10 @@ const MedicineForm = () => {
       }
 
       await medicineService.createMedicine(submitData)
-      toast.success('Obat berhasil ditambahkan')
+      toast.success(t('medicines.form.createSuccess'))
       navigate('/medicines')
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Gagal menambahkan obat')
+      toast.error(error.response?.data?.error || t('medicines.form.createFailed'))
       console.error('Create medicine error:', error)
     } finally {
       setSubmitting(false)
@@ -61,24 +63,24 @@ const MedicineForm = () => {
           className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Kembali
+          {t('medicines.form.back')}
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tambah Obat</h1>
-          <p className="text-gray-600">Tambahkan obat baru ke inventori</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('medicines.form.title')}</h1>
+          <p className="text-gray-600">{t('medicines.form.subtitle')}</p>
         </div>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Informasi Obat</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('medicines.form.medicineInfo')}</h2>
           
           <div className="space-y-6">
             {/* Medicine Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nama Obat <span className="text-red-500">*</span>
+                {t('medicines.form.medicineName')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -86,7 +88,7 @@ const MedicineForm = () => {
                 value={formData.name}
                 onChange={handleChange}
                 className="input"
-                placeholder="Contoh: Paracetamol 500mg"
+                placeholder={t('medicines.form.medicineNamePlaceholder')}
                 maxLength={150}
                 required
               />
@@ -95,7 +97,7 @@ const MedicineForm = () => {
             {/* Unit */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Satuan <span className="text-red-500">*</span>
+                {t('medicines.form.unit')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -103,19 +105,19 @@ const MedicineForm = () => {
                 value={formData.unit}
                 onChange={handleChange}
                 className="input"
-                placeholder="Contoh: Tablet, Botol, Strip, Kapsul"
+                placeholder={t('medicines.form.unitPlaceholder')}
                 maxLength={50}
                 required
               />
               <p className="text-sm text-gray-500 mt-1">
-                Satuan kemasan obat (misal: Tablet, Botol, Strip, Kapsul)
+                {t('medicines.form.unitHelp')}
               </p>
             </div>
 
             {/* Price */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Harga (Rp) <span className="text-red-500">*</span>
+                {t('medicines.form.price')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -123,20 +125,20 @@ const MedicineForm = () => {
                 value={formData.price}
                 onChange={handleChange}
                 className="input"
-                placeholder="Contoh: 5000"
+                placeholder={t('medicines.form.pricePlaceholder')}
                 min="0"
                 step="0.01"
                 required
               />
               <p className="text-sm text-gray-500 mt-1">
-                Harga per satuan
+                {t('medicines.form.priceHelp')}
               </p>
             </div>
 
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Deskripsi
+                {t('medicines.form.description')}
               </label>
               <textarea
                 name="description"
@@ -144,7 +146,7 @@ const MedicineForm = () => {
                 onChange={handleChange}
                 rows="4"
                 className="input w-full"
-                placeholder="Deskripsi obat, indikasi, efek samping, dll..."
+                placeholder={t('medicines.form.descriptionPlaceholder')}
               />
             </div>
           </div>
@@ -158,7 +160,7 @@ const MedicineForm = () => {
             className="btn bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
             disabled={submitting}
           >
-            Batal
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -168,12 +170,12 @@ const MedicineForm = () => {
             {submitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Menyimpan...
+                {t('medicines.form.saving')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Simpan
+                {t('medicines.form.saveButton')}
               </>
             )}
           </button>

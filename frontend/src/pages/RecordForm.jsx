@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { recordService, patientService, visitService, userService } from '../services'
 import { ArrowLeft, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const RecordForm = () => {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -44,7 +46,7 @@ const RecordForm = () => {
       setDoctors(doctorsList)
     } catch (error) {
       console.error('Fetch data error:', error)
-      toast.error('Gagal memuat data')
+      toast.error(t('records.form.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -97,10 +99,10 @@ const RecordForm = () => {
       }
 
       await recordService.createRecord(submitData)
-      toast.success('Rekam medis berhasil ditambahkan')
+      toast.success(t('records.form.createSuccess'))
       navigate('/records')
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Gagal membuat rekam medis')
+      toast.error(error.response?.data?.error || t('records.form.createFailed'))
       console.error('Create record error:', error)
     } finally {
       setSubmitting(false)
@@ -129,24 +131,24 @@ const RecordForm = () => {
           className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Kembali
+          {t('records.form.back')}
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tambah Rekam Medis</h1>
-          <p className="text-gray-600">Buat rekam medis elektronik pasien</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('records.form.title')}</h1>
+          <p className="text-gray-600">{t('records.form.subtitle')}</p>
         </div>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Informasi Kunjungan</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('records.form.visitInfo')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Patient */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pasien <span className="text-red-500">*</span>
+                {t('records.form.patient')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="patientId"
@@ -155,7 +157,7 @@ const RecordForm = () => {
                 className="input"
                 required
               >
-                <option value="">Pilih Pasien</option>
+                <option value="">{t('records.form.selectPatient')}</option>
                 {patients.map(patient => (
                   <option key={patient.id} value={patient.id}>
                     {patient.name} - {patient.medicalRecordNo}
@@ -167,7 +169,7 @@ const RecordForm = () => {
             {/* Visit */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kunjungan <span className="text-red-500">*</span>
+                {t('records.form.visit')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="visitId"
@@ -177,22 +179,22 @@ const RecordForm = () => {
                 required
                 disabled={!formData.patientId}
               >
-                <option value="">Pilih Kunjungan</option>
+                <option value="">{t('records.form.selectVisit')}</option>
                 {filteredVisits.map(visit => (
                   <option key={visit.id} value={visit.id}>
-                    {new Date(visit.scheduledAt).toLocaleDateString('id-ID')} - {visit.visitType}
+                    {new Date(visit.scheduledAt).toLocaleDateString(i18n.language === 'id' ? 'id-ID' : 'en-US')} - {visit.visitType}
                   </option>
                 ))}
               </select>
               {!formData.patientId && (
-                <p className="text-sm text-gray-500 mt-1">Pilih pasien terlebih dahulu</p>
+                <p className="text-sm text-gray-500 mt-1">{t('records.form.selectPatientFirst')}</p>
               )}
             </div>
 
             {/* Doctor */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Dokter <span className="text-red-500">*</span>
+                {t('records.form.doctor')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="doctorId"
@@ -201,7 +203,7 @@ const RecordForm = () => {
                 className="input"
                 required
               >
-                <option value="">Pilih Dokter</option>
+                <option value="">{t('records.form.selectDoctor')}</option>
                 {doctors.map(doctor => (
                   <option key={doctor.id} value={doctor.id}>
                     {doctor.name} - {doctor.department || 'Umum'}
@@ -213,7 +215,7 @@ const RecordForm = () => {
             {/* Diagnosis Code */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kode Diagnosis (ICD-10)
+                {t('records.form.diagnosisCode')}
               </label>
               <input
                 type="text"
@@ -221,7 +223,7 @@ const RecordForm = () => {
                 value={formData.diagnosisCode}
                 onChange={handleChange}
                 className="input"
-                placeholder="Contoh: J00"
+                placeholder={t('records.form.diagnosisCodePlaceholder')}
                 maxLength={20}
               />
             </div>
@@ -229,13 +231,13 @@ const RecordForm = () => {
         </div>
 
         <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Catatan Medis</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('records.form.medicalNotes')}</h2>
           
           <div className="space-y-6">
             {/* Symptoms */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Keluhan/Gejala
+                {t('records.form.symptoms')}
               </label>
               <textarea
                 name="symptoms"
@@ -243,14 +245,14 @@ const RecordForm = () => {
                 onChange={handleChange}
                 rows="4"
                 className="input w-full"
-                placeholder="Keluhan yang dialami pasien..."
+                placeholder={t('records.form.symptomsPlaceholder')}
               />
             </div>
 
             {/* Diagnosis */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Diagnosis
+                {t('records.form.diagnosis')}
               </label>
               <textarea
                 name="diagnosis"
@@ -258,14 +260,14 @@ const RecordForm = () => {
                 onChange={handleChange}
                 rows="4"
                 className="input w-full"
-                placeholder="Diagnosis medis..."
+                placeholder={t('records.form.diagnosisPlaceholder')}
               />
             </div>
 
             {/* Treatment */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tindakan/Terapi
+                {t('records.form.treatment')}
               </label>
               <textarea
                 name="treatment"
@@ -273,14 +275,14 @@ const RecordForm = () => {
                 onChange={handleChange}
                 rows="4"
                 className="input w-full"
-                placeholder="Tindakan medis atau terapi yang diberikan..."
+                placeholder={t('records.form.treatmentPlaceholder')}
               />
             </div>
 
             {/* Prescription */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Resep (JSON)
+                {t('records.form.prescription')}
               </label>
               <textarea
                 name="prescription"
@@ -288,10 +290,10 @@ const RecordForm = () => {
                 onChange={handleChange}
                 rows="5"
                 className="input w-full font-mono text-sm"
-                placeholder='{"medicines": [{"name": "Paracetamol", "dosage": "500mg", "frequency": "3x sehari"}]}'
+                placeholder={t('records.form.prescriptionPlaceholder')}
               />
               <p className="text-sm text-gray-500 mt-1">
-                Format JSON. Contoh: {`{"medicines": [{"name": "...", "dosage": "...", "frequency": "..."}]}`}
+                {t('records.form.prescriptionHelp')}
               </p>
             </div>
           </div>
@@ -305,7 +307,7 @@ const RecordForm = () => {
             className="btn bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
             disabled={submitting}
           >
-            Batal
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -315,12 +317,12 @@ const RecordForm = () => {
             {submitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Menyimpan...
+                {t('records.form.saving')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Simpan
+                {t('records.form.saveButton')}
               </>
             )}
           </button>

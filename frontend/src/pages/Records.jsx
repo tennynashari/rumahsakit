@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { recordService } from '../services'
 import { FileText, Download, Eye, Edit, Trash2, Plus, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const Records = () => {
+  const { t, i18n } = useTranslation()
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
@@ -26,7 +28,7 @@ const Records = () => {
       setRecords(response.data.records)
       setTotalPages(response.data.pagination.pages)
     } catch (error) {
-      toast.error('Gagal memuat data rekam medis')
+      toast.error(t('records.fetchFailed'))
       console.error('Fetch records error:', error)
     } finally {
       setLoading(false)
@@ -40,11 +42,11 @@ const Records = () => {
   const handleExport = async () => {
     try {
       if (!filters.startDate || !filters.endDate) {
-        toast.error('Silakan pilih tanggal mulai dan tanggal akhir')
+        toast.error(t('records.selectDateRange'))
         return
       }
 
-      toast.loading('Mengekspor data...')
+      toast.loading(t('records.exporting'))
       const params = {
         startDate: filters.startDate,
         endDate: filters.endDate
@@ -65,22 +67,22 @@ const Records = () => {
       window.URL.revokeObjectURL(url)
       
       toast.dismiss()
-      toast.success('Data berhasil diekspor')
+      toast.success(t('records.exportSuccess'))
     } catch (error) {
       toast.dismiss()
-      toast.error('Gagal mengekspor data')
+      toast.error(t('records.exportFailed'))
       console.error('Export error:', error)
     }
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus rekam medis ini?')) {
+    if (window.confirm(t('records.deleteConfirm'))) {
       try {
         await recordService.deleteRecord(id)
-        toast.success('Rekam medis berhasil dihapus')
+        toast.success(t('records.deleteSuccess'))
         fetchRecords(currentPage)
       } catch (error) {
-        toast.error('Gagal menghapus rekam medis')
+        toast.error(t('records.deleteFailed'))
       }
     }
   }
@@ -99,7 +101,8 @@ const Records = () => {
   }
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -107,7 +110,8 @@ const Records = () => {
   }
 
   const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString('id-ID', {
+    const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
+    return new Date(dateString).toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit'
     })
@@ -118,12 +122,12 @@ const Records = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rekam Medis</h1>
-          <p className="text-sm text-gray-600">Kelola data rekam medis elektronik pasien</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('records.title')}</h1>
+          <p className="text-sm text-gray-600">{t('records.subtitle')}</p>
         </div>
         <Link to="/records/new" className="btn btn-primary">
           <Plus className="w-4 h-4 mr-2" />
-          Tambah Rekam Medis
+          {t('records.addRecord')}
         </Link>
       </div>
 
@@ -132,7 +136,7 @@ const Records = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tanggal Mulai
+              {t('records.filters.startDate')}
             </label>
             <input
               type="date"
@@ -143,7 +147,7 @@ const Records = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tanggal Akhir
+              {t('records.filters.endDate')}
             </label>
             <input
               type="date"
@@ -159,7 +163,7 @@ const Records = () => {
               disabled={!filters.startDate || !filters.endDate}
             >
               <Download className="w-4 h-4 mr-2" />
-              Export Excel
+              {t('records.exportData')}
             </button>
           </div>
         </div>
@@ -170,12 +174,12 @@ const Records = () => {
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Memuat data...</p>
+            <p className="mt-4 text-gray-600">{t('common.loading')}</p>
           </div>
         ) : records.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Tidak ada data rekam medis</p>
+            <p className="text-gray-600">{t('common.noData')}</p>
           </div>
         ) : (
           <>
@@ -184,22 +188,22 @@ const Records = () => {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Pasien
+                      {t('records.table.patient')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Dokter
+                      {t('records.table.doctor')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Diagnosis
+                      {t('records.table.diagnosis')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Keluhan
+                      {t('records.table.symptoms')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tanggal
+                      {t('records.table.date')}
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aksi
+                      {t('records.table.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -214,7 +218,7 @@ const Records = () => {
                           {record.patient.medicalRecordNo}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {calculateAge(record.patient.dateOfBirth)} tahun • {record.patient.gender === 'MALE' ? 'L' : 'P'}
+                          {calculateAge(record.patient.dateOfBirth)} {t('records.table.yearsOld')} • {record.patient.gender === 'MALE' ? 'L' : 'P'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -255,21 +259,21 @@ const Records = () => {
                           <Link
                             to={`/records/${record.id}`}
                             className="text-primary-600 hover:text-primary-900"
-                            title="Lihat Detail"
+                            title={t('common.view')}
                           >
                             <Eye className="w-4 h-4" />
                           </Link>
                           <Link
                             to={`/records/${record.id}/edit`}
                             className="text-blue-600 hover:text-blue-900"
-                            title="Edit"
+                            title={t('common.edit')}
                           >
                             <Edit className="w-4 h-4" />
                           </Link>
                           <button
                             onClick={() => handleDelete(record.id)}
                             className="text-red-600 hover:text-red-900"
-                            title="Hapus"
+                            title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
