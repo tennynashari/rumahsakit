@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { Bell, ChevronDown, LogOut, User, Settings } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Settings, Languages } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const Navbar = () => {
   const { user, logout } = useAuth()
+  const { t, i18n } = useTranslation()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false)
 
   const handleLogout = () => {
     logout()
@@ -18,7 +21,7 @@ const Navbar = () => {
           <div className="flex items-center justify-start">
             <div className="flex ml-2 md:mr-24">
               <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-gray-900">
-                🏥 Hospital Information System
+                🏥 {t('navbar.hospitalName')}
               </span>
             </div>
           </div>
@@ -28,6 +31,44 @@ const Navbar = () => {
             <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
               <Bell className="w-5 h-5" />
             </button>
+            
+            {/* Language Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-1"
+              >
+                <Languages className="w-5 h-5" />
+                <span className="text-xs font-medium uppercase">{i18n.language}</span>
+              </button>
+              
+              {langDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                  <button
+                    onClick={() => {
+                      i18n.changeLanguage('en')
+                      setLangDropdownOpen(false)
+                    }}
+                    className={`flex items-center px-4 py-2 text-sm w-full text-left ${
+                      i18n.language === 'en' ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => {
+                      i18n.changeLanguage('id')
+                      setLangDropdownOpen(false)
+                    }}
+                    className={`flex items-center px-4 py-2 text-sm w-full text-left ${
+                      i18n.language === 'id' ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    Indonesia
+                  </button>
+                </div>
+              )}
+            </div>
             
             {/* User Menu */}
             <div className="relative">
@@ -51,11 +92,11 @@ const Navbar = () => {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
                   <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
                     <User className="w-4 h-4 mr-3" />
-                    Profile
+                    {t('navbar.profile')}
                   </button>
                   <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
                     <Settings className="w-4 h-4 mr-3" />
-                    Settings
+                    {t('navbar.settings')}
                   </button>
                   <hr className="my-1" />
                   <button
@@ -63,7 +104,7 @@ const Navbar = () => {
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                   >
                     <LogOut className="w-4 h-4 mr-3" />
-                    Sign out
+                    {t('navbar.logout')}
                   </button>
                 </div>
               )}

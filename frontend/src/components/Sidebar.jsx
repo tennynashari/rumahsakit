@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard,
   Users,
@@ -15,46 +16,47 @@ import {
 
 const Sidebar = () => {
   const { user } = useAuth()
+  const { t } = useTranslation()
 
   const navigation = [
     {
-      name: 'Dashboard',
+      name: 'dashboard',
       href: '/dashboard',
       icon: LayoutDashboard,
       roles: ['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK', 'PHARMACY', 'LABORATORY']
     },
     {
-      name: 'Patients',
+      name: 'patients',
       href: '/patients',
       icon: UserPlus,
       roles: ['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK']
     },
     {
-      name: 'Visits',
+      name: 'visits',
       href: '/visits',
       icon: Calendar,
       roles: ['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK']
     },
     {
-      name: 'Medical Records',
+      name: 'records',
       href: '/records',
       icon: FileText,
       roles: ['ADMIN', 'DOCTOR', 'NURSE']
     },
     {
-      name: 'Medicines',
+      name: 'medicines',
       href: '/medicines',
       icon: Pill,
       roles: ['ADMIN', 'PHARMACY']
     },
     {
-      name: 'Billing',
+      name: 'billing',
       href: '/billing',
       icon: CreditCard,
       roles: ['ADMIN', 'FRONT_DESK']
     },
     {
-      name: 'Users',
+      name: 'users',
       href: '/users',
       icon: Users,
       roles: ['ADMIN']
@@ -82,7 +84,7 @@ const Sidebar = () => {
                   }
                 >
                   <Icon className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" />
-                  <span className="ml-3 font-medium">{item.name}</span>
+                  <span className="ml-3 font-medium">{t(`sidebar.${item.name}`)}</span>
                 </NavLink>
               </li>
             )

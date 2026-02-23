@@ -1,0 +1,49 @@
+{
+  "common": {
+    "search": "Search",
+    "filter": "Filter",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "view": "View",
+    "actions": "Actions",
+    "status": "Status",
+    "loading": "Loading...",
+    "noData": "No data available"
+  },
+  "navbar": {
+    "hospitalName": "Hospital Information System",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "visits": "Visits",
+    "records": "Medical Records",
+    "medicines": "Medicines",
+    "billing": "Billing",
+    "users": "Users"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "quickActions": "Quick Actions",
+    "registerPatient": "Register Patient",
+    "scheduleVisit": "Schedule Visit",
+    "viewRecords": "View Records",
+    "manageMedicines": "Manage Medicines",
+    "recentActivities": "Recent Activities",
+    "viewAll": "View All",
+    "statistics": "Statistics",
+    "totalPatients": "Total Patients",
+    "todayVisits": "Today Visits",
+    "pendingRecords": "Pending Records",
+    "monthlyRevenue": "Monthly Revenue",
+    "fromLastMonth": "from last month"
+  }
+}

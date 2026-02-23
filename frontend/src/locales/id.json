@@ -1,0 +1,49 @@
+{
+  "common": {
+    "search": "Cari",
+    "filter": "Filter",
+    "add": "Tambah",
+    "edit": "Ubah",
+    "delete": "Hapus",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "view": "Lihat",
+    "actions": "Aksi",
+    "status": "Status",
+    "loading": "Memuat...",
+    "noData": "Tidak ada data"
+  },
+  "navbar": {
+    "hospitalName": "Sistem Informasi Rumah Sakit",
+    "profile": "Profil",
+    "settings": "Pengaturan",
+    "logout": "Keluar",
+    "language": "Bahasa"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "patients": "Pasien",
+    "visits": "Kunjungan",
+    "records": "Rekam Medis",
+    "medicines": "Obat-obatan",
+    "billing": "Tagihan",
+    "users": "Pengguna"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Selamat datang kembali",
+    "quickActions": "Aksi Cepat",
+    "registerPatient": "Daftar Pasien",
+    "scheduleVisit": "Jadwalkan Kunjungan",
+    "viewRecords": "Lihat Rekam Medis",
+    "manageMedicines": "Kelola Obat",
+    "recentActivities": "Aktivitas Terkini",
+    "viewAll": "Lihat Semua",
+    "statistics": "Statistik",
+    "totalPatients": "Total Pasien",
+    "todayVisits": "Kunjungan Hari Ini",
+    "pendingRecords": "Rekam Tertunda",
+    "monthlyRevenue": "Pendapatan Bulanan",
+    "fromLastMonth": "dari bulan lalu"
+  }
+}

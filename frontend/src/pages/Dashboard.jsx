@@ -1,13 +1,15 @@
 import React from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 import { Users, UserPlus, Calendar, FileText, TrendingUp, Activity } from 'lucide-react'
 
 const Dashboard = () => {
   const { user } = useAuth()
+  const { t } = useTranslation()
 
   const stats = [
     {
-      name: 'Total Patients',
+      name: 'totalPatients',
       value: '2,543',
       change: '+12%',
       changeType: 'increase',
@@ -15,7 +17,7 @@ const Dashboard = () => {
       color: 'bg-blue-500'
     },
     {
-      name: 'Today Visits',
+      name: 'todayVisits',
       value: '87',
       change: '+5%',
       changeType: 'increase',
@@ -23,7 +25,7 @@ const Dashboard = () => {
       color: 'bg-green-500'
     },
     {
-      name: 'Pending Records',
+      name: 'pendingRecords',
       value: '23',
       change: '-2%',
       changeType: 'decrease',
@@ -31,7 +33,7 @@ const Dashboard = () => {
       color: 'bg-yellow-500'
     },
     {
-      name: 'Monthly Revenue',
+      name: 'monthlyRevenue',
       value: 'Rp 125.430.000',
       change: '+18%',
       changeType: 'increase',
@@ -71,9 +73,9 @@ const Dashboard = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="border-b border-gray-200 pb-5">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
         <p className="mt-2 text-sm text-gray-600">
-          Welcome back, {user?.name}! ({user?.role})
+          {t('dashboard.welcome')}, {user?.name}! ({user?.role})
         </p>
       </div>
 
@@ -90,7 +92,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="ml-4 flex-1">
-                  <p className="text-sm font-medium text-gray-600">{stat.name}</p>
+                  <p className="text-sm font-medium text-gray-600">{t(`dashboard.${stat.name}`)}</p>
                   <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
                 </div>
               </div>
@@ -100,7 +102,7 @@ const Dashboard = () => {
                 }`}>
                   {stat.change}
                 </span>
-                <span className="text-sm text-gray-600 ml-2">from last month</span>
+                <span className="text-sm text-gray-600 ml-2">{t('dashboard.fromLastMonth')}</span>
               </div>
             </div>
           )
@@ -110,9 +112,9 @@ const Dashboard = () => {
       {/* Recent Activity */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivities')}</h2>
           <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-            View All
+            {t('dashboard.viewAll')}
           </button>
         </div>
         <div className="space-y-4">
