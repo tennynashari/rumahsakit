@@ -13,7 +13,7 @@ import {
   Settings,
   Activity,
   Bed,
-  Hospital
+  Building2
 } from 'lucide-react'
 
 const Sidebar = () => {
@@ -54,7 +54,7 @@ const Sidebar = () => {
     {
       name: 'inpatients',
       href: '/inpatients',
-      icon: Hospital,
+      icon: Building2,
       roles: ['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK']
     },
     {

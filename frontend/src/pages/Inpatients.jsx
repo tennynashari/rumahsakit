@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import inpatientService from '../services/inpatientService'
 import { 
-  Hospital, 
+  Building2, 
   Plus, 
   Search, 
   Edit, 
@@ -181,7 +181,7 @@ const Inpatients = () => {
           </div>
         ) : inpatients.length === 0 ? (
           <div className="text-center py-12">
-            <Hospital className="mx-auto h-12 w-12 text-gray-400" />
+            <Building2 className="mx-auto h-12 w-12 text-gray-400" />
             <p className="mt-2 text-sm text-gray-600">{t('common.noDataFound')}</p>
           </div>
         ) : (
