@@ -21,6 +21,7 @@ import RoomForm from './pages/RoomForm'
 import RoomEdit from './pages/RoomEdit'
 import RoomDetail from './pages/RoomDetail'
 import Inpatients from './pages/Inpatients'
+import CheckInForm from './pages/CheckInForm'
 import Medicines from './pages/Medicines'
 import MedicineForm from './pages/MedicineForm'
 import MedicineEdit from './pages/MedicineEdit'
@@ -244,6 +245,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Rooms />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/inpatients/check-in" 
+              element={
+                <ProtectedRoute>
+                  <CheckInForm />
                 </ProtectedRoute>
               } 
             />

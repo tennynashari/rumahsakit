@@ -14,13 +14,15 @@ const RoomDetail = () => {
 
   useEffect(() => {
     fetchRoom()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   const fetchRoom = async () => {
     try {
       setLoading(true)
       const response = await roomService.getRoom(id)
-      setRoom(response.data)
+      console.log('Room detail response:', response.data)
+      setRoom(response.data.room || response.data)
     } catch (error) {
       toast.error(t('rooms.loadFailed'))
       console.error('Fetch room error:', error)
@@ -204,7 +206,7 @@ const RoomDetail = () => {
                       <div>
                         <p className="font-medium text-gray-900">{occupancy.patient?.name}</p>
                         <p className="text-sm text-gray-600">
-                          {occupancy.patient?.medicalRecordNumber}
+                          {occupancy.patient?.medicalRecordNo}
                           {occupancy.bedNumber && ` • Bed ${occupancy.bedNumber}`}
                         </p>
                       </div>

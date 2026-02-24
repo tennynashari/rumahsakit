@@ -256,6 +256,102 @@ async function main() {
       console.log(`✅ Pasien dibuat: ${patient.name}`);
     }
 
+    // Ambil list rooms dan doctors untuk membuat inpatient records
+    const allRooms = await prisma.room.findMany({ where: { isActive: true } });
+    const allDoctors = users.filter(u => u.role === 'DOCTOR');
+
+    // Buat beberapa data rawat inap (inpatients)
+    const inpatientData = [
+      {
+        patientIndex: 0, // Budi Santoso
+        roomIndex: 0, // R001
+        bedNumber: 1,
+        doctorIndex: 0,
+        initialDiagnosis: 'Post-operative care after appendectomy',
+        daysAgo: 3,
+        estimatedDays: 7,
+        status: 'ACTIVE'
+      },
+      {
+        patientIndex: 1, // Siti Aminah
+        roomIndex: 1, // R002
+        bedNumber: 1,
+        doctorIndex: 1,
+        initialDiagnosis: 'Pneumonia with respiratory distress',
+        daysAgo: 5,
+        estimatedDays: 10,
+        status: 'ACTIVE'
+      },
+      {
+        patientIndex: 2, // Ahmad Wijaya
+        roomIndex: 4, // ICU room
+        bedNumber: 1,
+        doctorIndex: 2,
+        initialDiagnosis: 'Severe head trauma, requires ICU monitoring',
+        daysAgo: 2,
+        estimatedDays: 15,
+        status: 'ACTIVE'
+      },
+      {
+        patientIndex: 3, // Dewi Kusuma
+        roomIndex: 2, // R003
+        bedNumber: 1,
+        doctorIndex: 0,
+        initialDiagnosis: 'Gestational diabetes monitoring',
+        daysAgo: 1,
+        estimatedDays: 5,
+        status: 'ACTIVE'
+      },
+      {
+        patientIndex: 4, // Rudi Hartono
+        roomIndex: 3, // R004
+        bedNumber: 1,
+        doctorIndex: 1,
+        initialDiagnosis: 'Dengue fever grade 2',
+        daysAgo: 4,
+        estimatedDays: 7,
+        status: 'ACTIVE'
+      }
+    ];
+
+    for (let i = 0; i < inpatientData.length; i++) {
+      const data = inpatientData[i];
+      const patient = patients[data.patientIndex];
+      const room = allRooms[data.roomIndex];
+      const doctor = allDoctors[data.doctorIndex];
+      
+      const checkedInAt = new Date(Date.now() - data.daysAgo * 24 * 60 * 60 * 1000);
+      const estimatedCheckoutAt = new Date(Date.now() + (data.estimatedDays - data.daysAgo) * 24 * 60 * 60 * 1000);
+      
+      // Generate registration number
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+      const registrationNumber = `INP-${dateStr}-${String(i + 1).padStart(4, '0')}`;
+
+      const occupancy = await prisma.roomOccupancy.create({
+        data: {
+          registrationNumber,
+          patientId: patient.id,
+          roomId: room.id,
+          bedNumber: data.bedNumber,
+          doctorId: doctor.id,
+          checkedInAt,
+          estimatedCheckoutAt,
+          initialDiagnosis: data.initialDiagnosis,
+          status: data.status,
+          notes: `Patient admitted ${data.daysAgo} days ago`
+        }
+      });
+
+      // Update room status to OCCUPIED
+      await prisma.room.update({
+        where: { id: room.id },
+        data: { status: 'OCCUPIED' }
+      });
+
+      console.log(`✅ Rawat inap dibuat: ${patient.name} - ${room.roomNumber}`);
+    }
+
     // Ambil semua data yang sudah dibuat untuk membuat visits
     const doctors = users.filter(u => u.role === 'DOCTOR');
 

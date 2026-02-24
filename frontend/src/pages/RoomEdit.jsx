@@ -30,13 +30,16 @@ const RoomEdit = () => {
 
   useEffect(() => {
     fetchRoom()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   const fetchRoom = async () => {
     try {
       setLoading(true)
       const response = await roomService.getRoom(id)
-      const room = response.data
+      console.log('Room data:', response.data)
+      const room = response.data.room || response.data
+      console.log('Room object:', room)
       setFormData({
         roomNumber: room.roomNumber || '',
         roomName: room.roomName || '',
