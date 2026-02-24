@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import inpatientService from '../services/inpatientService'
+import CheckOutModal from '../components/CheckOutModal'
 import { 
   Building2, 
   Plus, 
@@ -325,6 +326,19 @@ const Inpatients = () => {
           </>
         )}
       </div>
+
+      {/* Checkout Modal */}
+      <CheckOutModal
+        occupancy={selectedOccupancy}
+        isOpen={checkoutModalOpen}
+        onClose={() => {
+          setCheckoutModalOpen(false)
+          setSelectedOccupancy(null)
+        }}
+        onSuccess={() => {
+          fetchInpatients(currentPage)
+        }}
+      />
     </div>
   )
 }

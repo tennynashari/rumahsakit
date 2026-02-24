@@ -22,6 +22,9 @@ import RoomEdit from './pages/RoomEdit'
 import RoomDetail from './pages/RoomDetail'
 import Inpatients from './pages/Inpatients'
 import CheckInForm from './pages/CheckInForm'
+import InpatientDetail from './pages/InpatientDetail'
+import InpatientEdit from './pages/InpatientEdit'
+import InpatientHistory from './pages/InpatientHistory'
 import Medicines from './pages/Medicines'
 import MedicineForm from './pages/MedicineForm'
 import MedicineEdit from './pages/MedicineEdit'
@@ -254,6 +257,33 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CheckInForm />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/inpatients/history" 
+              element={
+                <ProtectedRoute>
+                  <InpatientHistory />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/inpatients/:id/edit" 
+              element={
+                <ProtectedRoute>
+                  <InpatientEdit />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/inpatients/:id" 
+              element={
+                <ProtectedRoute>
+                  <InpatientDetail />
                 </ProtectedRoute>
               } 
             />
