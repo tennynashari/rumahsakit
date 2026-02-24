@@ -20,7 +20,10 @@
     "showing": "Menampilkan",
     "to": "sampai",
     "previous": "Sebelumnya",
-    "next": "Selanjutnya"
+    "next": "Selanjutnya",
+    "export": "Export Excel",
+    "exportSuccess": "Data berhasil diexport",
+    "exportFailed": "Gagal mengexport data"
   },
   "navbar": {
     "hospitalName": "Sistem Informasi Rumah Sakit",

@@ -45,6 +45,9 @@ router.post('/', [
 router.put('/:id', [
   auth,
   authorize('ADMIN', 'FRONT_DESK', 'DOCTOR'),
+  body('visitType').optional().isIn(['GENERAL_CHECKUP', 'OUTPATIENT', 'INPATIENT', 'EMERGENCY', 'MEDICAL_ACTION']),
+  body('scheduledAt').optional().isISO8601(),
+  body('status').optional().isIn(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW'])
 ], updateVisit);
 
 // @route   DELETE /api/visits/:id

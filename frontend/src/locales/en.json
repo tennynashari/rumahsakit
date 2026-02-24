@@ -20,7 +20,10 @@
     "showing": "Showing",
     "to": "to",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "export": "Export Excel",
+    "exportSuccess": "Data exported successfully",
+    "exportFailed": "Failed to export data"
   },
   "navbar": {
     "hospitalName": "Hospital Information System",

@@ -7,10 +7,16 @@ const {
   createRoom,
   updateRoom,
   deleteRoom,
-  getDashboardStats
+  getDashboardStats,
+  exportRoomsExcel
 } = require('../controllers/roomController');
 
 const router = express.Router();
+
+// @route   GET /api/rooms/export
+// @desc    Export rooms to Excel
+// @access  Private
+router.get('/export', auth, exportRoomsExcel);
 
 // @route   GET /api/rooms/dashboard/stats
 // @desc    Get dashboard statistics

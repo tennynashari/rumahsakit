@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const prisma = require('../database/prisma');
+const XLSX = require('xlsx');
 
 // Generate unique Registration Number for inpatient
 const generateRegistrationNumber = async () => {
@@ -695,11 +696,166 @@ const getOccupancyHistory = async (req, res) => {
   }
 };
 
+// @desc    Export inpatient history to Excel
+// @route   GET /api/inpatients/history/export
+// @access  Private
+const exportHistoryExcel = async (req, res) => {
+  try {
+    const { startDate, endDate, patientId } = req.query;
+
+    const where = {
+      status: 'CHECKED_OUT',
+      checkedOutAt: { not: null }
+    };
+
+    if (startDate && endDate) {
+      where.checkedOutAt = {
+        gte: new Date(startDate),
+        lte: new Date(endDate)
+      };
+    }
+
+    if (patientId) {
+      where.patientId = parseInt(patientId);
+    }
+
+    const history = await prisma.roomOccupancy.findMany({
+      where,
+      include: {
+        patient: true,
+        room: true,
+        doctor: {
+          select: {
+            name: true,
+            department: true
+          }
+        }
+      },
+      orderBy: {
+        checkedOutAt: 'desc'
+      }
+    });
+
+    // Calculate actual days for each occupancy
+    const historyWithDays = history.map(occ => {
+      const actualDays = calculateDays(occ.checkedInAt, occ.checkedOutAt);
+      return { ...occ, actualDays };
+    });
+
+    // Transform data for Excel
+    const excelData = historyWithDays.map((record, index) => {
+      const dischargeConditionMap = {
+        SEMBUH: 'Sembuh',
+        MEMBAIK: 'Membaik',
+        RUJUK: 'Dirujuk',
+        MENINGGAL: 'Meninggal',
+        APS: 'Atas Permintaan Sendiri'
+      };
+
+      const roomTypeMap = {
+        VIP: 'VIP',
+        KELAS_1: 'Kelas 1',
+        KELAS_2: 'Kelas 2',
+        KELAS_3: 'Kelas 3',
+        ICU: 'ICU',
+        NICU: 'NICU',
+        PICU: 'PICU',
+        ISOLATION: 'Isolasi'
+      };
+
+      return {
+        'No': index + 1,
+        'No. Registrasi': record.registrationNumber,
+        'No. Rekam Medis': record.patient.medicalRecordNo,
+        'Nama Pasien': record.patient.name,
+        'Jenis Kelamin': record.patient.gender === 'MALE' ? 'Laki-laki' : 
+                         record.patient.gender === 'FEMALE' ? 'Perempuan' : 'Lainnya',
+        'No. Kamar': record.room.roomNumber,
+        'Tipe Kamar': roomTypeMap[record.room.roomType] || record.room.roomType,
+        'No. Tempat Tidur': record.bedNumber || '-',
+        'Dokter': record.doctor?.name || '-',
+        'Departemen': record.doctor?.department || '-',
+        'Diagnosa Awal': record.initialDiagnosis || '-',
+        'Diagnosa Akhir': record.finalDiagnosis || '-',
+        'Tanggal Check-in': new Date(record.checkedInAt).toLocaleDateString('id-ID'),
+        'Jam Check-in': new Date(record.checkedInAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        'Tanggal Check-out': new Date(record.checkedOutAt).toLocaleDateString('id-ID'),
+        'Jam Check-out': new Date(record.checkedOutAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        'Lama Rawat (Hari)': record.actualDays,
+        'Kondisi Pasien': dischargeConditionMap[record.dischargeCondition] || record.dischargeCondition,
+        'Catatan Keluar': record.dischargeNotes || '-',
+        'Harga/Hari': new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(record.room.pricePerDay),
+        'Total Biaya Kamar': new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(record.room.pricePerDay * record.actualDays)
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 5 },  // No
+      { wch: 20 }, // No. Registrasi
+      { wch: 18 }, // No. Rekam Medis
+      { wch: 25 }, // Nama Pasien
+      { wch: 15 }, // Jenis Kelamin
+      { wch: 12 }, // No. Kamar
+      { wch: 15 }, // Tipe Kamar
+      { wch: 15 }, // Tempat Tidur
+      { wch: 25 }, // Dokter
+      { wch: 20 }, // Departemen
+      { wch: 30 }, // Diagnosa Awal
+      { wch: 30 }, // Diagnosa Akhir
+      { wch: 18 }, // Tgl Check-in
+      { wch: 12 }, // Jam Check-in
+      { wch: 18 }, // Tgl Check-out
+      { wch: 12 }, // Jam Check-out
+      { wch: 15 }, // Lama Rawat
+      { wch: 20 }, // Kondisi Pasien
+      { wch: 35 }, // Catatan Keluar
+      { wch: 18 }, // Harga/Hari
+      { wch: 20 }  // Total Biaya
+    ];
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Riwayat Rawat Inap');
+
+    // Generate filename with date range
+    const dateRange = startDate && endDate
+      ? `_${new Date(startDate).toISOString().split('T')[0]}_sd_${new Date(endDate).toISOString().split('T')[0]}`
+      : `_${new Date().toISOString().split('T')[0]}`;
+    const filename = `Riwayat_Rawat_Inap${dateRange}.xlsx`;
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set headers for file download
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Export history error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while exporting history'
+    });
+  }
+};
+
 module.exports = {
   getInpatients,
   getInpatient,
   checkInPatient,
   updateOccupancy,
   checkOutPatient,
-  getOccupancyHistory
+  getOccupancyHistory,
+  exportHistoryExcel
 };

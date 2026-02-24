@@ -7,10 +7,16 @@ const {
   checkInPatient,
   updateOccupancy,
   checkOutPatient,
-  getOccupancyHistory
+  getOccupancyHistory,
+  exportHistoryExcel
 } = require('../controllers/inpatientController');
 
 const router = express.Router();
+
+// @route   GET /api/inpatients/history/export
+// @desc    Export occupancy history to Excel
+// @access  Private
+router.get('/history/export', auth, exportHistoryExcel);
 
 // @route   GET /api/inpatients/history
 // @desc    Get occupancy history

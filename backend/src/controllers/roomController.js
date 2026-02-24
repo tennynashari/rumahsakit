@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const prisma = require('../database/prisma');
+const XLSX = require('xlsx');
 
 // @desc    Get all rooms
 // @route   GET /api/rooms
@@ -424,11 +425,154 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+// @desc    Export rooms to Excel
+// @route   GET /api/rooms/export
+// @access  Private
+const exportRoomsExcel = async (req, res) => {
+  try {
+    const { roomType, floor, status } = req.query;
+
+    const where = {
+      isActive: true,
+      deletedAt: null
+    };
+
+    if (roomType) {
+      where.roomType = roomType;
+    }
+
+    if (floor) {
+      where.floor = parseInt(floor);
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const rooms = await prisma.room.findMany({
+      where,
+      orderBy: [
+        { floor: 'asc' },
+        { roomNumber: 'asc' }
+      ],
+      include: {
+        _count: {
+          select: {
+            occupancies: true
+          }
+        },
+        occupancies: {
+          where: {
+            status: 'ACTIVE'
+          },
+          include: {
+            patient: {
+              select: {
+                name: true,
+                medicalRecordNo: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Transform data for Excel
+    const excelData = rooms.map((room, index) => {
+      const roomTypeMap = {
+        VIP: 'VIP',
+        KELAS_1: 'Kelas 1',
+        KELAS_2: 'Kelas 2',
+        KELAS_3: 'Kelas 3',
+        ICU: 'ICU',
+        NICU: 'NICU',
+        PICU: 'PICU',
+        ISOLATION: 'Isolasi'
+      };
+
+      const statusMap = {
+        AVAILABLE: 'Tersedia',
+        OCCUPIED: 'Terisi',
+        MAINTENANCE: 'Maintenance',
+        CLEANING: 'Dibersihkan',
+        RESERVED: 'Direservasi'
+      };
+
+      const activeOccupancy = room.occupancies.find(occ => occ.status === 'ACTIVE');
+
+      return {
+        'No': index + 1,
+        'No. Kamar': room.roomNumber,
+        'Nama Kamar': room.roomName || '-',
+        'Tipe Kamar': roomTypeMap[room.roomType] || room.roomType,
+        'Lantai': room.floor,
+        'Kapasitas Tempat Tidur': room.bedCapacity,
+        'Status': statusMap[room.status] || room.status,
+        'Harga/Hari': new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(room.pricePerDay),
+        'Pasien Saat Ini': activeOccupancy ? activeOccupancy.patient.name : '-',
+        'No. RM Pasien': activeOccupancy ? activeOccupancy.patient.medicalRecordNo : '-',
+        'Total Okupansi': room._count.occupancies,
+        'Fasilitas': room.facilities || '-',
+        'Keterangan': room.description || '-',
+        'Tanggal Dibuat': new Date(room.createdAt).toLocaleDateString('id-ID'),
+        'Terakhir Diupdate': new Date(room.updatedAt).toLocaleDateString('id-ID')
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 5 },  // No
+      { wch: 12 }, // No. Kamar
+      { wch: 25 }, // Nama Kamar
+      { wch: 15 }, // Tipe Kamar
+      { wch: 8 },  // Lantai
+      { wch: 18 }, // Kapasitas
+      { wch: 15 }, // Status
+      { wch: 18 }, // Harga
+      { wch: 25 }, // Pasien
+      { wch: 18 }, // No. RM
+      { wch: 15 }, // Total Okupansi
+      { wch: 30 }, // Fasilitas
+      { wch: 35 }, // Keterangan
+      { wch: 18 }, // Tanggal Dibuat
+      { wch: 18 }  // Terakhir Diupdate
+    ];
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Data Kamar');
+
+    // Generate filename
+    const filename = `Data_Kamar_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set headers for file download
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Export rooms error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while exporting rooms'
+    });
+  }
+};
+
 module.exports = {
   getRooms,
   getRoom,
   createRoom,
   updateRoom,
   deleteRoom,
-  getDashboardStats
+  getDashboardStats,
+  exportRoomsExcel
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { inpatientService } from '../services'
-import { ArrowLeft, Search, Eye, Calendar, Filter } from 'lucide-react'
+import { ArrowLeft, Search, Eye, Calendar, Filter, Download } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const InpatientHistory = () => {
@@ -73,6 +73,44 @@ const InpatientHistory = () => {
     })
     setCurrentPage(1)
     fetchHistory(1)
+  }
+
+  const handleExport = async () => {
+    try {
+      const params = {
+        ...(filters.startDate && { startDate: filters.startDate }),
+        ...(filters.endDate && { endDate: filters.endDate }),
+        ...(filters.patientId && { patientId: filters.patientId })
+      }
+
+      const response = await inpatientService.exportHistoryExcel(params)
+      
+      // Create blob and download
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      })
+      
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers['content-disposition']
+      const filename = contentDisposition
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : `Riwayat_Rawat_Inap_${new Date().toISOString().split('T')[0]}.xlsx`
+      
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      
+      toast.success(t('common.exportSuccess'))
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error(t('common.exportFailed'))
+    }
   }
 
   const formatDate = (dateString) => {

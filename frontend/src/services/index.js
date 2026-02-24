@@ -340,6 +340,15 @@ export const roomService = {
     const response = await api.get('/rooms/dashboard/stats')
     return response.data
   },
+
+  // Export rooms to Excel
+  exportRoomsExcel: async (params = {}) => {
+    const response = await api.get('/rooms/export', {
+      params,
+      responseType: 'blob'
+    })
+    return response
+  },
 }
 
 // Inpatient Service
@@ -378,5 +387,14 @@ export const inpatientService = {
   getHistory: async (params = {}) => {
     const response = await api.get('/inpatients/history', { params })
     return response.data
+  },
+
+  // Export history to Excel
+  exportHistoryExcel: async (params = {}) => {
+    const response = await api.get('/inpatients/history/export', {
+      params,
+      responseType: 'blob'
+    })
+    return response
   },
 }

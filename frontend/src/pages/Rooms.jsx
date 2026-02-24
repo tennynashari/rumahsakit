@@ -9,7 +9,8 @@ import {
   Edit, 
   Trash2, 
   Eye,
-  Filter
+  Filter,
+  Download
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -76,6 +77,44 @@ const Rooms = () => {
     }
   }
 
+  const handleExport = async () => {
+    try {
+      const params = {
+        ...(filters.roomType && { roomType: filters.roomType }),
+        ...(filters.floor && { floor: parseInt(filters.floor) }),
+        ...(filters.status && { status: filters.status })
+      }
+
+      const response = await roomService.exportRoomsExcel(params)
+      
+      // Create blob and download
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      })
+      
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers['content-disposition']
+      const filename = contentDisposition
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : `Data_Kamar_${new Date().toISOString().split('T')[0]}.xlsx`
+      
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      
+      toast.success(t('common.exportSuccess'))
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error(t('common.exportFailed'))
+    }
+  }
+
   const formatCurrency = (value) => {
     const locale = i18n.language === 'id' ? 'id-ID' : 'en-US'
     return new Intl.NumberFormat(locale, {
@@ -104,13 +143,22 @@ const Rooms = () => {
           <h1 className="text-2xl font-bold text-gray-900">{t('rooms.title')}</h1>
           <p className="text-sm text-gray-600">{t('rooms.subtitle')}</p>
         </div>
-        <Link
-          to="/rooms/new"
-          className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          {t('rooms.addRoom')}
-        </Link>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={handleExport}
+            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {t('common.export')}
+          </button>
+          <Link
+            to="/rooms/new"
+            className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            {t('rooms.addRoom')}
+          </Link>
+        </div>
       </div>
 
       {/* Search and Filters */}
