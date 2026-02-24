@@ -255,6 +255,7 @@ enum VisitType {
   OUTPATIENT
   INPATIENT
   EMERGENCY
+  MEDICAL_ACTION
 }
 
 enum VisitStatus {

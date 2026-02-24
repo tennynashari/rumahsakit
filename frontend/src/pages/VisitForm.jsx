@@ -158,6 +158,7 @@ const VisitForm = () => {
                 <option value="OUTPATIENT">{t('visitForm.visitTypes.OUTPATIENT')}</option>
                 <option value="INPATIENT">{t('visitForm.visitTypes.INPATIENT')}</option>
                 <option value="EMERGENCY">{t('visitForm.visitTypes.EMERGENCY')}</option>
+                <option value="MEDICAL_ACTION">{t('visitForm.visitTypes.MEDICAL_ACTION')}</option>
               </select>
             </div>
 

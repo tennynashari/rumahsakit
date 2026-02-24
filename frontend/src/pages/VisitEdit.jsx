@@ -183,6 +183,7 @@ const VisitEdit = () => {
                 <option value="OUTPATIENT">{t('visits.visitType.outpatient')}</option>
                 <option value="INPATIENT">{t('visits.visitType.inpatient')}</option>
                 <option value="EMERGENCY">{t('visits.visitType.emergency')}</option>
+                <option value="MEDICAL_ACTION">{t('visits.visitType.medicalAction')}</option>
               </select>
             </div>
 

@@ -112,7 +112,8 @@ const Visits = () => {
       GENERAL_CHECKUP: { label: t('visits.visitType.generalCheckup'), className: 'bg-green-100 text-green-800' },
       OUTPATIENT: { label: t('visits.visitType.outpatient'), className: 'bg-blue-100 text-blue-800' },
       INPATIENT: { label: t('visits.visitType.inpatient'), className: 'bg-purple-100 text-purple-800' },
-      EMERGENCY: { label: t('visits.visitType.emergency'), className: 'bg-red-100 text-red-800' }
+      EMERGENCY: { label: t('visits.visitType.emergency'), className: 'bg-red-100 text-red-800' },
+      MEDICAL_ACTION: { label: t('visits.visitType.medicalAction'), className: 'bg-orange-100 text-orange-800' }
     }
 
     const config = typeConfig[type] || { label: type, className: 'bg-gray-100 text-gray-800' }

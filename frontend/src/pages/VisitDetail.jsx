@@ -57,7 +57,8 @@ const VisitDetail = () => {
       GENERAL_CHECKUP: 'bg-green-50 text-green-700 border-green-200',
       OUTPATIENT: 'bg-blue-50 text-blue-700 border-blue-200',
       INPATIENT: 'bg-purple-50 text-purple-700 border-purple-200',
-      EMERGENCY: 'bg-red-50 text-red-700 border-red-200'
+      EMERGENCY: 'bg-red-50 text-red-700 border-red-200',
+      MEDICAL_ACTION: 'bg-orange-50 text-orange-700 border-orange-200'
     }
     return colors[type] || 'bg-gray-50 text-gray-700 border-gray-200'
   }
@@ -67,7 +68,8 @@ const VisitDetail = () => {
       GENERAL_CHECKUP: t('visits.visitType.generalCheckup'),
       OUTPATIENT: t('visits.visitType.outpatient'),
       INPATIENT: t('visits.visitType.inpatient'),
-      EMERGENCY: t('visits.visitType.emergency')
+      EMERGENCY: t('visits.visitType.emergency'),
+      MEDICAL_ACTION: t('visits.visitType.medicalAction')
     }
     return labels[type] || type
   }

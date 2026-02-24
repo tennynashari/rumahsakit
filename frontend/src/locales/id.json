@@ -176,7 +176,8 @@
       "outpatient": "Rawat Jalan",
       "inpatient": "Rawat Inap",
       "emergency": "Darurat",
-      "generalCheckup": "Pemeriksaan Umum"
+      "generalCheckup": "Pemeriksaan Umum",
+      "medicalAction": "Tindakan Medis"
     },
     "table": {
       "patientName": "Nama Pasien",
@@ -647,7 +648,8 @@
       "GENERAL_CHECKUP": "Pemeriksaan Umum",
       "OUTPATIENT": "Rawat Jalan",
       "INPATIENT": "Rawat Inap",
-      "EMERGENCY": "Darurat"
+      "EMERGENCY": "Darurat",
+      "MEDICAL_ACTION": "Tindakan Medis"
     },
     "status": {
       "SCHEDULED": "Terjadwal",

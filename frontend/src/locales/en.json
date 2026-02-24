@@ -174,7 +174,8 @@
       "outpatient": "Outpatient",
       "inpatient": "Inpatient",
       "emergency": "Emergency",
-      "generalCheckup": "General Checkup"
+      "generalCheckup": "General Checkup",
+      "medicalAction": "Medical Action"
     },
     "table": {
       "patientName": "Patient Name",
@@ -645,7 +646,8 @@
       "GENERAL_CHECKUP": "General Checkup",
       "OUTPATIENT": "Outpatient",
       "INPATIENT": "Inpatient",
-      "EMERGENCY": "Emergency"
+      "EMERGENCY": "Emergency",
+      "MEDICAL_ACTION": "Medical Action"
     },
     "status": {
       "SCHEDULED": "Scheduled",
