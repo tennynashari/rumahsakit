@@ -43,11 +43,12 @@ const Inpatients = () => {
       }
       
       const response = await inpatientService.getInpatients(params)
-      setInpatients(response.data.inpatients)
-      setTotalPages(response.data.pagination.pages)
+      setInpatients(response.data?.inpatients || [])
+      setTotalPages(response.data?.pagination?.pages || 1)
     } catch (error) {
       toast.error(t('inpatients.loadFailed'))
       console.error('Fetch inpatients error:', error)
+      setInpatients([])
     } finally {
       setLoading(false)
     }
@@ -179,7 +180,7 @@ const Inpatients = () => {
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
           </div>
-        ) : inpatients.length === 0 ? (
+        ) : !inpatients || inpatients.length === 0 ? (
           <div className="text-center py-12">
             <Building2 className="mx-auto h-12 w-12 text-gray-400" />
             <p className="mt-2 text-sm text-gray-600">{t('common.noDataFound')}</p>
@@ -216,17 +217,17 @@ const Inpatients = () => {
                 {inpatients.map((occupancy) => (
                   <tr key={occupancy.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {occupancy.patient.medicalRecordNumber}
+                      {occupancy.patient?.medicalRecordNumber || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {occupancy.patient.name}
+                      {occupancy.patient?.name || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {occupancy.room.roomNumber}
+                      {occupancy.room?.roomNumber || '-'}
                       {occupancy.bedNumber && ` - Bed ${occupancy.bedNumber}`}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {occupancy.doctor.name}
+                      {occupancy.doctor?.name || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatDate(occupancy.checkedInAt)}
@@ -284,7 +285,7 @@ const Inpatients = () => {
                   <div>
                     <p className="text-sm text-gray-700">
                       {t('common.showing')} <span className="font-medium">{(currentPage - 1) * 10 + 1}</span> {t('common.to')}{' '}
-                      <span className="font-medium">{Math.min(currentPage * 10, inpatients.length)}</span>
+                      <span className="font-medium">{Math.min(currentPage * 10, inpatients?.length || 0)}</span>
                     </p>
                   </div>
                   <div>

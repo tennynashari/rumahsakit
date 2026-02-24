@@ -6,12 +6,21 @@
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
+    "back": "Back",
     "view": "View",
+    "select": "Select",
     "actions": "Actions",
     "status": "Status",
+    "statistics": "Statistics",
     "loading": "Loading...",
-    "noData": "No data available"
+    "noData": "No data available",
+    "noDataFound": "No data found",
+    "showing": "Showing",
+    "to": "to",
+    "previous": "Previous",
+    "next": "Next"
   },
   "navbar": {
     "hospitalName": "Hospital Information System",

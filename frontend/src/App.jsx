@@ -17,6 +17,9 @@ import Records from './pages/Records'
 import RecordForm from './pages/RecordForm'
 import RecordEdit from './pages/RecordEdit'
 import Rooms from './pages/Rooms'
+import RoomForm from './pages/RoomForm'
+import RoomEdit from './pages/RoomEdit'
+import RoomDetail from './pages/RoomDetail'
 import Inpatients from './pages/Inpatients'
 import Medicines from './pages/Medicines'
 import MedicineForm from './pages/MedicineForm'
@@ -205,6 +208,33 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Records />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/rooms/new" 
+              element={
+                <ProtectedRoute>
+                  <RoomForm />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/rooms/:id/edit" 
+              element={
+                <ProtectedRoute>
+                  <RoomEdit />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/rooms/:id" 
+              element={
+                <ProtectedRoute>
+                  <RoomDetail />
                 </ProtectedRoute>
               } 
             />

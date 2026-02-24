@@ -6,12 +6,21 @@
     "edit": "Ubah",
     "delete": "Hapus",
     "save": "Simpan",
+    "saving": "Menyimpan...",
     "cancel": "Batal",
+    "back": "Kembali",
     "view": "Lihat",
+    "select": "Pilih",
     "actions": "Aksi",
     "status": "Status",
+    "statistics": "Statistik",
     "loading": "Memuat...",
-    "noData": "Tidak ada data"
+    "noData": "Tidak ada data",
+    "noDataFound": "Tidak ada data ditemukan",
+    "showing": "Menampilkan",
+    "to": "sampai",
+    "previous": "Sebelumnya",
+    "next": "Selanjutnya"
   },
   "navbar": {
     "hospitalName": "Sistem Informasi Rumah Sakit",
