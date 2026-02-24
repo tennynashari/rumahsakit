@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import roomService from '../services/roomService'
+import { roomService } from '../services'
 import { 
   Bed, 
   Plus, 
