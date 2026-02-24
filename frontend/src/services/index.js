@@ -302,3 +302,81 @@ export const dashboardService = {
     return response.data
   },
 }
+
+// Room Service
+export const roomService = {
+  // Get all rooms with filters
+  getRooms: async (params = {}) => {
+    const response = await api.get('/rooms', { params })
+    return response.data
+  },
+
+  // Get single room by ID
+  getRoom: async (id) => {
+    const response = await api.get(`/rooms/${id}`)
+    return response.data
+  },
+
+  // Create new room
+  createRoom: async (roomData) => {
+    const response = await api.post('/rooms', roomData)
+    return response.data
+  },
+
+  // Update room
+  updateRoom: async (id, roomData) => {
+    const response = await api.put(`/rooms/${id}`, roomData)
+    return response.data
+  },
+
+  // Delete room
+  deleteRoom: async (id) => {
+    const response = await api.delete(`/rooms/${id}`)
+    return response.data
+  },
+
+  // Get dashboard statistics
+  getDashboardStats: async () => {
+    const response = await api.get('/rooms/dashboard/stats')
+    return response.data
+  },
+}
+
+// Inpatient Service
+export const inpatientService = {
+  // Get all active inpatients with filters
+  getInpatients: async (params = {}) => {
+    const response = await api.get('/inpatients', { params })
+    return response.data
+  },
+
+  // Get single inpatient occupancy by ID
+  getInpatient: async (id) => {
+    const response = await api.get(`/inpatients/${id}`)
+    return response.data
+  },
+
+  // Check-in patient
+  checkInPatient: async (checkInData) => {
+    const response = await api.post('/inpatients/check-in', checkInData)
+    return response.data
+  },
+
+  // Update occupancy (change room)
+  updateOccupancy: async (id, updateData) => {
+    const response = await api.put(`/inpatients/${id}`, updateData)
+    return response.data
+  },
+
+  // Check-out patient
+  checkOutPatient: async (id, checkOutData) => {
+    const response = await api.post(`/inpatients/${id}/check-out`, checkOutData)
+    return response.data
+  },
+
+  // Get occupancy history
+  getHistory: async (params = {}) => {
+    const response = await api.get('/inpatients/history', { params })
+    return response.data
+  },
+}

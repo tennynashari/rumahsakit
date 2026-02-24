@@ -203,9 +203,16 @@ async function main() {
     for (let i = 1; i <= 20; i++) {
       const roomTypeIndex = Math.floor(Math.random() * roomTypes.length);
       const roomType = roomTypes[roomTypeIndex];
-      const room = await prisma.room.create({
-        data: {
-          roomNumber: `R${i.toString().padStart(3, '0')}`,
+      const roomNumber = `R${i.toString().padStart(3, '0')}`;
+      const room = await prisma.room.upsert({
+        where: { roomNumber },
+        update: {
+          roomType: roomType,
+          status: 'AVAILABLE',
+          isActive: true
+        },
+        create: {
+          roomNumber,
           roomName: `${roomType} Suite ${i}`,
           roomType: roomType,
           bedCapacity: roomType === 'ICU' || roomType === 'NICU' || roomType === 'PICU' ? 1 : (roomType === 'VIP' ? 1 : Math.floor(Math.random() * 2) + 1),
@@ -217,7 +224,7 @@ async function main() {
           status: 'AVAILABLE'
         }
       });
-      console.log(`✅ Ruangan dibuat: ${room.roomNumber} - ${room.roomType}`);
+      console.log(`✅ Ruangan dibuat/diperbarui: ${room.roomNumber} - ${room.roomType}`);
     }
 
     // Buat data pasien contoh
@@ -319,6 +326,19 @@ async function main() {
       const patient = patients[data.patientIndex];
       const room = allRooms[data.roomIndex];
       const doctor = allDoctors[data.doctorIndex];
+      
+      // Check if patient already has active occupancy
+      const existingOccupancy = await prisma.roomOccupancy.findFirst({
+        where: {
+          patientId: patient.id,
+          status: 'ACTIVE'
+        }
+      });
+
+      if (existingOccupancy) {
+        console.log(`⏭️  Pasien ${patient.name} sudah memiliki okupansi aktif, dilewati`);
+        continue;
+      }
       
       const checkedInAt = new Date(Date.now() - data.daysAgo * 24 * 60 * 60 * 1000);
       const estimatedCheckoutAt = new Date(Date.now() + (data.estimatedDays - data.daysAgo) * 24 * 60 * 60 * 1000);
