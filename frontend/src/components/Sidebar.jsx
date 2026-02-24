@@ -11,7 +11,9 @@ import {
   Pill,
   CreditCard,
   Settings,
-  Activity
+  Activity,
+  Bed,
+  Hospital
 } from 'lucide-react'
 
 const Sidebar = () => {
@@ -42,6 +44,18 @@ const Sidebar = () => {
       href: '/records',
       icon: FileText,
       roles: ['ADMIN', 'DOCTOR', 'NURSE']
+    },
+    {
+      name: 'rooms',
+      href: '/rooms',
+      icon: Bed,
+      roles: ['ADMIN', 'NURSE', 'FRONT_DESK']
+    },
+    {
+      name: 'inpatients',
+      href: '/inpatients',
+      icon: Hospital,
+      roles: ['ADMIN', 'DOCTOR', 'NURSE', 'FRONT_DESK']
     },
     {
       name: 'medicines',

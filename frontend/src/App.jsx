@@ -16,6 +16,8 @@ import VisitEdit from './pages/VisitEdit'
 import Records from './pages/Records'
 import RecordForm from './pages/RecordForm'
 import RecordEdit from './pages/RecordEdit'
+import Rooms from './pages/Rooms'
+import Inpatients from './pages/Inpatients'
 import Medicines from './pages/Medicines'
 import MedicineForm from './pages/MedicineForm'
 import MedicineEdit from './pages/MedicineEdit'
@@ -203,6 +205,24 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Records />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/rooms" 
+              element={
+                <ProtectedRoute>
+                  <Rooms />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/inpatients" 
+              element={
+                <ProtectedRoute>
+                  <Inpatients />
                 </ProtectedRoute>
               } 
             />

@@ -188,22 +188,36 @@ async function main() {
     }
 
     // Buat ruangan contoh
-    const roomTypes = ['SINGLE', 'DOUBLE', 'ICU', 'EMERGENCY'];
-    const roomNames = ['VIP', 'Kelas 1', 'Kelas 2', 'Kelas 3', 'ICU', 'IGD'];
+    const roomTypes = ['VIP', 'KELAS_1', 'KELAS_2', 'KELAS_3', 'ICU', 'NICU', 'PICU', 'ISOLATION'];
+    const facilities = [
+      ['AC', 'TV', 'BATHROOM', 'WIFI'],
+      ['AC', 'BATHROOM', 'WIFI'],
+      ['AC', 'BATHROOM'],
+      ['BATHROOM'],
+      ['AC', 'BATHROOM', 'WIFI'],
+      ['AC', 'BATHROOM', 'WIFI'],
+      ['AC', 'BATHROOM', 'WIFI'],
+      ['AC', 'BATHROOM']
+    ];
     
     for (let i = 1; i <= 20; i++) {
-      const roomType = roomTypes[Math.floor(Math.random() * roomTypes.length)];
+      const roomTypeIndex = Math.floor(Math.random() * roomTypes.length);
+      const roomType = roomTypes[roomTypeIndex];
       const room = await prisma.room.create({
         data: {
           roomNumber: `R${i.toString().padStart(3, '0')}`,
+          roomName: `${roomType} Suite ${i}`,
           roomType: roomType,
-          capacity: roomType === 'ICU' ? 1 : (roomType === 'SINGLE' ? 1 : Math.floor(Math.random() * 3) + 2),
-          pricePerDay: roomType === 'ICU' ? 1500000 : (roomType === 'SINGLE' ? 750000 : (Math.floor(Math.random() * 200000) + 300000)),
+          bedCapacity: roomType === 'ICU' || roomType === 'NICU' || roomType === 'PICU' ? 1 : (roomType === 'VIP' ? 1 : Math.floor(Math.random() * 2) + 1),
+          pricePerDay: roomType === 'VIP' ? 2000000 : (roomType === 'KELAS_1' ? 1000000 : (roomType === 'KELAS_2' ? 750000 : (roomType === 'KELAS_3' ? 500000 : (roomType === 'ICU' || roomType === 'NICU' || roomType === 'PICU' ? 3000000 : 1500000)))),
           floor: Math.floor(i / 5) + 1,
-          description: `Ruangan ${roomNames[Math.floor(Math.random() * roomNames.length)]}`
+          building: i <= 10 ? 'Gedung A' : 'Gedung B',
+          facilities: facilities[roomTypeIndex],
+          description: `Kamar rawat inap tipe ${roomType}`,
+          status: 'AVAILABLE'
         }
       });
-      console.log(`✅ Ruangan dibuat: ${room.roomNumber}`);
+      console.log(`✅ Ruangan dibuat: ${room.roomNumber} - ${room.roomType}`);
     }
 
     // Buat data pasien contoh
