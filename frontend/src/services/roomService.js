@@ -36,6 +36,15 @@ const roomService = {
     const response = await api.get('/rooms/dashboard/stats')
     return response.data
   },
+
+  // Export rooms to Excel
+  exportRoomsExcel: async (params = {}) => {
+    const response = await api.get('/rooms/export', {
+      params,
+      responseType: 'blob'
+    })
+    return response
+  },
 }
 
 export default roomService
