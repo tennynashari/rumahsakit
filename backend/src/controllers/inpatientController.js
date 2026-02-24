@@ -146,7 +146,7 @@ const getInpatients = async (req, res) => {
     res.json({
       success: true,
       data: {
-        occupancies: occupanciesWithDays,
+        inpatients: occupanciesWithDays,
         pagination: {
           page,
           limit,

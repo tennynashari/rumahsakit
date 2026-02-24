@@ -26,9 +26,12 @@ router.post('/check-in', [
   body('patientId').isInt().withMessage('Patient ID is required'),
   body('roomId').isInt().withMessage('Room ID is required'),
   body('doctorId').isInt().withMessage('Doctor ID is required'),
+  body('initialDiagnosis').notEmpty().withMessage('Initial diagnosis is required'),
   body('bedNumber').optional().isInt({ min: 1 }),
   body('checkedInAt').optional().isISO8601(),
-  body('estimatedCheckoutAt').optional().isISO8601()
+  body('estimatedCheckoutAt').optional().isISO8601(),
+  body('careClass').optional().isString(),
+  body('notes').optional().isString()
 ], checkInPatient);
 
 // @route   POST /api/inpatients/:id/check-out
