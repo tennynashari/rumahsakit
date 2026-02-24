@@ -463,7 +463,8 @@ const exportVisitsExcel = async (req, res) => {
         'Jenis Kunjungan': visit.visitType === 'GENERAL_CHECKUP' ? 'Pemeriksaan Umum' :
                            visit.visitType === 'OUTPATIENT' ? 'Rawat Jalan' : 
                            visit.visitType === 'INPATIENT' ? 'Rawat Inap' : 
-                           visit.visitType === 'EMERGENCY' ? 'Darurat' : visit.visitType,
+                           visit.visitType === 'EMERGENCY' ? 'Darurat' : 
+                           visit.visitType === 'MEDICAL_ACTION' ? 'Tindakan Medis' : visit.visitType,
         'Tanggal Kunjungan': new Date(visit.scheduledAt).toLocaleDateString('id-ID'),
         'Jam': new Date(visit.scheduledAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
         'Status': visit.status === 'SCHEDULED' ? 'Terjadwal' :
