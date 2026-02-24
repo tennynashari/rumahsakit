@@ -244,9 +244,16 @@ async function main() {
     const patients = [];
     for (let i = 0; i < patientNames.length; i++) {
       const patientData = patientNames[i];
-      const patient = await prisma.patient.create({
-        data: {
-          medicalRecordNo: `MR${(i + 1).toString().padStart(6, '0')}`,
+      const medicalRecordNo = `MR${(i + 1).toString().padStart(6, '0')}`;
+      const patient = await prisma.patient.upsert({
+        where: { medicalRecordNo },
+        update: {
+          name: patientData.name,
+          gender: patientData.gender,
+          phone: patientData.phone
+        },
+        create: {
+          medicalRecordNo,
           name: patientData.name,
           dateOfBirth: new Date(Date.now() - Math.floor(Math.random() * 30 * 365 * 24 * 60 * 60 * 1000) - (18 * 365 * 24 * 60 * 60 * 1000)),
           gender: patientData.gender,
@@ -260,7 +267,7 @@ async function main() {
         }
       });
       patients.push(patient);
-      console.log(`✅ Pasien dibuat: ${patient.name}`);
+      console.log(`✅ Pasien dibuat/diperbarui: ${patient.name}`);
     }
 
     // Ambil list rooms dan doctors untuk membuat inpatient records
