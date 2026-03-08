@@ -109,22 +109,24 @@ const Patients = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('patients.title')}</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('patients.title')}</h1>
           <p className="text-sm text-gray-600">Manage patient information and records</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           <button 
             onClick={handleExport}
-            className="btn bg-green-600 hover:bg-green-700 text-white"
+            className="btn bg-green-600 hover:bg-green-700 text-white text-sm"
           >
-            <Download className="w-4 h-4 mr-2" />
-            {t('patients.exportData')}
+            <Download className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">{t('patients.exportData')}</span>
+            <span className="sm:hidden">Export</span>
           </button>
-          <Link to="/patients/new" className="btn btn-primary">
-            <Plus className="w-4 h-4 mr-2" />
-            {t('patients.registerNew')}
+          <Link to="/patients/new" className="btn btn-primary text-sm">
+            <Plus className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">{t('patients.registerNew')}</span>
+            <span className="sm:hidden">New</span>
           </Link>
         </div>
       </div>
@@ -171,76 +173,141 @@ const Patients = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>{t('patients.table.mrn')}</th>
-                  <th>{t('patients.table.name')}</th>
-                  <th>Age/Gender</th>
-                  <th>{t('patients.table.phone')}</th>
-                  <th>Visits</th>
-                  <th>Registered</th>
-                  <th>{t('patients.table.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {patients.length === 0 ? (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="table">
+                <thead>
                   <tr>
-                    <td colSpan="7" className="text-center py-8 text-gray-500">
-                      {t('common.noData')}
-                    </td>
+                    <th>{t('patients.table.mrn')}</th>
+                    <th>{t('patients.table.name')}</th>
+                    <th>Age/Gender</th>
+                    <th>{t('patients.table.phone')}</th>
+                    <th>Visits</th>
+                    <th>Registered</th>
+                    <th>{t('patients.table.actions')}</th>
                   </tr>
-                ) : (
-                  patients.map((patient) => (
-                    <tr key={patient.id} className="hover:bg-gray-50">
-                      <td className="font-mono text-sm">{patient.medicalRecordNo}</td>
-                      <td>
-                        <div className="font-medium text-gray-900">{patient.name}</div>
-                      </td>
-                      <td>
-                        <div className="text-sm">
-                          <div>{calculateAge(patient.dateOfBirth)} {t('patients.detail.yearsOld')}</div>
-                          <div className="text-gray-500">{t(`patients.gender.${patient.gender.toLowerCase()}`)}</div>
-                        </div>
-                      </td>
-                      <td className="text-sm">{patient.phone || '-'}</td>
-                      <td>
-                        <span className="badge badge-gray">
-                          {patient._count?.visits || 0} visits
-                        </span>
-                      </td>
-                      <td className="text-sm text-gray-500">
-                        {formatDate(patient.createdAt)}
-                      </td>
-                      <td>
-                        <div className="flex items-center space-x-2">
-                          <Link
-                            to={`/patients/${patient.id}`}
-                            className="text-primary-600 hover:text-primary-800"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Link>
-                          <Link
-                            to={`/patients/${patient.id}/edit`}
-                            className="text-yellow-600 hover:text-yellow-800"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(patient.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {patients.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-8 text-gray-500">
+                        {t('common.noData')}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    patients.map((patient) => (
+                      <tr key={patient.id} className="hover:bg-gray-50">
+                        <td className="font-mono text-sm">{patient.medicalRecordNo}</td>
+                        <td>
+                          <div className="font-medium text-gray-900">{patient.name}</div>
+                        </td>
+                        <td>
+                          <div className="text-sm">
+                            <div>{calculateAge(patient.dateOfBirth)} {t('patients.detail.yearsOld')}</div>
+                            <div className="text-gray-500">{t(`patients.gender.${patient.gender.toLowerCase()}`)}</div>
+                          </div>
+                        </td>
+                        <td className="text-sm">{patient.phone || '-'}</td>
+                        <td>
+                          <span className="badge badge-gray">
+                            {patient._count?.visits || 0} visits
+                          </span>
+                        </td>
+                        <td className="text-sm text-gray-500">
+                          {formatDate(patient.createdAt)}
+                        </td>
+                        <td>
+                          <div className="flex items-center space-x-2">
+                            <Link
+                              to={`/patients/${patient.id}`}
+                              className="text-primary-600 hover:text-primary-800"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Link>
+                            <Link
+                              to={`/patients/${patient.id}/edit`}
+                              className="text-yellow-600 hover:text-yellow-800"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(patient.id)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-gray-200">
+              {patients.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  {t('common.noData')}
+                </div>
+              ) : (
+                patients.map((patient) => (
+                  <div key={patient.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 mb-1">{patient.name}</div>
+                        <div className="text-xs font-mono text-gray-500">MRN: {patient.medicalRecordNo}</div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Link
+                          to={`/patients/${patient.id}`}
+                          className="text-primary-600 hover:text-primary-800 p-1"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                        <Link
+                          to={`/patients/${patient.id}/edit`}
+                          className="text-yellow-600 hover:text-yellow-800 p-1"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(patient.id)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500">Age:</span>
+                        <span className="ml-1 font-medium">{calculateAge(patient.dateOfBirth)} yrs</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Gender:</span>
+                        <span className="ml-1 font-medium">{t(`patients.gender.${patient.gender.toLowerCase()}`)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Phone:</span>
+                        <span className="ml-1 font-medium">{patient.phone || '-'}</span>
+                      </div>
+                      <div>
+                        <span className="badge badge-gray text-xs">
+                          {patient._count?.visits || 0} visits
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-400">
+                      Registered: {formatDate(patient.createdAt)}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
         )}
 
         {/* Pagination */}

@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { Bell, ChevronDown, LogOut, User, Settings, Languages } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Settings, Languages, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth()
   const { t, i18n } = useTranslation()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -19,9 +19,18 @@ const Navbar = () => {
       <div className="px-3 py-3 lg:px-5 lg:pl-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-start">
+            {/* Hamburger Menu Button */}
+            <button
+              onClick={onMenuClick}
+              className="p-2 text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            
             <div className="flex ml-2 md:mr-24">
-              <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-gray-900">
-                🏥 {t('navbar.hospitalName')}
+              <span className="self-center text-base md:text-xl font-semibold sm:text-2xl whitespace-nowrap text-gray-900">
+                🏥 <span className="hidden sm:inline">{t('navbar.hospitalName')}</span>
+                <span className="sm:hidden">HIS</span>
               </span>
             </div>
           </div>

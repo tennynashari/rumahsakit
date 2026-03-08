@@ -73,27 +73,27 @@ const Dashboard = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="border-b border-gray-200 pb-5">
-        <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
         <p className="mt-2 text-sm text-gray-600">
           {t('dashboard.welcome')}, {user?.name}! ({user?.role})
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
             <div key={stat.name} className="card">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
-                    <Icon className="w-6 h-6 text-white" />
+                  <div className={`w-10 h-10 md:w-12 md:h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
+                    <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   </div>
                 </div>
-                <div className="ml-4 flex-1">
-                  <p className="text-sm font-medium text-gray-600">{t(`dashboard.${stat.name}`)}</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+                <div className="ml-3 md:ml-4 flex-1">
+                  <p className="text-xs md:text-sm font-medium text-gray-600">{t(`dashboard.${stat.name}`)}</p>
+                  <p className="text-lg md:text-2xl font-semibold text-gray-900">{stat.value}</p>
                 </div>
               </div>
               <div className="mt-4">
@@ -102,7 +102,7 @@ const Dashboard = () => {
                 }`}>
                   {stat.change}
                 </span>
-                <span className="text-sm text-gray-600 ml-2">{t('dashboard.fromLastMonth')}</span>
+                <span className="text-sm text-gray-600 ml-2 hidden sm:inline">{t('dashboard.fromLastMonth')}</span>
               </div>
             </div>
           )
@@ -112,8 +112,8 @@ const Dashboard = () => {
       {/* Recent Activity */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivities')}</h2>
-          <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">{t('dashboard.recentActivities')}</h2>
+          <button className="text-xs md:text-sm text-blue-600 hover:text-blue-800 font-medium">
             {t('dashboard.viewAll')}
           </button>
         </div>
@@ -123,11 +123,11 @@ const Dashboard = () => {
             return (
               <div key={activity.id} className="flex items-start">
                 <div className={`flex-shrink-0 ${activity.color}`}>
-                  <Icon className="w-6 h-6" />
+                  <Icon className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div className="ml-3 flex-1">
                   <p className="text-sm font-medium text-gray-900">{activity.type}</p>
-                  <p className="text-sm text-gray-500">{activity.description}</p>
+                  <p className="text-xs md:text-sm text-gray-500">{activity.description}</p>
                   <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
                 </div>
               </div>
@@ -137,22 +137,26 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <button className="btn btn-primary justify-center">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <button className="btn btn-primary justify-center text-sm md:text-base">
           <UserPlus className="w-4 h-4 mr-2" />
-          New Patient
+          <span className="hidden sm:inline">New Patient</span>
+          <span className="sm:hidden">New</span>
         </button>
-        <button className="btn btn-secondary justify-center">
+        <button className="btn btn-secondary justify-center text-sm md:text-base">
           <Calendar className="w-4 h-4 mr-2" />
-          Schedule Visit
+          <span className="hidden sm:inline">Schedule Visit</span>
+          <span className="sm:hidden">Schedule</span>
         </button>
-        <button className="btn btn-secondary justify-center">
+        <button className="btn btn-secondary justify-center text-sm md:text-base">
           <FileText className="w-4 h-4 mr-2" />
-          View Records
+          <span className="hidden sm:inline">View Records</span>
+          <span className="sm:hidden">Records</span>
         </button>
-        <button className="btn btn-secondary justify-center">
+        <button className="btn btn-secondary justify-center text-sm md:text-base">
           <TrendingUp className="w-4 h-4 mr-2" />
-          View Reports
+          <span className="hidden sm:inline">View Reports</span>
+          <span className="sm:hidden">Reports</span>
         </button>
       </div>
     </div>

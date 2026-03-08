@@ -94,24 +94,24 @@ const Inpatients = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('inpatients.title')}</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('inpatients.title')}</h1>
           <p className="text-sm text-gray-600">{t('inpatients.subtitle')}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Link
             to="/inpatients/history"
-            className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            className="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
           >
-            <Calendar className="w-5 h-5 mr-2" />
+            <Calendar className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
             {t('inpatients.history')}
           </Link>
           <Link
             to="/inpatients/check-in"
-            className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <Plus className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
             {t('inpatients.checkIn')}
           </Link>
         </div>
@@ -119,7 +119,7 @@ const Inpatients = () => {
 
       {/* Search and Filters */}
       <div className="bg-white p-4 rounded-lg shadow space-y-4">
-        <form onSubmit={handleSearch} className="flex gap-4">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 sm:gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -128,20 +128,20 @@ const Inpatients = () => {
                 placeholder={t('inpatients.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
               />
             </div>
           </div>
           <button
             type="submit"
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm w-full sm:w-auto"
           >
             {t('common.search')}
           </button>
         </form>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('rooms.filterByType')}
@@ -149,7 +149,7 @@ const Inpatients = () => {
             <select
               value={filters.roomType}
               onChange={(e) => setFilters({ ...filters, roomType: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
             >
               <option value="">{t('rooms.allTypes')}</option>
               {roomTypes.map((type) => (
@@ -169,7 +169,7 @@ const Inpatients = () => {
               placeholder={t('rooms.allFloors')}
               value={filters.floor}
               onChange={(e) => setFilters({ ...filters, floor: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
             />
           </div>
         </div>
@@ -188,80 +188,138 @@ const Inpatients = () => {
           </div>
         ) : (
           <>
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('inpatients.medicalRecordNo')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('inpatients.patientName')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('inpatients.roomNumber')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('inpatients.doctor')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('inpatients.checkInDate')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('inpatients.lengthOfStay')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('common.actions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {inpatients.map((occupancy) => (
-                  <tr key={occupancy.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {occupancy.patient?.medicalRecordNo || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {occupancy.patient?.name || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {occupancy.room?.roomNumber || '-'}
-                      {occupancy.bedNumber && ` - Bed ${occupancy.bedNumber}`}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {occupancy.doctor?.name || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDate(occupancy.checkedInAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {occupancy.currentDays} {t('inpatients.days')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <Link
-                          to={`/inpatients/${occupancy.id}`}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <Eye className="w-5 h-5" />
-                        </Link>
-                        <Link
-                          to={`/inpatients/${occupancy.id}/edit`}
-                          className="text-primary-600 hover:text-primary-900"
-                        >
-                          <Edit className="w-5 h-5" />
-                        </Link>
-                        <button
-                          onClick={() => openCheckoutModal(occupancy)}
-                          className="text-green-600 hover:text-green-900"
-                        >
-                          <LogOut className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </td>
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('inpatients.medicalRecordNo')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('inpatients.patientName')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('inpatients.roomNumber')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('inpatients.doctor')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('inpatients.checkInDate')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('inpatients.lengthOfStay')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('common.actions')}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {inpatients.map((occupancy) => (
+                    <tr key={occupancy.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {occupancy.patient?.medicalRecordNo || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {occupancy.patient?.name || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {occupancy.room?.roomNumber || '-'}
+                        {occupancy.bedNumber && ` - Bed ${occupancy.bedNumber}`}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {occupancy.doctor?.name || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatDate(occupancy.checkedInAt)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {occupancy.currentDays} {t('inpatients.days')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <Link
+                            to={`/inpatients/${occupancy.id}`}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <Eye className="w-5 h-5" />
+                          </Link>
+                          <Link
+                            to={`/inpatients/${occupancy.id}/edit`}
+                            className="text-primary-600 hover:text-primary-900"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </Link>
+                          <button
+                            onClick={() => openCheckoutModal(occupancy)}
+                            className="text-green-600 hover:text-green-900"
+                          >
+                            <LogOut className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden divide-y divide-gray-200">
+              {inpatients.map((occupancy) => (
+                <div key={occupancy.id} className="p-4 hover:bg-gray-50">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 mb-1">{occupancy.patient?.name || '-'}</div>
+                      <div className="text-xs text-gray-500">MRN: {occupancy.patient?.medicalRecordNo || '-'}</div>
+                    </div>
+                    <div className="flex items-center space-x-2 ml-2">
+                      <Link
+                        to={`/inpatients/${occupancy.id}`}
+                        className="text-blue-600 hover:text-blue-900 p-1"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        to={`/inpatients/${occupancy.id}/edit`}
+                        className="text-primary-600 hover:text-primary-900 p-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => openCheckoutModal(occupancy)}
+                        className="text-green-600 hover:text-green-900 p-1"
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">Room:</span>
+                      <span className="ml-1 font-medium">
+                        {occupancy.room?.roomNumber || '-'}
+                        {occupancy.bedNumber && ` - Bed ${occupancy.bedNumber}`}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Doctor:</span>
+                      <span className="ml-1 font-medium">{occupancy.doctor?.name || '-'}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-gray-500">Check-in:</span>
+                      <span className="ml-1 font-medium">{formatDate(occupancy.checkedInAt)}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Stay:</span>
+                      <span className="ml-1 font-medium">{occupancy.currentDays} {t('inpatients.days')}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (

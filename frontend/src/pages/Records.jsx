@@ -120,20 +120,21 @@ const Records = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('records.title')}</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('records.title')}</h1>
           <p className="text-sm text-gray-600">{t('records.subtitle')}</p>
         </div>
-        <Link to="/records/new" className="btn btn-primary">
+        <Link to="/records/new" className="btn btn-primary text-sm w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
-          {t('records.addRecord')}
+          <span className="hidden sm:inline">{t('records.addRecord')}</span>
+          <span className="sm:hidden">Add Record</span>
         </Link>
       </div>
 
       {/* Filters */}
       <div className="card">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t('records.filters.startDate')}
@@ -142,7 +143,7 @@ const Records = () => {
               type="date"
               value={filters.startDate}
               onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-              className="input"
+              className="input text-sm"
             />
           </div>
           <div>
@@ -153,17 +154,18 @@ const Records = () => {
               type="date"
               value={filters.endDate}
               onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-              className="input"
+              className="input text-sm"
             />
           </div>
           <div className="flex items-end">
             <button 
               onClick={handleExport}
-              className="btn bg-green-600 hover:bg-green-700 text-white w-full"
+              className="btn bg-green-600 hover:bg-green-700 text-white w-full text-sm"
               disabled={!filters.startDate || !filters.endDate}
             >
-              <Download className="w-4 h-4 mr-2" />
-              {t('records.exportData')}
+              <Download className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">{t('records.exportData')}</span>
+              <span className="sm:hidden">Export</span>
             </button>
           </div>
         </div>
@@ -183,7 +185,8 @@ const Records = () => {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -285,51 +288,99 @@ const Records = () => {
               </table>
             </div>
 
+            {/* Mobile Card View */}
+            <div className="lg:hidden divide-y divide-gray-200">
+              {records.map((record) => (
+                <div key={record.id} className="p-4 hover:bg-gray-50">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 mb-1">{record.patient.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {record.patient.medicalRecordNo} • {calculateAge(record.patient.dateOfBirth)} yrs • {record.patient.gender === 'MALE' ? 'L' : 'P'}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2 ml-2">
+                      <Link
+                        to={`/records/${record.id}`}
+                        className="text-primary-600 hover:text-primary-900 p-1"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        to={`/records/${record.id}/edit`}
+                        className="text-blue-600 hover:text-blue-900 p-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(record.id)}
+                        className="text-red-600 hover:text-red-900 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">Doctor:</span>
+                      <span className="ml-1 font-medium text-gray-900">{record.doctor.name}</span>
+                      <span className="ml-1 text-xs text-gray-500">({record.doctor.department})</span>
+                    </div>
+                    {(record.diagnosisCode || record.diagnosis) && (
+                      <div>
+                        <span className="text-gray-500">Diagnosis:</span>
+                        {record.diagnosisCode && (
+                          <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            {record.diagnosisCode}
+                          </span>
+                        )}
+                        {record.diagnosis && (
+                          <div className="mt-1 text-gray-900">{record.diagnosis}</div>
+                        )}
+                      </div>
+                    )}
+                    {record.symptoms && (
+                      <div>
+                        <span className="text-gray-500">Symptoms:</span>
+                        <div className="mt-1 text-gray-900">{record.symptoms}</div>
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-400 pt-1">
+                      {formatDate(record.createdAt)} • {formatTime(record.createdAt)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+              <div className="bg-white px-4 py-3 border-t border-gray-200">
                 <div className="flex items-center justify-between">
-                  <div className="flex-1 flex justify-between sm:hidden">
+                  <div className="text-sm text-gray-700">
+                    <span className="hidden sm:inline">Halaman </span>
+                    <span className="font-medium">{currentPage}</span>
+                    <span className="hidden sm:inline"> dari </span>
+                    <span className="sm:hidden">/</span>
+                    <span className="font-medium">{totalPages}</span>
+                  </div>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="btn btn-secondary"
+                      className="btn btn-secondary text-sm disabled:opacity-50"
                     >
-                      Previous
+                      <span className="hidden sm:inline">Sebelumnya</span>
+                      <span className="sm:hidden">Prev</span>
                     </button>
                     <button
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className="btn btn-secondary"
+                      className="btn btn-secondary text-sm disabled:opacity-50"
                     >
-                      Next
+                      <span className="hidden sm:inline">Selanjutnya</span>
+                      <span className="sm:hidden">Next</span>
                     </button>
-                  </div>
-                  <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm text-gray-700">
-                        Halaman <span className="font-medium">{currentPage}</span> dari{' '}
-                        <span className="font-medium">{totalPages}</span>
-                      </p>
-                    </div>
-                    <div>
-                      <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                        <button
-                          onClick={() => setCurrentPage(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className="btn btn-secondary"
-                        >
-                          Sebelumnya
-                        </button>
-                        <button
-                          onClick={() => setCurrentPage(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                          className="btn btn-secondary ml-3"
-                        >
-                          Selanjutnya
-                        </button>
-                      </nav>
-                    </div>
                   </div>
                 </div>
               </div>

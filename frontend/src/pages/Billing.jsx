@@ -150,20 +150,21 @@ const Billing = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('billing.title')}</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('billing.title')}</h1>
           <p className="text-sm text-gray-600">{t('billing.subtitle')}</p>
         </div>
-        <Link to="/billing/new" className="btn btn-primary">
+        <Link to="/billing/new" className="btn btn-primary text-sm w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
-          {t('billing.addBilling')}
+          <span className="hidden sm:inline">{t('billing.addBilling')}</span>
+          <span className="sm:hidden">Add</span>
         </Link>
       </div>
 
       {/* Filters */}
       <div className="card">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t('billing.filters.startDate')}
@@ -172,7 +173,7 @@ const Billing = () => {
               type="date"
               value={filters.startDate}
               onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-              className="input"
+              className="input text-sm"
             />
           </div>
           <div>
@@ -183,7 +184,7 @@ const Billing = () => {
               type="date"
               value={filters.endDate}
               onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-              className="input"
+              className="input text-sm"
             />
           </div>
           <div>
@@ -193,7 +194,7 @@ const Billing = () => {
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="input"
+              className="input text-sm"
             >
               <option value="">{t('billing.filters.allStatus')}</option>
               <option value="PAID">{t('billing.status.paid')}</option>
@@ -205,11 +206,12 @@ const Billing = () => {
           <div className="flex items-end">
             <button 
               onClick={handleExport}
-              className="btn bg-green-600 hover:bg-green-700 text-white w-full"
+              className="btn bg-green-600 hover:bg-green-700 text-white w-full text-sm"
               disabled={!filters.startDate || !filters.endDate}
             >
-              <Download className="w-4 h-4 mr-2" />
-              {t('common.exportExcel')}
+              <Download className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">{t('common.exportExcel')}</span>
+              <span className="sm:hidden">Export</span>
             </button>
           </div>
         </div>
@@ -229,7 +231,8 @@ const Billing = () => {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -341,51 +344,100 @@ const Billing = () => {
               </table>
             </div>
 
+            {/* Mobile Card View */}
+            <div className="lg:hidden divide-y divide-gray-200">
+              {billings.map((billing) => (
+                <div key={billing.id} className="p-4 hover:bg-gray-50">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        {getStatusBadge(billing.status)}
+                      </div>
+                      <div className="font-medium text-gray-900 mb-1">{billing.patient.name}</div>
+                      <div className="text-xs text-gray-500">MRN: {billing.patient.medicalRecordNo}</div>
+                    </div>
+                    <div className="flex items-center space-x-2 ml-2">
+                      <Link
+                        to={`/billing/${billing.id}`}
+                        className="text-primary-600 hover:text-primary-900 p-1"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                      {billing.status === 'UNPAID' && (
+                        <button
+                          onClick={() => handleMarkAsPaid(billing.id)}
+                          className="text-green-600 hover:text-green-900 p-1"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </button>
+                      )}
+                      <Link
+                        to={`/billing/${billing.id}/edit`}
+                        className="text-blue-600 hover:text-blue-900 p-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(billing.id)}
+                        className="text-red-600 hover:text-red-900 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Subtotal:</span>
+                      <span className="font-medium">{formatCurrency(billing.subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Tax:</span>
+                      <span className="font-medium">{formatCurrency(billing.tax)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Discount:</span>
+                      <span className="font-medium">{formatCurrency(billing.discount)}</span>
+                    </div>
+                    <div className="flex justify-between pt-2 border-t">
+                      <span className="text-gray-900 font-semibold">Total:</span>
+                      <span className="text-gray-900 font-bold">{formatCurrency(billing.total)}</span>
+                    </div>
+                    <div className="text-xs text-gray-400 pt-1">
+                      {formatDate(billing.createdAt)} • {formatTime(billing.createdAt)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+              <div className="bg-white px-4 py-3 border-t border-gray-200">
                 <div className="flex items-center justify-between">
-                  <div className="flex-1 flex justify-between sm:hidden">
+                  <div className="text-sm text-gray-700">
+                    <span className="hidden sm:inline">{t('billing.pagination.page')} </span>
+                    <span className="font-medium">{currentPage}</span>
+                    <span className="hidden sm:inline"> {t('billing.pagination.of')} </span>
+                    <span className="sm:hidden">/</span>
+                    <span className="font-medium">{totalPages}</span>
+                  </div>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="btn btn-secondary"
+                      className="btn btn-secondary text-sm disabled:opacity-50"
                     >
-                      {t('billing.pagination.previous')}
+                      <span className="hidden sm:inline">{t('billing.pagination.previous')}</span>
+                      <span className="sm:hidden">Prev</span>
                     </button>
                     <button
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className="btn btn-secondary"
+                      className="btn btn-secondary text-sm disabled:opacity-50"
                     >
-                      {t('billing.pagination.next')}
+                      <span className="hidden sm:inline">{t('billing.pagination.next')}</span>
+                      <span className="sm:hidden">Next</span>
                     </button>
-                  </div>
-                  <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm text-gray-700">
-                        {t('billing.pagination.page')} <span className="font-medium">{currentPage}</span> {t('billing.pagination.of')}{' '}
-                        <span className="font-medium">{totalPages}</span>
-                      </p>
-                    </div>
-                    <div>
-                      <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                        <button
-                          onClick={() => setCurrentPage(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className="btn btn-secondary"
-                        >
-                          {t('billing.pagination.previous')}
-                        </button>
-                        <button
-                          onClick={() => setCurrentPage(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                          className="btn btn-secondary ml-3"
-                        >
-                          {t('billing.pagination.next')}
-                        </button>
-                      </nav>
-                    </div>
                   </div>
                 </div>
               </div>
