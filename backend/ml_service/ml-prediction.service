@@ -1,0 +1,22 @@
+[Unit]
+Description=Hospital ML Prediction Service
+After=network.target
+
+[Service]
+Type=simple
+User=klinik
+Group=klinik
+WorkingDirectory=/var/www/rumahsakit/backend/ml_service
+Environment="PATH=/var/www/rumahsakit/backend/ml_service/venv/bin"
+ExecStart=/var/www/rumahsakit/backend/ml_service/venv/bin/python app.py
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=append:/var/log/ml-prediction.log
+StandardError=append:/var/log/ml-prediction-error.log
+
+[Install]
+WantedBy=multi-user.target
