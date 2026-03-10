@@ -501,10 +501,8 @@ async function main() {
     }
     console.log(`✅ Generated ${historicalVisitsCount} historical visits`);
     
-    // Get all rooms
-    const allRooms = await prisma.room.findMany();
-    
-    if (allRooms.length > 0) {
+    // Use existing allRooms variable (already declared earlier)
+    if (allRooms && allRooms.length > 0) {
       // Generate 60 historical room occupancies (random between 50-100)
       const historicalOccupanciesCount = Math.floor(Math.random() * 51) + 50; // 50-100
       
