@@ -56,7 +56,41 @@
     "todayVisits": "Today Visits",
     "pendingRecords": "Pending Records",
     "monthlyRevenue": "Monthly Revenue",
-    "fromLastMonth": "from last month"
+    "fromLastMonth": "from last month",
+    "ai": {
+      "title": "AI Prediction",
+      "trainButton": "Fetch & Train",
+      "predictButton": "Predict",
+      "training": "Training...",
+      "predicting": "Predicting...",
+      "trainingSuccess": "Models trained successfully! You can now get predictions.",
+      "trainingFailed": "Failed to train models. Please try again.",
+      "predictionFailed": "Failed to get predictions. Please try again.",
+      "mlServiceUnavailable": "ML service is not available. Please ensure Python service is running on port 5030.",
+      "visitPredictions": "Top 3 Visit Types - 7 Day Forecast",
+      "roomPredictions": "Top 3 Room Types - 7 Day Forecast",
+      "noPredictions": "No predictions available",
+      "clickPredict": "Click 'Fetch & Train' first, then 'Predict' to see forecasts",
+      "generatedAt": "Generated at",
+      "date": "Date",
+      "top3": "Top 3",
+      "visitType": {
+        "GENERAL_CHECKUP": "General Checkup",
+        "INPATIENT": "Inpatient",
+        "EMERGENCY": "Emergency",
+        "MEDICAL_ACTION": "Medical Action"
+      },
+      "roomType": {
+        "VIP": "VIP",
+        "KELAS_1": "Class 1",
+        "KELAS_2": "Class 2",
+        "KELAS_3": "Class 3",
+        "ICU": "ICU",
+        "NICU": "NICU",
+        "PICU": "PICU",
+        "ISOLATION": "Isolation"
+      }
+    }
   },
   "patients": {
     "title": "Patients",

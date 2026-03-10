@@ -58,7 +58,41 @@
     "todayVisits": "Kunjungan Hari Ini",
     "pendingRecords": "Rekam Tertunda",
     "monthlyRevenue": "Pendapatan Bulanan",
-    "fromLastMonth": "dari bulan lalu"
+    "fromLastMonth": "dari bulan lalu",
+    "ai": {
+      "title": "Prediksi AI",
+      "trainButton": "Ambil & Latih",
+      "predictButton": "Prediksi",
+      "training": "Melatih...",
+      "predicting": "Memprediksi...",
+      "trainingSuccess": "Model berhasil dilatih! Anda sekarang dapat melihat prediksi.",
+      "trainingFailed": "Gagal melatih model. Silakan coba lagi.",
+      "predictionFailed": "Gagal mendapatkan prediksi. Silakan coba lagi.",
+      "mlServiceUnavailable": "Layanan ML tidak tersedia. Pastikan layanan Python berjalan pada port 5030.",
+      "visitPredictions": "Top 3 Tipe Kunjungan - Prediksi 7 Hari",
+      "roomPredictions": "Top 3 Tipe Kamar - Prediksi 7 Hari",
+      "noPredictions": "Belum ada prediksi",
+      "clickPredict": "Klik 'Ambil & Latih' terlebih dahulu, kemudian 'Prediksi' untuk melihat ramalan",
+      "generatedAt": "Dibuat pada",
+      "date": "Tanggal",
+      "top3": "Top 3",
+      "visitType": {
+        "GENERAL_CHECKUP": "Pemeriksaan Umum",
+        "INPATIENT": "Rawat Inap",
+        "EMERGENCY": "Darurat",
+        "MEDICAL_ACTION": "Tindakan Medis"
+      },
+      "roomType": {
+        "VIP": "VIP",
+        "KELAS_1": "Kelas 1",
+        "KELAS_2": "Kelas 2",
+        "KELAS_3": "Kelas 3",
+        "ICU": "ICU",
+        "NICU": "NICU",
+        "PICU": "PICU",
+        "ISOLATION": "Isolasi"
+      }
+    }
   },
   "patients": {
     "title": "Data Pasien",

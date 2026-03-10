@@ -88,4 +88,25 @@ api.interceptors.response.use(
   }
 )
 
+// Prediction API methods
+export const predictionAPI = {
+  // Train ML models with historical data
+  train: async () => {
+    const response = await api.post('/predictions/train')
+    return response.data
+  },
+  
+  // Get predictions
+  predict: async (days = 7) => {
+    const response = await api.post('/predictions/predict', { days })
+    return response.data
+  },
+  
+  // Check ML service health
+  checkHealth: async () => {
+    const response = await api.get('/predictions/health')
+    return response.data
+  }
+}
+
 export default api

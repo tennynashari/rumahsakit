@@ -459,6 +459,115 @@ async function main() {
       console.log(`✅ Kunjungan dibuat: ${patient.name} - ${visitType}`);
     }
 
+    // ========== HISTORICAL DATA FOR AI TRAINING ==========
+    console.log('\n🤖 Generating historical data for AI predictions...');
+    
+    // Generate visits for the last 6 months (for AI training)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const visitTypesForAI = ['GENERAL_CHECKUP', 'INPATIENT', 'EMERGENCY', 'MEDICAL_ACTION'];
+    const roomTypesForAI = ['VIP', 'KELAS_1', 'KELAS_2', 'KELAS_3', 'ICU', 'NICU', 'PICU', 'ISOLATION'];
+    
+    // Generate 80 historical visits (random between 50-100)
+    const historicalVisitsCount = Math.floor(Math.random() * 51) + 50; // 50-100
+    
+    for (let i = 0; i < historicalVisitsCount; i++) {
+      const patient = patients[Math.floor(Math.random() * patients.length)];
+      const doctor = doctors[Math.floor(Math.random() * doctors.length)];
+      
+      // Random visit type with weighted distribution
+      let visitType;
+      const rand = Math.random();
+      if (rand < 0.4) visitType = 'GENERAL_CHECKUP'; // 40%
+      else if (rand < 0.65) visitType = 'INPATIENT'; // 25%
+      else if (rand < 0.85) visitType = 'EMERGENCY'; // 20%
+      else visitType = 'MEDICAL_ACTION'; // 15%
+      
+      // Random date within last 6 months
+      const randomDaysAgo = Math.floor(Math.random() * 180); // 0-180 days
+      const visitDate = new Date(Date.now() - randomDaysAgo * 24 * 60 * 60 * 1000);
+      
+      await prisma.visit.create({
+        data: {
+          patientId: patient.id,
+          doctorId: doctor.id,
+          visitType: visitType,
+          scheduledAt: visitDate,
+          status: 'COMPLETED',
+          notes: `Historical ${visitType.toLowerCase()} visit for ML training`
+        }
+      });
+    }
+    console.log(`✅ Generated ${historicalVisitsCount} historical visits`);
+    
+    // Get all rooms
+    const allRooms = await prisma.room.findMany();
+    
+    if (allRooms.length > 0) {
+      // Generate 60 historical room occupancies (random between 50-100)
+      const historicalOccupanciesCount = Math.floor(Math.random() * 51) + 50; // 50-100
+      
+      for (let i = 0; i < historicalOccupanciesCount; i++) {
+        const patient = patients[Math.floor(Math.random() * patients.length)];
+        const doctor = doctors[Math.floor(Math.random() * doctors.length)];
+        
+        // Select random room with weighted distribution
+        let roomType;
+        const rand = Math.random();
+        if (rand < 0.30) roomType = 'KELAS_1'; // 30%
+        else if (rand < 0.55) roomType = 'KELAS_2'; // 25%
+        else if (rand < 0.75) roomType = 'VIP'; // 20%
+        else if (rand < 0.87) roomType = 'ICU'; // 12%
+        else if (rand < 0.95) roomType = 'KELAS_3'; // 8%
+        else roomType = roomTypesForAI[Math.floor(Math.random() * roomTypesForAI.length)]; // 5% others
+        
+        const roomsOfType = allRooms.filter(r => r.roomType === roomType);
+        if (roomsOfType.length === 0) continue;
+        
+        const room = roomsOfType[Math.floor(Math.random() * roomsOfType.length)];
+        
+        // Random check-in date within last 6 months
+        const randomDaysAgo = Math.floor(Math.random() * 180); // 0-180 days
+        const checkInDate = new Date(Date.now() - randomDaysAgo * 24 * 60 * 60 * 1000);
+        
+        // Random length of stay 1-14 days
+        const lengthOfStay = Math.floor(Math.random() * 14) + 1;
+        const checkOutDate = new Date(checkInDate);
+        checkOutDate.setDate(checkOutDate.getDate() + lengthOfStay);
+        
+        // Generate unique registration number
+        const regNumber = `REG${Date.now()}-${i}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+        
+        try {
+          await prisma.roomOccupancy.create({
+            data: {
+              registrationNumber: regNumber,
+              patientId: patient.id,
+              roomId: room.id,
+              doctorId: doctor.id,
+              bedNumber: Math.floor(Math.random() * room.bedCapacity) + 1,
+              checkedInAt: checkInDate,
+              checkedOutAt: checkOutDate,
+              actualDays: lengthOfStay,
+              status: 'CHECKED_OUT',
+              initialDiagnosis: 'Historical occupancy for ML training',
+              dischargeCondition: ['RECOVERED', 'IMPROVED', 'STABLE'][Math.floor(Math.random() * 3)],
+              totalRoomCost: room.pricePerDay * lengthOfStay
+            }
+          });
+        } catch (error) {
+          // Skip if duplicate registration number
+          console.log(`⚠️ Skipped duplicate registration number`);
+        }
+      }
+      console.log(`✅ Generated ${historicalOccupanciesCount} historical room occupancies`);
+    } else {
+      console.log('⚠️ No rooms found, skipping room occupancy generation');
+    }
+    
+    console.log('🤖 Historical data generation completed!\n');
+
     console.log('🎉 Database berhasil di-seed!');
     console.log('\n📋 Kredensial Login Default:');
     console.log('Email: admin@klinik.com');

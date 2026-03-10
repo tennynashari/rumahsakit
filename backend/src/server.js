@@ -17,6 +17,7 @@ const billingRoutes = require('./routes/billingRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const inpatientRoutes = require('./routes/inpatientRoutes');
+const predictionRoutes = require('./routes/predictionRoutes');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -82,6 +83,7 @@ app.use('/api/medicines', medicineRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/inpatients', inpatientRoutes);
+app.use('/api/predictions', predictionRoutes);
 
 // Static files for uploads
 app.use('/uploads', express.static('uploads'));
