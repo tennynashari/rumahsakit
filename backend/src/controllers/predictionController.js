@@ -36,7 +36,7 @@ const fetchHistoricalData = async () => {
           DATE(scheduled_at) as date,
           COUNT(*)::int as count
         FROM visits
-        WHERE visit_type = ${visitType}
+        WHERE visit_type::text = ${visitType}
           AND status IN ('COMPLETED', 'IN_PROGRESS')
           AND scheduled_at >= ${sixMonthsAgo}
         GROUP BY DATE(scheduled_at)
@@ -60,7 +60,7 @@ const fetchHistoricalData = async () => {
           COUNT(*)::int as count
         FROM room_occupancies ro
         JOIN rooms r ON ro.room_id = r.id
-        WHERE r.room_type = ${roomType}
+        WHERE r.room_type::text = ${roomType}
           AND ro.checked_in_at >= ${sixMonthsAgo}
         GROUP BY DATE(ro.checked_in_at)
         ORDER BY date
